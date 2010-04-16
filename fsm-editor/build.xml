@@ -1,0 +1,48 @@
+<project name="FSM" default="build">
+
+	<dirname property="FSM" file="${ant.file}"/>
+
+	<!-- project properties -->
+	<property name="FSM.archive" 	value="fsm-editor.jar"/>
+
+	<property name="Lib"		location="${FSM}/../lib"/>
+
+	<!-- project paths -->
+	<property name="FSM.sources"	location="${FSM}/src"/>
+	<property name="FSM.binaries"	location="${FSM}/bin"/>
+
+	<!-- standard targets -->
+	<target name="clean">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${FSM.binaries}"/>
+		</delete>
+		<delete dir="${FSM.binaries}" includeemptydirs="true" failonerror="false"/>
+	</target>
+	<target name="build" depends="clean">
+		<!-- 	uncomment the following 2 lines to print the classpath -->
+		<!-- 	<property name="myclasspath" refid="DMS.archives"/> -->
+		<!-- 	<echo message="Classpath = ${myclasspath}"/> -->
+		<mkdir dir="${FSM.binaries}"/>
+		<javac srcdir="${FSM.sources}" destdir="${FSM.binaries}" debug="true">
+			<classpath>
+				<fileset dir="${Lib}" includes="*.jar"/>
+			</classpath>
+		</javac>
+		<copy todir="${FSM.binaries}">
+			<fileset dir="${FSM.sources}">
+				<filename name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+	<target name="jar" depends="build">
+        <jar destfile="${FSM.binaries}/${FSM.archive}" filesetmanifest="mergewithoutmain">
+             <manifest>
+                <attribute name="Main-Class" value="com.mxgraph.examples.swing.SCXMLEditor"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/jgraphx.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
+            <fileset dir="${FSM.binaries}"/>
+		</jar>
+    </target>
+</project>

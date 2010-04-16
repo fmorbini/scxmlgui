@@ -1,0 +1,37 @@
+<project name="JGRAPHX" default="build">
+
+	<dirname property="JGRAPHX" file="${ant.file}"/>
+
+	<!-- project properties -->
+	<property name="JGRAPHX.archive" 	value="jgraphx.jar"/>
+
+	<!-- project paths -->
+	<property name="JGRAPHX.sources"	location="${JGRAPHX}/src"/>
+	<property name="JGRAPHX.binaries"	location="${JGRAPHX}/bin"/>
+
+	<!-- standard targets -->
+	<target name="clean">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${JGRAPHX.binaries}"/>
+		</delete>
+		<delete dir="${JGRAPHX.binaries}" includeemptydirs="true" failonerror="false"/>
+	</target>
+	<target name="build" depends="clean">
+		<!-- 	uncomment the following 2 lines to print the classpath -->
+		<!-- 	<property name="myclasspath" refid="DMS.archives"/> -->
+		<!-- 	<echo message="Classpath = ${myclasspath}"/> -->
+		<mkdir dir="${JGRAPHX.binaries}"/>
+		<javac srcdir="${JGRAPHX.sources}" destdir="${JGRAPHX.binaries}" debug="true">
+		</javac>
+		<copy todir="${JGRAPHX.binaries}">
+			<fileset dir="${JGRAPHX.sources}">
+				<filename name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+	<target name="jar" depends="build">
+        <jar destfile="${JGRAPHX.binaries}/${JGRAPHX.archive}" filesetmanifest="mergewithoutmain">
+            <fileset dir="${JGRAPHX.binaries}"/>
+        </jar>
+    </target>
+</project>
