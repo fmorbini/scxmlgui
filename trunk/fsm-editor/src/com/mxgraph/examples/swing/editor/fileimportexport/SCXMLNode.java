@@ -1,0 +1,387 @@
+package com.mxgraph.examples.swing.editor.fileimportexport;
+
+import java.io.Serializable;
+import java.util.HashMap;
+
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.undo.UndoManager;
+
+public class SCXMLNode implements Serializable {
+	private static final long serialVersionUID = -2136349535452806563L;
+
+	public static final String INTERNALID="internalID";
+	public static final String ID="id";
+	public static final String TYPE="type";
+	public static final String INITIAL="initial";
+	public static final String FINAL="final";
+	public static final String ONENTRYEXE="onentryexe";
+	public static final String INITEXE="initexe";
+	public static final String FINALDATA="finalData";
+	public static final String ONEXITEXE="onexitexe";
+
+	public static final String PARALLEL="parallel";
+	public static final String NORMAL="normal";
+	public static final String STYLE="style";
+	public static final String DATAMODEL="datamodel";
+	public static final String DONEDATA="donedata";
+	
+	public static final String DEFAULTFILLCOLOR="#e3ffae";
+	public static final String DEFAULTSTROKECOLOR="#000000";
+	public static final String DEFAULTSHAPE="rounded=1";
+	public static final String PARALLELFILLCOLOR="#0074ff";
+	public static final String PARALLELSTROKECOLOR="#0074ff";
+	public static final String INITIALFILLCOLOR="#ff7eff";
+	public static final String FINALSTROKECOLOR="#FF0000";
+	public static final String CLUSTERSHAPE="swimlane";
+
+	public static final String DATAMODELUNDO="DMundo";
+	public static final String DATAMODELDOC="DMdoc";
+	
+	public static final String SCXMLIDUNDO="SCXMLIDundo";
+	public static final String SCXMLIDDOC="SCXMLIDdoc";
+	public static final String ONENTRYUNDO="ENTRYundo";
+	public static final String ONENTRYDOC="ENTRYdoc";
+	public static final String ONEXITUNDO="EXITundo";
+	public static final String ONEXITDOC="EXItdoc";
+	// only initial states
+	public static final String ONINITIALENTRYUNDO="INITIALundo";
+	public static final String ONINITIALENTRYDOC="INITIALdoc";
+	// only final states
+	public static final String FINALDONEDATAUNDO="FINALundo";
+	public static final String FINALDONEDATADOC="FINALdoc";
+
+	private HashMap<String,Object> node;
+	public SCXMLNode() {
+		node=new HashMap<String, Object>();
+		node.put(TYPE,NORMAL);
+		this.setShape(DEFAULTSHAPE);
+		this.setFillColor(DEFAULTFILLCOLOR);
+		this.setStrokeColor(DEFAULTSTROKECOLOR);
+		this.setInitial(false);
+		this.setFinal(false);
+		this.setParallel(false);
+	}
+	public String getInternalID() {
+		return (String)node.get(INTERNALID);
+	}
+	public void setInternalID(String internalID) {
+		node.put(INTERNALID, internalID);
+	}
+	public String getID() {
+		AbstractDocument dmd = getSCXMLIDDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(ID);
+			}
+		}
+		else
+			return (String)node.get(ID);
+	}
+	public void setID(String scxmlID) {
+		node.put(ID, scxmlID);
+	}
+	public String getOnEntry() {
+		AbstractDocument dmd = getOnEntryDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(ONENTRYEXE);
+			}
+		}
+		else
+			return (String)node.get(ONENTRYEXE);
+	}
+	public String getOnExit() {
+		AbstractDocument dmd = getOnExitDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(ONEXITEXE);
+			}
+		}
+		else
+			return (String)node.get(ONEXITEXE);
+	}
+	public String getOnInitialEntry() {
+		AbstractDocument dmd = getInitialEntryDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(INITEXE);
+			}
+		}
+		else
+			return (String)node.get(INITEXE);
+	}
+	public void setFinalData(String scxmlID) {
+		node.put(FINALDATA, scxmlID);
+	}
+	public String getFinalData() {
+		AbstractDocument dmd = getFinalDataDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(FINALDATA);
+			}
+		}
+		else
+			return (String)node.get(FINALDATA);
+	}
+	public void setOnEntry(String exe) {
+		node.put(ONENTRYEXE,exe);
+	}
+	public void setOnExit(String exe) {
+		node.put(ONEXITEXE,exe);
+	}
+	public void setOnInitialEntry(String exe) {
+		node.put(INITEXE,exe);
+	}
+	public void setDoneData(String dd) {
+		assert(isFinal());
+		node.put(DONEDATA,dd);
+	}
+	public String getDoneData() {
+		assert(isFinal());
+		AbstractDocument dmd = getFinalDataDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(DONEDATA);
+			}
+		}
+		else
+			return (String)node.get(DONEDATA);
+	}
+	public void setDataModel(String dm) {
+		node.put(DATAMODEL,dm);
+	}
+	public void addToDataModel(String dm) {
+		String pdm=getDataModel();
+		node.put(DATAMODEL,(pdm==null)?dm:pdm+dm);
+	}
+	public String getDataModel() {
+		AbstractDocument dmd = getDatamodelDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(DATAMODEL);
+			}
+		}
+		else
+			return (String)node.get(DATAMODEL);
+	}
+	public void setParallel(boolean b) {
+		this.setFillColor((isInitial())?INITIALFILLCOLOR:((b)?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
+		this.setStrokeColor((isFinal())?FINALSTROKECOLOR:((b)?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
+		node.put(TYPE, (b)?PARALLEL:NORMAL);
+		if (b) setCluster(true); // a parallel node must be a cluster
+	}
+	public boolean isParallel() {
+		if (node.get(TYPE).equals(PARALLEL))
+			return true;
+		else
+			return false;
+	}
+	public void setInitial(Boolean b) {
+		this.setFillColor((b)?INITIALFILLCOLOR:((isParallel())?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
+		node.put(INITIAL, b);
+	}
+	public Boolean isInitial() {
+		return (Boolean)node.get(INITIAL);
+	}
+	public void setCluster(Boolean b) {
+		if (b) setShape(CLUSTERSHAPE);
+		else setShape(DEFAULTSHAPE);
+	}
+	public boolean isClusterNode() {
+		return getShape().equals(CLUSTERSHAPE);
+	}
+	public void setFinal(Boolean b) {
+		this.setStrokeColor((b)?FINALSTROKECOLOR:((isParallel())?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
+		node.put(FINAL, b);
+	}
+	public Boolean isFinal() {
+		return (Boolean)node.get(FINAL);
+	}
+	@Override
+	public String toString() {
+		String ret="<";
+		for (String i:node.keySet())
+			ret+=i+": "+node.get(i)+"; ";
+		return ret+">";
+	}
+	public void setShape(String shape) {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		if (sh==null) {
+			node.put(STYLE,sh=new HashMap<String, String>());
+		}
+		sh.put("root",shape);
+	}
+	public String getShape() {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		return (sh==null)?null:sh.get("root");
+	}
+	public void setFillColor(String color) {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		if (sh==null) {
+			node.put(STYLE,sh=new HashMap<String, String>());
+		}
+		if (color==null)
+			sh.remove("fillColor");
+		else
+			sh.put("fillColor",color);
+	}
+	public String getFillColor() {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		return (sh==null)?null:sh.get("fillColor");
+	}
+	public void setStrokeColor(String color) {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		if (sh==null) {
+			node.put(STYLE,sh=new HashMap<String, String>());
+		}
+		if (color==null)
+			sh.remove("strokeColor");
+		else
+			sh.put("strokeColor",color);
+	}
+	public String getStrokeColor() {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		return (sh==null)?null:sh.get("strokeColor");
+	}
+	public String getStyle() {
+		HashMap<String, String> sh = (HashMap<String, String>)node.get(STYLE);
+		String ret=sh.get("root")+";";
+		for (String k:sh.keySet()) {
+			if (!k.equals("root"))
+				ret+=k+"="+sh.get(k)+";";
+		}
+		return ret;
+	}
+	// getter and setter for document and undomanager for the datamodel editor
+	public UndoManager getDatamodelUndoManager() {
+		return (UndoManager) node.get(DATAMODELUNDO);
+	}
+	public UndoManager setDatamodelUndoManager(UndoManager um) {
+		node.put(DATAMODELUNDO,um);
+		return um;
+	}
+	public AbstractDocument getDatamodelDoc() {
+		return (AbstractDocument) node.get(DATAMODELDOC);
+	}
+	public AbstractDocument setDatamodelDoc(AbstractDocument doc) {
+		node.put(DATAMODELDOC,doc);
+		return doc;
+	}
+	// getter and setter for document and undomanager for the onentry editor
+	public UndoManager getOnEntryUndoManager() {
+		return (UndoManager) node.get(ONENTRYUNDO);
+	}
+	public UndoManager setOnEntryUndoManager(UndoManager um) {
+		node.put(ONENTRYUNDO,um);
+		return um;
+	}
+	public AbstractDocument getOnEntryDoc() {
+		return (AbstractDocument) node.get(ONENTRYDOC);
+	}
+	public AbstractDocument setOnEntryDoc(AbstractDocument doc) {
+		node.put(ONENTRYDOC,doc);
+		return doc;
+	}
+	// getter and setter for document and undomanager for the onexit editor
+	public UndoManager getOnExitUndoManager() {
+		return (UndoManager) node.get(ONEXITUNDO);
+	}
+	public UndoManager setOnExitUndoManager(UndoManager um) {
+		node.put(ONEXITUNDO,um);
+		return um;
+	}
+	public AbstractDocument getOnExitDoc() {
+		return (AbstractDocument) node.get(ONEXITDOC);
+	}
+	public AbstractDocument setOnExitDoc(AbstractDocument doc) {
+		node.put(ONEXITDOC,doc);
+		return doc;
+	}
+	// getter and setter for document and undomanager for the executable content for the the editor for the initial entry in an initial node
+	public UndoManager getInitialEntryUndoManager() {
+		return (UndoManager) node.get(ONINITIALENTRYUNDO);
+	}
+	public UndoManager setInitialEntryUndoManager(UndoManager um) {
+		node.put(ONINITIALENTRYUNDO,um);
+		return um;
+	}
+	public AbstractDocument getInitialEntryDoc() {
+		return (AbstractDocument) node.get(ONINITIALENTRYDOC);
+	}
+	public AbstractDocument setInitialEntryDoc(AbstractDocument doc) {
+		node.put(ONINITIALENTRYDOC,doc);
+		return doc;
+	}
+	// getter and setter for document and undomanager for the donedata field of a final node
+	public UndoManager getFinalUndoManager() {
+		return (UndoManager) node.get(FINALDONEDATAUNDO);
+	}
+	public UndoManager setFinalUndoManager(UndoManager um) {
+		node.put(FINALDONEDATAUNDO,um);
+		return um;
+	}
+	public AbstractDocument getFinalDataDoc() {
+		return (AbstractDocument) node.get(FINALDONEDATADOC);
+	}
+	public AbstractDocument setFinalDataDoc(AbstractDocument doc) {
+		node.put(FINALDONEDATADOC,doc);
+		return doc;
+	}
+	// getter and setter for document and undomanager for the SCXML ID field of a node
+	public UndoManager getSCXMLIDUndoManager() {
+		return (UndoManager) node.get(SCXMLIDUNDO);
+	}
+	public UndoManager setSCXMLIDUndoManager(UndoManager um) {
+		node.put(SCXMLIDUNDO,um);
+		return um;
+	}
+	public AbstractDocument getSCXMLIDDoc() {
+		return (AbstractDocument) node.get(SCXMLIDDOC);
+	}
+	public AbstractDocument setSCXMLIDDoc(AbstractDocument doc) {
+		node.put(SCXMLIDDOC,doc);
+		return doc;
+	}
+
+	public SCXMLNode cloneNode(SCXMLImportExport scxmlImportExport) {
+		SCXMLNode n=(SCXMLNode) scxmlImportExport.buildNodeValue();
+		n.node=(HashMap<String, Object>) this.node.clone();
+		// removes the documents in the original value (if there). But get their values (because if there they have the
+		// real value of the property they represent (the document)
+		n.setDatamodelDoc(null);
+		n.setDatamodelUndoManager(null);
+		n.setDataModel(getDataModel());
+		n.setFinalDataDoc(null);
+		n.setFinalUndoManager(null);
+		n.setFinalData(getFinalData());
+		n.setInitialEntryDoc(null);
+		n.setInitialEntryUndoManager(null);
+		n.setOnInitialEntry(getOnInitialEntry());
+		n.setOnEntryDoc(null);
+		n.setOnEntryUndoManager(null);
+		n.setOnEntry(getOnEntry());
+		n.setOnExitDoc(null);
+		n.setOnExitUndoManager(null);
+		n.setOnExit(getOnExit());
+		n.setSCXMLIDDoc(null);
+		n.setSCXMLIDUndoManager(null);
+		n.setID(getID());
+		return n;
+	}
+}
+
