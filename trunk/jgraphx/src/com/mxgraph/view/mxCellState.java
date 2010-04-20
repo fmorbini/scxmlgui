@@ -4,6 +4,7 @@
  */
 package com.mxgraph.view;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -489,6 +490,10 @@ public class mxCellState extends mxRectangle
 		return clone;
 	}
 
+	public Point relativizePointToThisState(Point p, double s, mxPoint tr) {
+		return new Point(p.x-=(int)getX()/s,p.y-=(int)getY()/s);
+	}
+	
 	public int getIndexOfEdgePointAt(int x, int y,int tol) {
 		Rectangle rect = new Rectangle(x - tol / 2, y - tol / 2, tol, tol);
 		List<mxPoint> pts = getAbsolutePoints();

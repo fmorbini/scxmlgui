@@ -144,8 +144,13 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 		// Routes multiple loops
 		if (src == trg)
 		{
-			double x0 = src.getX() + src.getWidth() + this.spacing;
-			double y0 = src.getY() + src.getHeight() / 2;
+			//now loops are the children of the cell of which they are attached (i.e. src)
+			// so there is no need to sum src.getX and src.getY because the coordinates of the edge
+			// are already relative to that point.
+			//double x0 = src.getX() + src.getWidth() + this.spacing;
+			//double y0 = src.getY() + src.getHeight() / 2;
+			double x0 = src.getWidth() + this.spacing;
+			double y0 = src.getHeight() / 2;
 
 			for (int i = 0; i < parallels.size(); i++)
 			{
