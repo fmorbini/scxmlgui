@@ -91,6 +91,6 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 
 		// edit scxml datamodel
 		add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
-		add(editor.bind(mxResources.get("doLayout"), new DoLayoutAction(graph)));
+		add(editor.bind(mxResources.get("doLayout"), new DoLayoutAction(graph,c)));
 	}
 }

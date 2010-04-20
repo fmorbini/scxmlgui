@@ -3,6 +3,8 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -15,9 +17,12 @@ import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxUtils;
+import com.mxgraph.view.mxCellState;
+import com.mxgraph.view.mxGraphView;
 
 public class SCXMLImportExport implements IImportExport {
 	
@@ -141,7 +146,8 @@ public class SCXMLImportExport implements IImportExport {
 		NodeList states = el.getChildNodes();
 		for (int s = 0; s < states.getLength(); s++) {
 			Node n = states.item(s);
-			if (n.getNodeType()==Node.ELEMENT_NODE) {
+			switch (n.getNodeType()) {
+			case Node.ELEMENT_NODE:
 				String name=n.getNodeName().toLowerCase();
 				// STATE: normal or parallel
 				Boolean isParallel=false;
@@ -152,8 +158,9 @@ public class SCXMLImportExport implements IImportExport {
 				} else if (name.equals("transition")) {
 					addEdge(processEdge(pn,n));
 				} else if (name.equals("final")) {
-					pn.setFinal(true);
-					getNodeHier(n, pn);
+					SCXMLNode node = handleSCXMLNode(n,pn,isParallel);
+					node.setFinal(true);
+					getNodeHier(n, node);
 				} else if (name.equals("initial")) {
 					//pn.setInitial(true);
 					// only one child that is a transition
@@ -189,6 +196,23 @@ public class SCXMLImportExport implements IImportExport {
 					String content=collectAllChildrenInString(n);
 					root.addToDataModel(content);
 				}
+				break;
+			case Node.COMMENT_NODE:
+				String positionString=n.getNodeValue();
+				Pattern p = Pattern.compile("^[\\s]*x=([\\d]+) y=([\\d]+) w=([\\d]+) h=([\\d]+)[\\s]*$");
+				Matcher m = p.matcher(positionString);
+				int x,y,h,w;
+				if (m.matches() && (m.groupCount()==4)) {
+					try {
+						x=Integer.parseInt(m.group(1));
+						y=Integer.parseInt(m.group(2));
+						w=Integer.parseInt(m.group(3));
+						h=Integer.parseInt(m.group(4));
+						pn.setGeometry(x,y,w,h);
+					} catch (NumberFormatException e) {
+					}
+				}
+				break;
 			}
 		}
 	}
@@ -269,15 +293,16 @@ public class SCXMLImportExport implements IImportExport {
 				SCXMLNode n = internalID2nodes.get(internalID);				
 				mxCell cn=addOrUpdateNode(graph,n,null);
 				//System.out.println(n.getStyle());
+                // set geometry and size
 				cn.setStyle(n.getStyle());
-			}
-			// then automatically adjust the size of nodes that are not clusters:
-			for (String internalID:internalID2nodes.keySet()) {
-				if (!internalID2clusters.containsKey(internalID)) {
-					assert(internalID2cell.get(internalID)!=null);
+				mxGeometry g=null;//n.getGeometry();
+				if (g!=null) {
+					graph.setCellAsMovable(cn, false);
+					model.setGeometry(cn, g);
+				} else if (!internalID2clusters.containsKey(internalID)) {
 					graph.updateCellSize(internalID2cell.get(internalID));
 				}
-			}			
+			}
 			// then add the edges
 			for (String fromSCXMLID:fromToEdges.keySet()) {
 				HashMap<String, ArrayList<SCXMLEdge>> toEdge = fromToEdges.get(fromSCXMLID);
@@ -374,11 +399,13 @@ public class SCXMLImportExport implements IImportExport {
 		// for any state/node: get all outgoing edges: add a transition for each of them
 		//  for any transition: print event/condition and exe content.
 		// for any state/node: print the on-entry/on-exit/donedata
-		// for any state/node: add the children states, repeat process recursively		
-		mxIGraphModel model = from.getGraph().getModel();
+		// for any state/node: add the children states, repeat process recursively
+		SCXMLGraph graph=(SCXMLGraph) from.getGraph();
+		mxGraphView view = graph.getView();
+		mxIGraphModel model = graph.getModel();
 		mxCell root=followUniqueDescendantLineTillSCXMLValueIsFound(model);
 		if (root!=null) {
-			String scxml=mxVertex2SCXMLString(root,true);
+			String scxml=mxVertex2SCXMLString(view,root,true);
 			System.out.println(scxml);
 			scxml=XMLUtils.prettyPrintXMLString(scxml, " ");			
 			System.out.println(scxml);
@@ -386,7 +413,7 @@ public class SCXMLImportExport implements IImportExport {
 		}
 	}
 	
-	private String mxVertex2SCXMLString(mxCell n, boolean isRoot) {
+	private String mxVertex2SCXMLString(mxGraphView view, mxCell n, boolean isRoot) {
 		String ret="";
 		String ID=null;
 		String datamodel=null;
@@ -425,6 +452,10 @@ public class SCXMLImportExport implements IImportExport {
 		if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null))
 			ret+=" initial=\""+initialChild.getID()+"\"";
 		ret+=">";
+
+		// save the geometric information of this node:
+		ret+="<!-- "+getGeometryString(view,n)+" -->";
+		
 		if (!StringUtils.isEmptyString(datamodel))
 			ret+="<datamodel>"+datamodel+"</datamodel>";
 		if (value.isInitial() && !StringUtils.isEmptyString(oninitialentry=value.getOnInitialEntry()))
@@ -441,10 +472,16 @@ public class SCXMLImportExport implements IImportExport {
 		for(int i=0;i<nc;i++) {
 			mxCell c=(mxCell) n.getChildAt(i);
 			if (c.isVertex())
-				ret+=mxVertex2SCXMLString(c,false);
+				ret+=mxVertex2SCXMLString(view,c,false);
 		}
 		ret+=close;
 		return ret;
+	}
+	private String getGeometryString(mxGraphView view, mxCell n) {
+		mxCellState ns=view.getState(n);
+		if (ns!=null)
+			return "x="+(int)ns.getX()+" y="+(int)ns.getY()+" w="+(int)ns.getWidth()+" h="+(int)ns.getHeight();
+		else return "";
 	}
 	private SCXMLNode getInitialChildOfmxCell(mxCell n) {
 		int nc=n.getChildCount();

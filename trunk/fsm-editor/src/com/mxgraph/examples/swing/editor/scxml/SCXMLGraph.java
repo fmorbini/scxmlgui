@@ -104,7 +104,7 @@ public class SCXMLGraph extends mxGraph
 			System.out.println("WARNING: non NULL and non SCXMLEdge value passed for new edge (insertEdge in SCXMLGraph)");
 			value=getEditor().getCurrentFileIO().buildEdgeValue();
 		}
-		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight");
+		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight;strokeColor=#888888");
 	}
 	@Override
 	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges)

@@ -38,6 +38,8 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 	{
 		super(graph);
 
+		setWheelScrollingEnabled(false);
+		
 		//addComponentListener(this);
 		setDragEnabled(false);
 		

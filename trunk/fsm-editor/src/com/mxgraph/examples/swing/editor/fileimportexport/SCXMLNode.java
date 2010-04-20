@@ -7,9 +7,16 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.undo.UndoManager;
 
+import com.mxgraph.model.mxGeometry;
+
 public class SCXMLNode implements Serializable {
 	private static final long serialVersionUID = -2136349535452806563L;
 
+	public static final String GEOX="geomtryX";
+	public static final String GEOY="geomtryY";
+	public static final String GEOW="geomtryW";
+	public static final String GEOH="geomtryH";
+	
 	public static final String INTERNALID="internalID";
 	public static final String ID="id";
 	public static final String TYPE="type";
@@ -382,6 +389,23 @@ public class SCXMLNode implements Serializable {
 		n.setSCXMLIDUndoManager(null);
 		n.setID(getID());
 		return n;
+	}
+	public void setGeometry(int x, int y, int w, int h) {
+		node.put(GEOX, x);
+		node.put(GEOY, y);
+		node.put(GEOW, w);
+		node.put(GEOH, h);
+	}
+	public mxGeometry getGeometry() {		
+		if (node.containsKey(GEOX)) {
+			int x,y,h,w;
+			x=(Integer)node.get(GEOX);
+			y=(Integer)node.get(GEOY);
+			w=(Integer)node.get(GEOW);
+			h=(Integer)node.get(GEOH);
+			return new mxGeometry(x, y, w, h);
+		}
+		else return null;
 	}
 }
 
