@@ -5,7 +5,9 @@
 	<!-- project properties -->
 	<property name="FSM.archive" 	value="fsm-editor.jar"/>
 
-	<property name="Lib"		location="${FSM}/../lib"/>
+	<property name="Lib"		location="${FSM}/../../lib"/>
+	<property name="JBPM"		location="${Lib}/JBPM"/>
+	<property name="JGRAPHX"		location="${Lib}/JGraphX"/>
 
 	<!-- project paths -->
 	<property name="FSM.sources"	location="${FSM}/src"/>
@@ -25,7 +27,8 @@
 		<mkdir dir="${FSM.binaries}"/>
 		<javac srcdir="${FSM.sources}" destdir="${FSM.binaries}" debug="true">
 			<classpath>
-				<fileset dir="${Lib}" includes="*.jar"/>
+				<fileset dir="${JBPM}" includes="*.jar"/>
+				<fileset dir="${JGRAPHX}" includes="*.jar"/>
 			</classpath>
 		</javac>
 		<copy todir="${FSM.binaries}">
@@ -40,8 +43,8 @@
                 <attribute name="Main-Class" value="com.mxgraph.examples.swing.SCXMLEditor"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <zipfileset excludes="META-INF/*.SF" src="${Lib}/jgraphx.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${JGRAPHX}/jgraphx.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${JBPM}/dom4j.jar"/>
             <fileset dir="${FSM.binaries}"/>
 		</jar>
     </target>

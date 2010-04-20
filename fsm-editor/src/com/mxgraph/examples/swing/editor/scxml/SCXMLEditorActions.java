@@ -180,18 +180,30 @@ public class SCXMLEditorActions
 			assert(cell.isEdge());
 			SCXMLGraphEditor editor = getEditor(e);
 			mxGraphComponent gc = editor.getGraphComponent();
-			mxCellState cs = gc.getGraph().getView().getState(cell);
+			mxGraphView gv = gc.getGraph().getView();
+			mxCellState cs = gv.getState(cell);
 			//List<mxPoint> pts = cs.getAbsolutePoints();
 			mxGeometry cg = cell.getGeometry();
-			List<mxPoint> ptsAlreadyThere = cg.getPoints();
-			if (ptsAlreadyThere==null) ptsAlreadyThere=new ArrayList<mxPoint>();
+			
+			if (cg.isRelative()) {
+				mxCellState ps = gv.getState(cell.getParent());
+				pos=ps.relativizePointToThisState(pos,gv.getScale(),gv.getTranslate());
+			}
+			
+			List<mxPoint> ptsAlreadyThere = (cg.getPoints()==null)?new ArrayList<mxPoint>():new ArrayList<mxPoint>(cg.getPoints());
 			if (index>=ptsAlreadyThere.size())
 				ptsAlreadyThere.add(new mxPoint(pos.x, pos.y));
 			else
 				ptsAlreadyThere.add(index,new mxPoint(pos.x, pos.y));
-			cg.setPoints(ptsAlreadyThere);
+
 			mxGraphModel model=(mxGraphModel) gc.getGraph().getModel();
-			model.execute(new mxGeometryChange(model, cell, cg));
+			mxGeometry geometry = (mxGeometry) cg.clone();
+			geometry.setPoints(ptsAlreadyThere);
+			model.setGeometry(cell, geometry);
+			
+			//cg.setPoints(ptsAlreadyThere);
+			//mxGraphModel model=(mxGraphModel) gc.getGraph().getModel();
+			//model.execute(new mxGeometryChange(model, cell, cg));
 		}
 	}
 	public static class RemoveCornerToEdgeAction extends AbstractAction
@@ -211,10 +223,17 @@ public class SCXMLEditorActions
 			mxCellState cs = gc.getGraph().getView().getState(cell);
 			//List<mxPoint> pts = cs.getAbsolutePoints();
 			mxGeometry cg = cell.getGeometry();
-			List<mxPoint> ptsAlreadyThere = cg.getPoints();
+			List<mxPoint> ptsAlreadyThere = new ArrayList<mxPoint>(cg.getPoints());
+			
 			ptsAlreadyThere.remove(index);
+
 			mxGraphModel model=(mxGraphModel) gc.getGraph().getModel();
-			model.execute(new mxGeometryChange(model, cell, cg));
+			mxGeometry geometry = (mxGeometry) cg.clone();
+			geometry.setPoints(ptsAlreadyThere);
+			model.setGeometry(cell, geometry);
+			
+			//mxGraphModel model=(mxGraphModel) gc.getGraph().getModel();
+			//model.execute(new mxGeometryChange(model, cell, cg));
 		}
 	}
 
@@ -1510,9 +1529,12 @@ public class SCXMLEditorActions
 	{
 		mxGraph graph;
 		mxClusterLayout layout;
-		public DoLayoutAction(mxGraph g) {
+		mxCell parentToLayout;
+		
+		public DoLayoutAction(mxGraph g, mxCell p) {
 			graph=g;
 			layout=new mxClusterLayout(g);
+			parentToLayout=p;
 		}
 		public DoLayoutAction(mxGraph g,mxIGraphLayout[] ls) {
 			graph=g;
@@ -1523,7 +1545,7 @@ public class SCXMLEditorActions
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
-			layout.execute(graph.getDefaultParent());
+			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
 		}
 	}
 

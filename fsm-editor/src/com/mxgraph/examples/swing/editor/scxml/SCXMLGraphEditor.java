@@ -31,6 +31,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -411,6 +412,10 @@ public class SCXMLGraphEditor extends JPanel
 		status(e.getX() + ", " + e.getY());
 	}
 
+	public int getScroollingAmount(JScrollBar hs, MouseWheelEvent e) {
+		return (int) (e.getWheelRotation()*hs.getModel().getExtent()*0.7);
+	}
+	
 	/**
 	 * 
 	 */
@@ -428,6 +433,12 @@ public class SCXMLGraphEditor extends JPanel
 						|| e.isControlDown())
 				{
 					SCXMLGraphEditor.this.mouseWheelMoved(e);
+				} else {
+					JScrollBar s = (e.isShiftDown())?graphComponent.getHorizontalScrollBar():graphComponent.getVerticalScrollBar();
+					if (s!=null) {
+						int d=getScroollingAmount(s,e);
+						s.setValue(s.getValue()+d);
+					}
 				}
 			}
 
