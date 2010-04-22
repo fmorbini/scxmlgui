@@ -4,17 +4,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.TransferHandler;
-import javax.swing.Action;
 
 import com.mxgraph.examples.swing.SCXMLEditor;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.HistoryAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.NewSCXMLAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLListener;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.util.mxResources;
@@ -84,6 +86,11 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		menu.add(editor.bind(mxResources.get("selectNone"), mxGraphActions
 				.getSelectNoneAction()));
 
+		menu = add(new JMenu(mxResources.get("tools")));
+		menu.add(editor.bind(mxResources.get("showSCXMLListener"), new ShowSCXMLListener()));
+		
+		add(Box.createHorizontalGlue());
+		
 		// Creates the help menu
 		menu = add(new JMenu(mxResources.get("help")));
 

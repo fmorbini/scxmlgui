@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
@@ -43,13 +42,13 @@ import org.w3c.dom.Document;
 
 import com.mxgraph.analysis.mxDistanceCostFunction;
 import com.mxgraph.analysis.mxGraphAnalysis;
-import com.mxgraph.examples.swing.SCXMLEditor;
 import com.mxgraph.examples.swing.editor.EditorRuler;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
+import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor.AskToSaveIfRequired;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.layout.mxClusterLayout;
@@ -58,7 +57,6 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.model.mxGraphModel.mxGeometryChange;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxConnectionHandler;
@@ -1454,35 +1452,6 @@ public class SCXMLEditorActions
 		}
 	}
 
-	/**
-	 *
-	 */
-	@SuppressWarnings("serial")
-	public static class NewAction extends AbstractAction
-	{
-
-		/**
-		 * 
-		 */
-		public void actionPerformed(ActionEvent e)
-		{
-			SCXMLGraphEditor editor = getEditor(e);
-
-			if (editor != null)
-			{
-				if (AskToSaveIfRequired.check(editor)) {
-					mxGraph graph = editor.getGraphComponent().getGraph();
-					// Check modified flag and display save dialog
-					mxCell root = new mxCell();
-					root.insert(new mxCell());
-					graph.getModel().setRoot(root);
-
-					editor.setModified(false);
-					editor.setCurrentFile(null,null);
-				}
-			}
-		}
-	}
 	@SuppressWarnings("serial")
 	public static class NewSCXMLAction extends AbstractAction
 	{
@@ -2080,6 +2049,20 @@ public class SCXMLEditorActions
 					graph.setCellStyle(value);
 				}
 			}
+		}
+	}
+
+	@SuppressWarnings("serial")
+	public static class ShowSCXMLListener extends AbstractAction
+	{
+		/**
+		 * 
+		 */
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLListener scxmlListener=editor.getSCXMLListener();
+			scxmlListener.showTool();
 		}
 	}
 

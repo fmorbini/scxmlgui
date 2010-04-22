@@ -65,7 +65,7 @@ public class SCXMLGraph extends mxGraph
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
 				if (!StringUtils.isEmptyString(parentValue.getID()))
 					if (gc.isSCXMLNodeAlreadyThere(parentValue)) return "duplicated node name.";
-					else gc.addSCXMLNode(parentValue);
+					else gc.addSCXMLNode(parentValue,parent);
 				if (parentValue.isClusterNode()) {
 					int numInitialChildren=0;
 					for (int i=0;i<numChildren;i++) {

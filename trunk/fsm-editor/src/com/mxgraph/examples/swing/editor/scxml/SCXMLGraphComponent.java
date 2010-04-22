@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 import com.mxgraph.examples.swing.SCXMLEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.io.mxCodec;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
@@ -100,16 +101,19 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		return super.importCells(cells, dx, dy, target, location);
 	}
 
-	private HashMap<String,Boolean> nodeNames=new HashMap<String, Boolean>();
-	public void addSCXMLNode(SCXMLNode n) {
-		nodeNames.put(n.getID(), null);
+	private HashMap<String,mxCell> scxmlNodes=new HashMap<String, mxCell>();
+	public void addSCXMLNode(SCXMLNode n, mxCell node) {
+		scxmlNodes.put(n.getID(), node);
 	}
 	public boolean isSCXMLNodeAlreadyThere(SCXMLNode n) {
-		return nodeNames.containsKey(n.getID());
+		return scxmlNodes.containsKey(n.getID());
+	}
+	public mxCell getSCXMLNodeForID(String id) {
+		return scxmlNodes.get(id);
 	}
 	public boolean validateGraph(StringBuffer warnings)
 	{		
-		nodeNames.clear();
+		scxmlNodes.clear();
 		return (validateGraph(graph.getModel().getRoot(),new Hashtable<Object, Object>(),warnings)==null);
 	}
 
