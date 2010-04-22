@@ -5,9 +5,9 @@
 	<!-- project properties -->
 	<property name="FSM.archive" 	value="fsm-editor.jar"/>
 
-	<property name="Lib"		location="${FSM}/../../lib"/>
-	<property name="JBPM"		location="${Lib}/JBPM"/>
-	<property name="JGRAPHX"		location="${Lib}/JGraphX"/>
+	<property name="Lib"		location="${FSM}/../lib"/>
+	<property name="JBPM"		location="${Lib}/dom4j.jar"/>
+	<property name="JGRAPHX"	location="${Lib}/jgraphx.jar"/>
 
 	<!-- project paths -->
 	<property name="FSM.sources"	location="${FSM}/src"/>
@@ -21,14 +21,11 @@
 		<delete dir="${FSM.binaries}" includeemptydirs="true" failonerror="false"/>
 	</target>
 	<target name="build" depends="clean">
-		<!-- 	uncomment the following 2 lines to print the classpath -->
-		<!-- 	<property name="myclasspath" refid="DMS.archives"/> -->
-		<!-- 	<echo message="Classpath = ${myclasspath}"/> -->
 		<mkdir dir="${FSM.binaries}"/>
 		<javac srcdir="${FSM.sources}" destdir="${FSM.binaries}" debug="true">
 			<classpath>
-				<fileset dir="${JBPM}" includes="*.jar"/>
-				<fileset dir="${JGRAPHX}" includes="*.jar"/>
+			  <pathelement location="${JBPM}"/>
+			  <pathelement location="${JGRAPHX}"/>
 			</classpath>
 		</javac>
 		<copy todir="${FSM.binaries}">
@@ -43,8 +40,8 @@
                 <attribute name="Main-Class" value="com.mxgraph.examples.swing.SCXMLEditor"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <zipfileset excludes="META-INF/*.SF" src="${JGRAPHX}/jgraphx.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="${JBPM}/dom4j.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${JGRAPHX}"/>
+            <zipfileset excludes="META-INF/*.SF" src="${JBPM}"/>
             <fileset dir="${FSM.binaries}"/>
 		</jar>
     </target>

@@ -409,7 +409,7 @@ public class SCXMLImportExport implements IImportExport {
 			System.out.println(scxml);
 			scxml=XMLUtils.prettyPrintXMLString(scxml, " ");			
 			System.out.println(scxml);
-			mxUtils.writeFile(scxml, into);
+			mxUtils.writeFile(scxml, into);			
 		}
 	}
 	

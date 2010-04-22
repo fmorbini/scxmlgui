@@ -44,6 +44,7 @@ import com.mxgraph.examples.swing.editor.EditorKeyboardHandler;
 import com.mxgraph.examples.swing.editor.EditorPalette;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
+import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
@@ -93,6 +94,8 @@ public class SCXMLGraphEditor extends JPanel
 	 * a summary view of the entire graph
 	 */
 	protected mxGraphOutline graphOutline;
+
+	private SCXMLListener scxmlListener;
 
 	/**
 	 * the toolbar with shapes and stuff that can be added to the graph
@@ -163,6 +166,10 @@ public class SCXMLGraphEditor extends JPanel
 			undo.setEnabled(undoManager.canUndo());
 	}
 
+	public SCXMLListener getSCXMLListener() {
+		return scxmlListener;
+	}
+	
 	/**
 	 * 
 	 */
@@ -586,7 +593,7 @@ public class SCXMLGraphEditor extends JPanel
 	/**
 	 * 
 	 */
-	public mxGraphComponent getGraphComponent()
+	public SCXMLGraphComponent getGraphComponent()
 	{
 		return graphComponent;
 	}
@@ -700,6 +707,7 @@ public class SCXMLGraphEditor extends JPanel
 		if (frame != null)
 		{
 			frame.dispose();
+			scxmlListener.dispose();
 		}
 	}
 
@@ -747,8 +755,7 @@ public class SCXMLGraphEditor extends JPanel
 		@Override
 		public void windowClosing(WindowEvent arg0) {
 			if (AskToSaveIfRequired.check(editor)) {
-				this.dispose();
-				System.exit(0);
+				editor.exit();
 			}
 		}
 
@@ -789,6 +796,8 @@ public class SCXMLGraphEditor extends JPanel
 		graphOutline = new mxGraphOutline(graphComponent,200,200);
 		JLayeredPane lp = frame.getLayeredPane();
 		lp.add(graphOutline, JLayeredPane.POPUP_LAYER);
+		
+		scxmlListener=new SCXMLListener(editor);
 		
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setJMenuBar(new SCXMLEditorMenuBar(editor));
