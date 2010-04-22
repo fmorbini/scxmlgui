@@ -14,11 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUndoableEdit;
+import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
 /**
  * Extends mxEventSource to implement a graph model. The graph model acts as
@@ -966,7 +969,15 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 
 		return style;
 	}
+	public String setStyleCovert(Object cell, String style)
+	{
+		if (style != getStyle(cell))
+		{
+			executeCovert(new mxStyleChange(this, cell, style));
+		}
 
+		return style;
+	}
 	/**
 	 * Inner callback to update the style of the given mxCell
 	 * using mxCell.setStyle and return the previous style.
@@ -1061,6 +1072,16 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 		fireEvent(new mxEventObject(mxEvent.EXECUTE, "change", change));
 		endUpdate();
 	}
+	public void executeCovert(mxAtomicGraphModelChange change)
+	{
+		assert(currentEdit.isEmpty());
+		currentEdit.setTransparent(true);
+		change.execute();
+		beginUpdate();
+		currentEdit.add(change);
+		fireEvent(new mxEventObject(mxEvent.EXECUTE, "change", change));
+		endUpdate();
+	}
 
 	/* (non-Javadoc)
 	 * @see com.mxgraph.model.mxIGraphModel#beginUpdate()
@@ -1087,8 +1108,7 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 			{
 				if (endingUpdate && !currentEdit.isEmpty())
 				{
-					fireEvent(new mxEventObject(mxEvent.BEFORE_UNDO, "edit",
-							currentEdit));
+					fireEvent(new mxEventObject(mxEvent.BEFORE_UNDO, "edit",currentEdit));
 					mxUndoableEdit tmp = currentEdit;
 					currentEdit = createUndoableEdit();
 					tmp.dispatch();
@@ -2313,6 +2333,34 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 					previous);
 		}
 
+	}
+
+	@Override
+	public void highlightCell(mxCell node, String color) {
+		if (node!=null) {
+			String style=getStyle(node);
+			if (node.isVertex()) {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, color);
+			} else {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, color);
+			}
+			setStyleCovert(node, style);
+		}
+	}
+
+	@Override
+	public void highlightCell(mxCell node, String color, String width) {
+		if (node!=null) {
+			String style=getStyle(node);
+			if (node.isVertex()) {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, color);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+			} else {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, color);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+			}
+			setStyleCovert(node, style);
+		}
 	}
 
 }

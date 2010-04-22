@@ -357,6 +357,8 @@ public class mxConstants
 	 * @see com.mxgraph.util.mxUtils#parseColor(String)
 	 */
 	public static String STYLE_FILLCOLOR = "fillColor";
+	public static String STYLE_HIGHLIGHTFILLCOLOR = "highlightFillColor";
+	public static String STYLE_HIGHLIGHTSTROKECOLOR = "highlightStrokeColor";
 
 	/**
 	 * Defines the key for the gradientColor style. The value is a string
@@ -403,6 +405,7 @@ public class mxConstants
 	 * The value reflects the stroke width in pixels.
 	 */
 	public static String STYLE_STROKEWIDTH = "strokeWidth";
+	public static String STYLE_HIGHLIGHTSTROKEWIDTH = "highlightStrokeWidth";
 
 	/**
 	 * Defines the key for the align style. Possible values are

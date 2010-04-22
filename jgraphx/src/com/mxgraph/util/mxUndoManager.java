@@ -135,16 +135,18 @@ public class mxUndoManager extends mxEventSource
 	 */
 	public void undoableEditHappened(mxUndoableEdit undoableEdit)
 	{
-		trim();
-
-		if (size > 0 && size == history.size())
-		{
-			history.remove(0);
+		if (!undoableEdit.getTransparent()) {
+			trim();
+	
+			if (size > 0 && size == history.size())
+			{
+				history.remove(0);
+			}
+	
+			history.add(undoableEdit);
+			indexOfNextAdd = history.size();
+			fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 		}
-
-		history.add(undoableEdit);
-		indexOfNextAdd = history.size();
-		fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 	}
 
 	/**
