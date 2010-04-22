@@ -45,6 +45,7 @@ public class mxUndoableEdit
 	 * Specifies the state of the undoable edit.
 	 */
 	protected boolean undone, redone;
+	private boolean transparent;
 
 	/**
 	 * Constructs a new undoable edit for the given source.
@@ -59,8 +60,13 @@ public class mxUndoableEdit
 	 */
 	public mxUndoableEdit(Object source, boolean significant)
 	{
+		this(source,significant,false);
+	}
+	public mxUndoableEdit(Object source, boolean significant,boolean transparent)
+	{
 		this.source = source;
 		this.significant = significant;
+		this.transparent=transparent;
 	}
 
 	/**
@@ -143,7 +149,7 @@ public class mxUndoableEdit
 	 */
 	public void undo()
 	{
-		if (!undone)
+		if (!undone && !transparent)
 		{
 			int count = changes.size();
 
@@ -165,7 +171,7 @@ public class mxUndoableEdit
 	 */
 	public void redo()
 	{
-		if (!redone)
+		if (!redone && !transparent)
 		{
 			int count = changes.size();
 
@@ -182,4 +188,11 @@ public class mxUndoableEdit
 		dispatch();
 	}
 
+	public void setTransparent(boolean t) {
+		transparent=t;
+	}
+	public boolean getTransparent() {
+		return transparent;
+	}
+	
 }

@@ -365,8 +365,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 			// Prepares the background
 			boolean shadow = mxUtils.isTrue(style, mxConstants.STYLE_SHADOW,
 					false);
-			Color fillColor = mxUtils.getColor(style,
-					mxConstants.STYLE_FILLCOLOR);
+			Color fillColor = mxUtils.getStyleFillColor(style);
 			Paint fillPaint = getFillPaint(new Rectangle(x, y, w, h),
 					fillColor, style);
 
@@ -1306,10 +1305,8 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 	 */
 	public void drawLine(List<mxPoint> pts, Map<String, Object> style)
 	{
-		Color penColor = mxUtils.getColor(style, mxConstants.STYLE_STROKECOLOR,
-				Color.black);
-		float penWidth = mxUtils.getFloat(style, mxConstants.STYLE_STROKEWIDTH,
-				1);
+		Color penColor = mxUtils.getStyleStrokeColor(style,Color.BLACK);
+		float penWidth = mxUtils.getStyleStrokeWidth(style,(float)1);
 
 		if (penColor != null && penWidth > 0)
 		{
@@ -1328,8 +1325,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 				Rectangle bounds = new Rectangle(p0.getPoint());
 				bounds.add(pe.getPoint());
 
-				Color fillColor = mxUtils.getColor(style,
-						mxConstants.STYLE_FILLCOLOR);
+				Color fillColor = mxUtils.getStyleFillColor(style);
 				Paint fillPaint = getFillPaint(bounds, fillColor, style);
 				boolean shadow = mxUtils.isTrue(style,
 						mxConstants.STYLE_SHADOW, false);

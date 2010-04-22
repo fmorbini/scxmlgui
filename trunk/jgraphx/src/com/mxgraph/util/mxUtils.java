@@ -1266,6 +1266,26 @@ public class mxUtils
 	{
 		return getColor(dict, key, null);
 	}
+	public static Color getStyleFillColor(Map<String, Object> dict)
+	{
+		Color c=getColor(dict, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, null);
+		if (c==null) c=getColor(dict, mxConstants.STYLE_FILLCOLOR, null);
+		return c;
+	}
+	public static Color getStyleStrokeColor(Map<String, Object> dict,Color defaultColor)
+	{
+		Color c=getColor(dict, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, null);
+		if (c==null) c=getColor(dict, mxConstants.STYLE_STROKECOLOR, null);
+		if (c==null) c=defaultColor;
+		return c;
+	}
+	public static Float getStyleStrokeWidth(Map<String, Object> dict,Float defaultWidth)
+	{
+		Float w=getFloat(dict, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH);
+		if (w==null||w<=0) w=getFloat(dict, mxConstants.STYLE_STROKEWIDTH);
+		if (w==null||w<=0) w=defaultWidth;
+		return w;
+	}
 
 	/**
 	 * Returns the value for key in dictionary as a color or the given default

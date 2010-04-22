@@ -267,7 +267,7 @@ public interface mxIGraphModel
 	 * @return Returns the new style.
 	 */
 	String setStyle(Object cell, String style);
-
+	String setStyleCovert(Object cell, String style);
 	/**
 	 * Returns true if the given cell is collapsed.
 	 * 
@@ -333,5 +333,8 @@ public interface mxIGraphModel
 	 * Removes the given listener from the list of listeners.
 	 */
 	void removeListener(mxIEventListener listener, String eventName);
+
+	void highlightCell(mxCell node, String string);
+	void highlightCell(mxCell node, String color, String width);
 
 }
