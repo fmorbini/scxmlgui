@@ -1,6 +1,7 @@
 package com.mxgraph.examples.swing.editor.listener;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -25,12 +26,14 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
@@ -123,6 +126,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		list.setSelectedIndex(0);
 		list.addListSelectionListener(this);
 		list.setVisibleRowCount(10);
+		list.setCellRenderer((ListCellRenderer) new SCXMLEventRenderer());
 		listScrollPane = new JScrollPane(list);
 
 		saveButton = new JButton(mxResources.get("save"));
@@ -147,37 +151,54 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		setStatus(PRESTARTING);
 	}
 
+	class SCXMLEventRenderer extends JLabel implements ListCellRenderer {
+		public Component getListCellRendererComponent(
+				JList list,
+				Object value,            // value to display
+				int index,               // cell index
+				boolean isSelected,      // is the cell selected
+				boolean cellHasFocus)    // the list and the cell have the focus
+		{	    	 
+			String s = value.toString();
+			setText(index+": "+s);
+			if (isSelected) {
+				setBackground(list.getSelectionBackground());
+				setForeground(list.getSelectionForeground());
+			}
+			else {
+				setBackground(list.getBackground());
+				setForeground(list.getForeground());
+			}
+			setEnabled(list.isEnabled());
+			setFont(list.getFont());
+			setOpaque(true);
+			return this;
+		}
+	}
+
 	//This method is required by ListSelectionListener.
 	public void valueChanged(ListSelectionEvent e) {
 		int status=getStatus();
-		if ((status==STARTED)||(status==LOADING)) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					JScrollBar vs = listScrollPane.getVerticalScrollBar();
-					if (vs!=null) vs.setValue(vs.getMaximum());
-				}
-			});
-			if (e.getValueIsAdjusting() == false) {
-				int index=list.getSelectedIndex();
-				if (index>=0) {
-					SCXMLEvent event = (SCXMLEvent)listModel.get(index);
-					event.execute(model);
-					setHighlightAtIndex(index);
-				}
+		if (e.getValueIsAdjusting() == false) {
+			int lastIndex = listModel.size()-1;
+			int selectedIndex = list.getSelectedIndex();
+			if ((lastIndex<0) || (selectedIndex>=lastIndex)) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						JScrollBar vs = listScrollPane.getVerticalScrollBar();
+						if (vs!=null) vs.setValue(vs.getMaximum());
+					}
+				});
 			}
-		} else {
-			if (e.getValueIsAdjusting() == false) {
-				int index=list.getSelectedIndex();
-				if (index>=0) {
-					resetAllSCXMLEventExecutions();
-					HashSet<mxCell> set = getHighlightAtIndex(index);
-					if (set!=null) {
-						for(mxCell c:set) {
-							if (c!=null) {
-								if (c.isEdge()) doEdgeShow(model, c);
-								else doNodeShow(model, c);
-							}
+			if (selectedIndex>=0) {
+				resetAllSCXMLEventExecutions();
+				HashSet<mxCell> set = getHighlightAtIndex(selectedIndex);
+				if (set!=null) {
+					for(mxCell c:set) {
+						if (c!=null) {
+							if (c.isEdge()) doEdgeShow(model,c,true,highlightedCells);
+							else doNodeShow(model,c,true,highlightedCells);
 						}
 					}
 				}
@@ -185,7 +206,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		}
 	}
 
-	private void setHighlightAtIndex(int index) {
+	private void setHighlightAtIndex(int index,HashSet<mxCell> highlightedCells) {
 		highlightedCellsEachInstant.add(index, new HashSet<mxCell>(highlightedCells));
 	}
 	private HashSet<mxCell> getHighlightAtIndex(int index) {
@@ -289,8 +310,6 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				}
 			}
 		} else if (cmd.equals("load")) {
-			setStatus(LOADING);
-
 			String wd = (lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():System.getProperty("user.dir"));
 			JFileChooser fc = new JFileChooser(wd);
 			fc.setFileFilter(new FileNameExtensionFilter("Event List", "txt"));
@@ -299,14 +318,16 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				lastDir = fc.getSelectedFile().getParent();
 				String filename = fc.getSelectedFile().getAbsolutePath();
 				try {
+					setStatus(LOADING);
 					setEventListFromString(mxUtils.readFile(filename));
-					setStatus(STOPPED);
 				} catch (IOException ex) {
 					ex.printStackTrace();
 					JOptionPane.showMessageDialog(editor.getGraphComponent(),
 							ex.toString(),
 							mxResources.get("error"),
-							JOptionPane.ERROR_MESSAGE);					}			
+							JOptionPane.ERROR_MESSAGE);
+				}			
+				setStatus(STOPPED);
 			}
 		}
 	}
@@ -370,7 +391,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			startStopButton.setText(mxResources.get("stopSCXMLListener"));
 			startStopButton.setEnabled(true);
 			id.setEnabled(false);
-			list.setEnabled(false);
+			list.setEnabled(true);
 			saveButton.setEnabled(false);
 			break;
 		case STOPPED:
@@ -398,7 +419,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		case LOADING:
 			status=LOADING;
 			resetEventList();
-			list.setEnabled(false);
+			list.setEnabled(true);
 			break;
 		}
 	}
@@ -492,8 +513,21 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	public void addEvent(String command) {
 		try {
 			SCXMLEvent event = new SCXMLEvent(command);
+			int lastIndex = listModel.size()-1;
+			int selectedIndex = list.getSelectedIndex();
 			listModel.addElement(event);
-			list.setSelectedIndex(listModel.size()-1);
+			if ((lastIndex<0) || (selectedIndex>=lastIndex)) {
+				event.execute(model,false,highlightedCells);
+				setHighlightAtIndex(lastIndex+1,highlightedCells);
+				list.setSelectedIndex(lastIndex+1);
+			} else {
+				HashSet<mxCell> prevHighlightedCells = getHighlightAtIndex(lastIndex);
+				HashSet<mxCell> newHighlightedCells = (prevHighlightedCells==null)? new HashSet<mxCell>():new HashSet<mxCell>(prevHighlightedCells);
+				// updates the highlight
+				event.execute(model,false,newHighlightedCells);
+				// store the new highlight state (without changing the display
+				setHighlightAtIndex(lastIndex+1,newHighlightedCells);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			//JOptionPane.showMessageDialog(this, "Unknown command received", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -503,27 +537,27 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	public void resetAllSCXMLEventExecutions() {
 		for (mxCell c:highlightedCells) {
 			if (c!=null) {
-				if (c.isEdge()) doEdgeHide(model, c,true);
-				else doNodeHide(model, c,true);
+				if (c.isEdge()) doEdgeHide(model, c,true,true,highlightedCells);
+				else doNodeHide(model, c,true,true,highlightedCells);
 			}
 		}
 		highlightedCells.clear();
 	}
 
-	private void doNodeShow(mxIGraphModel model,mxCell n) {
-		model.highlightCell(n, "#ffe088");
+	private void doNodeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
+		if (show) model.highlightCell(n, "#ffe088");
 		highlightedCells.add(n);
 	}
-	private void doEdgeShow(mxIGraphModel model,mxCell n) {
-		model.highlightCell(n, "#ff9b88","3");
+	private void doEdgeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
+		if (show) model.highlightCell(n, "#ff9b88","3");
 		highlightedCells.add(n);
 	}
-	private void doNodeHide(mxIGraphModel model,mxCell n,boolean delayRemoval) {
-		model.highlightCell(n,null);
+	private void doNodeHide(mxIGraphModel model,mxCell n,boolean delayRemoval,boolean show,HashSet<mxCell> highlightedCells) {
+		if (show) model.highlightCell(n,null);
 		if (!delayRemoval) highlightedCells.remove(n);
 	}
-	private void doEdgeHide(mxIGraphModel model,mxCell n,boolean delayRemoval) {
-		model.highlightCell(n,null,null);
+	private void doEdgeHide(mxIGraphModel model,mxCell n,boolean delayRemoval,boolean show,HashSet<mxCell> highlightedCells) {
+		if (show) model.highlightCell(n,null,null);
 		if (!delayRemoval) highlightedCells.remove(n);
 	}
 
@@ -560,25 +594,25 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			}
 		}
 		
-		public void execute(mxIGraphModel model) {
+		public void execute(mxIGraphModel model,boolean show,HashSet<mxCell> highlightedCells) {
 			Object[] edges;
 			switch (command) {
 			case SHOWNODE:
-				doNodeShow(model, arg1);
+				doNodeShow(model, arg1,show,highlightedCells);
 				break;
 			case SHOWEDGE:
 				edges = mxGraphModel.getEdgesBetween(model, arg1, arg2, true);
 				for(Object edge:edges){
-					doEdgeShow(model,(mxCell) edge);
+					doEdgeShow(model,(mxCell) edge,show,highlightedCells);
 				}
 				break;
 			case HIDENODE:
-				doNodeHide(model, arg1,false);
+				doNodeHide(model, arg1,false,show,highlightedCells);
 				break;
 			case HIDEEDGE:
 				edges = mxGraphModel.getEdgesBetween(model, arg1, arg2, true);
 				for(Object edge:edges){
-					doEdgeHide(model,(mxCell) edge,false);
+					doEdgeHide(model,(mxCell) edge,false,show,highlightedCells);
 				}
 				break;
 			}

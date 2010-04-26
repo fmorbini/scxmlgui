@@ -69,6 +69,11 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		return false;
 	}
 	
+	@Override
+	public SCXMLGraph getGraph()
+	{
+		return (SCXMLGraph) graph;
+	}
 	/**
 	 * Overrides drop behaviour to set the cell style if the target
 	 * is not a valid drop target and the cells are of the same

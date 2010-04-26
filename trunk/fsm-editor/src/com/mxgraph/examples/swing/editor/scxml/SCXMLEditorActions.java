@@ -1482,6 +1482,7 @@ public class SCXMLEditorActions
 					mxCell p = (mxCell) graph.insertVertex(null, value.getInternalID(), value, 0, 0, gc.getSize().width, gc.getSize().height, value.getStyle());
 					p.setValue(value);
 					graph.setCellAsMovable(p, false);
+					graph.setCellAsDeletable(p, false);
 					editor.setModified(false);
 					editor.undoManager.clear();
 					editor.updateUndoRedoActionState();
@@ -2066,4 +2067,26 @@ public class SCXMLEditorActions
 		}
 	}
 
+	public static class ZoomIN extends AbstractAction
+	{
+		/**
+		 * 
+		 */
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			editor.getGraphComponent().zoomIn();
+		}
+	}
+	public static class ZoomOUT extends AbstractAction
+	{
+		/**
+		 * 
+		 */
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			editor.getGraphComponent().zoomOut();
+		}
+	}
 }

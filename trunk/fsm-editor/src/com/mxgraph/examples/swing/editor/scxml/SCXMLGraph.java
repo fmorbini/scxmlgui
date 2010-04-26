@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -34,10 +35,16 @@ public class SCXMLGraph extends mxGraph
 	 */
 	public static final NumberFormat numberFormat = NumberFormat.getInstance();
 	private SCXMLEditor editor;
-	private HashMap<Object,Boolean> movable=new HashMap<Object, Boolean>();
+	private HashSet<Object> immovable=new HashSet<Object>();
+	private HashSet<Object> undeletable=new HashSet<Object>();
 
 	public void setCellAsMovable(Object cell,Boolean m) {
-		movable.put(cell,m);
+		if (m) immovable.remove(cell);
+		else immovable.add(cell);
+	}
+	public void setCellAsDeletable(Object cell,Boolean d) {
+		if (d) undeletable.remove(cell);
+		else undeletable.add(cell);
 	}
 	@Override
 	public mxRectangle getPaintBounds(Object[] cells)
@@ -93,7 +100,12 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public boolean isCellMovable(Object cell)
 	{			
-		return isCellsMovable() && !isCellLocked(cell) && !(movable.containsKey(cell) && !movable.get(cell));
+		return isCellsMovable() && !isCellLocked(cell) && immovable.contains(cell);
+	}
+	@Override
+	public boolean isCellDeletable(Object cell)
+	{			
+		return isCellsDeletable() && !undeletable.contains(cell);
 	}
 	@Override
 	public Object insertEdge(Object parent, String id, Object value,Object source, Object target)
