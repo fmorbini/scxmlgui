@@ -220,4 +220,8 @@ public class mxRectangle extends mxPoint
 		return clone;
 	}
 
+	@Override
+	public String toString() {
+		return "mxRectangle ["+x+" "+y+" "+width+" "+height+"]";
+	}
 }

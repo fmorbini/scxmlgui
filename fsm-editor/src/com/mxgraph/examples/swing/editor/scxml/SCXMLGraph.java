@@ -100,7 +100,7 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public boolean isCellMovable(Object cell)
 	{			
-		return isCellsMovable() && !isCellLocked(cell) && immovable.contains(cell);
+		return isCellsMovable() && !isCellLocked(cell) && !immovable.contains(cell);
 	}
 	@Override
 	public boolean isCellDeletable(Object cell)

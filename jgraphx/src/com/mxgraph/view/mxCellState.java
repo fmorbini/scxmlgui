@@ -491,7 +491,10 @@ public class mxCellState extends mxRectangle
 	}
 
 	public Point relativizePointToThisState(Point p, double s, mxPoint tr) {
-		return new Point(p.x-=(int)getX()/s,p.y-=(int)getY()/s);
+		return new Point((int)(p.x-getX()/s),(int)(p.y-getY()/s));
+	}
+	public mxRectangle relativizeRectangleToThisState(mxRectangle r, double s, mxPoint tr) {
+		return new mxRectangle(r.getX()-getX()/s, r.getY()-getY()/s, r.getWidth(), r.getHeight());
 	}
 	
 	public int getIndexOfEdgePointAt(int x, int y,int tol) {
