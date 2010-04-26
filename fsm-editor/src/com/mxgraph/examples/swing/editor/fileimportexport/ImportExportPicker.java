@@ -42,6 +42,8 @@ public class ImportExportPicker {
 		add(ff, new HTMLImportExport());
 		ff=new DefaultFileFilter(".svg","SVG " + mxResources.get("file") + " (.svg)");
 		add(ff, new SVGImportExport());
+		ff=new DefaultFileFilter(".dot","DOT " + mxResources.get("file") + " (.dot)");
+		add(ff, new DOTImportExport());
 		IImportExport images=new IMGImportExport();
 		// Adds a filter for each supported image format
 		Object[] imageFormats = ImageIO.getReaderFormatNames();

@@ -260,14 +260,17 @@ public class SCXMLImportExport implements IImportExport {
 		root=handleSCXMLNode(doc.getDocumentElement(),null,false);
 		root.setID("SCXML");
 		getNodeHier(doc.getDocumentElement(),root);
-		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
 
+		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
 		// empty the graph
-		mxCell root = new mxCell();
-		root.insert(new mxCell());
-		graph.getModel().setRoot(root);
-		
+		mxCell gr = new mxCell();
+		gr.insert(new mxCell());
+		graph.getModel().setRoot(gr);
+
 		populateGraph(graph);
+		// set the SCXML (this.root) mxCell as not deletable.
+		gr=internalID2cell.get(root.getInternalID());
+		graph.setCellAsDeletable(gr, false);
 	}
 
 	private HashMap<String,mxCell> internalID2cell=new HashMap<String, mxCell>();

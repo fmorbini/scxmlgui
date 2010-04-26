@@ -147,6 +147,7 @@ public class SCXMLGraphEditor extends JPanel
 		{
 			undoManager.undoableEditHappened((mxUndoableEdit) evt.getProperty("edit"));
 			updateUndoRedoActionState();
+			changeTracker.invoke(null, null);
 		}
 	};
 	private Action undo;
@@ -177,7 +178,8 @@ public class SCXMLGraphEditor extends JPanel
 	{
 		public void invoke(Object source, mxEventObject evt)
 		{
-			setModified(true);
+			if (undoManager.canUndo()) setModified(true);
+			else setModified(false);
 		}
 	};
 

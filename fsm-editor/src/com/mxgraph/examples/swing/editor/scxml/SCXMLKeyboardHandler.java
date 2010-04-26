@@ -46,7 +46,8 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 			map.put(KeyStroke.getKeyStroke("control shift E"), "selectEdges");
 			map.put(KeyStroke.getKeyStroke("control A"), "selectAll");
 			map.put(KeyStroke.getKeyStroke("ESCAPE"), "selectNone");
-
+			map.put(KeyStroke.getKeyStroke("control PAGE_UP"), "zoomIN");
+			map.put(KeyStroke.getKeyStroke("control PAGE_DOWN"), "zoomOUT");
 		}
 
 		return map;
@@ -64,12 +65,15 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 		map.put("new", new SCXMLEditorActions.NewSCXMLAction());
 		map.put("open", new SCXMLEditorActions.OpenAction());
 		map.put("delete", mxGraphActions.getDeleteAction());
+		//map.put("delete",new SCXMLEditorActions.DeleteAction("delete"));
 		map.put("undo", new SCXMLEditorActions.HistoryAction(true));
 		map.put("redo", new SCXMLEditorActions.HistoryAction(false));
 		map.put("selectVertices", mxGraphActions.getSelectVerticesAction());
 		map.put("selectEdges", mxGraphActions.getSelectEdgesAction());
 		map.put("selectAll", mxGraphActions.getSelectAllAction());
 		map.put("selectNone", mxGraphActions.getSelectNoneAction());
+		map.put("zoomIN", new SCXMLEditorActions.ZoomIN());
+		map.put("zoomOUT", new SCXMLEditorActions.ZoomOUT());
 
 		return map;
 	}
