@@ -150,6 +150,7 @@ public interface mxICell
 	 * @return Returns the number of children.
 	 */
 	int getChildCount();
+	public boolean hasAVertexAsChild();
 
 	/**
 	 * Returns the index of the specified child in the child array.

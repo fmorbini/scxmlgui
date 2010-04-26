@@ -344,6 +344,15 @@ public class mxCell implements mxICell, Cloneable, Serializable
 		return (children != null) ? children.size() : 0;
 	}
 
+	public boolean hasAVertexAsChild() {
+		int l=getChildCount();
+		for (int i=0;i<l;i++) {
+			mxCell c = (mxCell)getChildAt(i);
+			if (c.isVertex()) return true;
+		}
+		return false;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.mxgraph.model.mxICell#getIndex(com.mxgraph.model.mxICell)
 	 */
