@@ -25,6 +25,8 @@ import java.util.List;
  */
 public class mxUndoManager extends mxEventSource
 {
+	
+	int unmodifiedPosition;
 
 	/**
 	 * Maximum command history size. 0 means unlimited history. Default is 100.
@@ -56,6 +58,7 @@ public class mxUndoManager extends mxEventSource
 	{
 		this.size = size;
 		clear();
+		resetUnmodifiedState();
 	}
 
 	/**
@@ -141,6 +144,7 @@ public class mxUndoManager extends mxEventSource
 			if (size > 0 && size == history.size())
 			{
 				history.remove(0);
+				unmodifiedPosition--;
 			}
 	
 			history.add(undoableEdit);
@@ -163,4 +167,12 @@ public class mxUndoManager extends mxEventSource
 		}
 	}
 
+	public void resetUnmodifiedState() {
+		//System.out.println("reset= "+indexOfNextAdd+" "+unmodifiedPosition);
+		unmodifiedPosition=indexOfNextAdd;
+	}
+	public boolean isUnmodifiedState() {
+		//System.out.println("check= "+indexOfNextAdd+" "+unmodifiedPosition);
+		return indexOfNextAdd==unmodifiedPosition;
+	}
 }

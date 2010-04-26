@@ -178,8 +178,8 @@ public class SCXMLGraphEditor extends JPanel
 	{
 		public void invoke(Object source, mxEventObject evt)
 		{
-			if (undoManager.canUndo()) setModified(true);
-			else setModified(false);
+			if (undoManager.isUnmodifiedState()) setModified(false);
+			else setModified(true);
 		}
 	};
 
@@ -195,7 +195,7 @@ public class SCXMLGraphEditor extends JPanel
 		// Stores a reference to the graph and creates the command history
 		graphComponent = component;
 		final mxGraph graph = graphComponent.getGraph();
-		undoManager = new mxUndoManager();
+		undoManager = new mxUndoManager(100);
 
 		// Updates the modified flag if the graph model changes
 		graph.getModel().addListener(mxEvent.CHANGE, changeTracker);

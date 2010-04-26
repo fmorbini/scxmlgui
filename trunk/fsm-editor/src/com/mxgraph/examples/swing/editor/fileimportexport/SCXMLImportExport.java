@@ -112,7 +112,7 @@ public class SCXMLImportExport implements IImportExport {
 	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel) {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
-		String nodeIDString=(nodeID==null)?"":nodeID.getNodeValue().replaceAll("[\\s]", "");
+		String nodeIDString=(nodeID==null)?"":nodeID.getNodeValue().replaceAll("^[\\s]+|[\\s]+$", "");
 		SCXMLNode node;
 		if (nodeIDString.equals("") || ((node=scxmlID2nodes.get(nodeIDString))==null)) {
 			node=new SCXMLNode();
@@ -412,7 +412,7 @@ public class SCXMLImportExport implements IImportExport {
 			System.out.println(scxml);
 			scxml=XMLUtils.prettyPrintXMLString(scxml, " ");			
 			System.out.println(scxml);
-			mxUtils.writeFile(scxml, into);			
+			mxUtils.writeFile(scxml, into);
 		}
 	}
 	

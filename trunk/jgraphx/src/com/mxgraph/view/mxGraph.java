@@ -1992,6 +1992,7 @@ public class mxGraph extends mxEventSource
 			for (int i = 0; i < cells.length; i++)
 			{
 				mxGeometry geo = getCellGeometry(cells[i]);
+				mxCellState parentState = getView().getState(cells[i]);
 
 				if (geo != null)
 				{
@@ -1999,7 +2000,7 @@ public class mxGraph extends mxEventSource
 
 					if (children != null && children.length > 0)
 					{
-						mxRectangle childBounds = getBoundingBoxFromGeometry(children);
+						mxRectangle childBounds = getBoundingBoxFromGeometryConsideringEdgesRelativeToThisState(children,parentState);
 
 						if (childBounds.getWidth() > 0
 								&& childBounds.getHeight() > 0)
@@ -4194,30 +4195,51 @@ public class mxGraph extends mxEventSource
 	 * Returns the bounding box for the geometries of the vertices in the
 	 * given array of cells.
 	 */
-	public mxRectangle getBoundingBoxFromGeometry(Object[] cells)
-	{
+	public mxRectangle getBoundingBoxFromGeometry(Object[] cells) {
 		mxRectangle result = null;
-
 		if (cells != null)
 		{
 			for (int i = 0; i < cells.length; i++)
 			{
-				if (getModel().isVertex(cells[i]))
-				{
-					mxGeometry geo = getCellGeometry(cells[i]);
-
-					if (result == null)
-					{
-						result = new mxRectangle(geo);
-					}
-					else
-					{
-						result.add(geo);
-					}
+				mxCell cell=(mxCell) cells[i];
+				if (cell.isVertex()) {
+					mxRectangle geo = getCellGeometry(cell);
+					if (result == null) result = new mxRectangle(geo);
+					else result.add(geo);
 				}
 			}
 		}
 
+		return result;
+	}
+	public mxRectangle getBoundingBoxFromGeometryConsideringEdgesRelativeToThisState(Object[] cells, mxCellState parentState) {
+		mxRectangle result = null;
+		Stack<mxCell> stack=new Stack<mxCell>();
+		
+		if (cells != null) {
+			for (int i = 0; i < cells.length; i++) stack.push((mxCell) cells[i]);
+			while (!stack.isEmpty()) {
+				mxCell cell=stack.pop();
+				mxRectangle geo=null;
+				if (cell.isVertex()) {
+					geo = getCellGeometry(cell);
+					int length=cell.getChildCount();
+					for (int j=0;j<length;j++) {
+						mxCell child=(mxCell) cell.getChildAt(j);
+						if ((child!=null) && child.isEdge()) stack.push(child); //cycles
+					}
+				} else if (cell.isEdge()) {
+					mxGraphView view=getView();
+					mxCellState state = view.getState(cell);
+
+					geo=parentState.relativizeRectangleToThisState(geo, view.getScale(), view.getTranslate());
+					
+					//geo=getCellGeometry(cell);
+				}
+				if (result == null) result = new mxRectangle(geo);
+				else result.add(geo);
+			}
+		}
 		return result;
 	}
 

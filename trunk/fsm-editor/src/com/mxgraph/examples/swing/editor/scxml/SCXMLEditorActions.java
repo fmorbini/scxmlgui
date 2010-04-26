@@ -808,6 +808,7 @@ public class SCXMLEditorActions
 				try
 				{
 					fileIO.write(fc,editor);
+					editor.undoManager.resetUnmodifiedState();
 				}
 				catch (Throwable ex)
 				{
@@ -1452,7 +1453,6 @@ public class SCXMLEditorActions
 		}
 	}
 
-	@SuppressWarnings("serial")
 	public static class NewSCXMLAction extends AbstractAction
 	{
 		/**
@@ -1481,10 +1481,10 @@ public class SCXMLEditorActions
 					value.setCluster(true);
 					mxCell p = (mxCell) graph.insertVertex(null, value.getInternalID(), value, 0, 0, gc.getSize().width, gc.getSize().height, value.getStyle());
 					p.setValue(value);
-					graph.setCellAsMovable(p, false);
 					graph.setCellAsDeletable(p, false);
 					editor.setModified(false);
 					editor.undoManager.clear();
+					editor.undoManager.resetUnmodifiedState();
 					editor.updateUndoRedoActionState();
 				}
 			}
@@ -1515,7 +1515,17 @@ public class SCXMLEditorActions
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
+			mxIGraphModel model = graph.getModel();
+			//model.beginUpdate();
 			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
+			/*try
+			{
+				layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
+			}
+			finally
+			{
+				model.endUpdate();
+			}*/
 		}
 	}
 
@@ -1561,6 +1571,7 @@ public class SCXMLEditorActions
 								editor.setModified(false);
 								editor.setCurrentFile(fc.getSelectedFile(),fie);
 								editor.undoManager.clear();
+								editor.undoManager.resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
 							}
 							catch (IOException e1)
