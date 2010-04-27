@@ -491,10 +491,13 @@ public class mxCellState extends mxRectangle
 	}
 
 	public Point relativizePointToThisState(Point p, double s, mxPoint tr) {
+		//p is already normalized to the scale
 		return new Point((int)(p.x-getX()/s),(int)(p.y-getY()/s));
 	}
 	public mxRectangle relativizeRectangleToThisState(mxRectangle r, double s, mxPoint tr) {
-		return new mxRectangle(r.getX()-getX()/s, r.getY()-getY()/s, r.getWidth(), r.getHeight());
+		// r is not normalized to the scale
+		System.out.println("scale="+s+" this.x="+getX()+" this.y="+getY());
+		return new mxRectangle((r.getX()-getX())/s, (r.getY()-getY())/s, r.getWidth()/s, r.getHeight()/s);
 	}
 	
 	public int getIndexOfEdgePointAt(int x, int y,int tol) {
