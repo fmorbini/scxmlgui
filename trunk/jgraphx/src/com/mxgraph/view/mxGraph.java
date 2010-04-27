@@ -4223,6 +4223,7 @@ public class mxGraph extends mxEventSource
 				mxRectangle geo=null;
 				if (cell.isVertex()) {
 					geo = getCellGeometry(cell);
+					//System.out.println("NODE: "+convertValueToString(cell)+" "+geo);
 					int length=cell.getChildCount();
 					for (int j=0;j<length;j++) {
 						mxCell child=(mxCell) cell.getChildAt(j);
@@ -4231,8 +4232,10 @@ public class mxGraph extends mxEventSource
 				} else if (cell.isEdge()) {
 					mxGraphView view=getView();
 					mxCellState state = view.getState(cell);
-
+					geo = state.getLabelBounds();
+					//System.out.println("EDGE SB: "+convertValueToString(cell)+" "+geo);
 					geo=parentState.relativizeRectangleToThisState(geo, view.getScale(), view.getTranslate());
+					//System.out.println("RELATIVE EDGE: "+convertValueToString(cell)+" "+geo);
 					
 					//geo=getCellGeometry(cell);
 				}
@@ -4240,6 +4243,7 @@ public class mxGraph extends mxEventSource
 				else result.add(geo);
 			}
 		}
+		//System.out.println("result: "+result);
 		return result;
 	}
 
