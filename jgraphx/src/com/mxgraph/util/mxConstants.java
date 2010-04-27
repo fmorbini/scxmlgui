@@ -533,6 +533,7 @@ public class mxConstants
 	 * @see com.mxgraph.util.mxUtils#parseColor(String)
 	 */
 	public static String STYLE_LABEL_BACKGROUNDCOLOR = "labelBackgroundColor";
+	public static String STYLE_HIGHLIGHT_LABEL_BACKGROUNDCOLOR = "highlightLabelBackgroundColor";
 
 	/**
 	 * Defines the key for the label border color. The value is a string
@@ -741,7 +742,8 @@ public class mxConstants
 	 * @see com.mxgraph.util.mxUtils#parseColor(String)
 	 */
 	public static String STYLE_FONTCOLOR = "fontColor";
-
+	public static String STYLE_HIGHLIGHTFONTCOLOR = "highlightFontColor";
+	
 	/**
 	 * Defines the key for the fontFamily style. Possible values are names such
 	 * as Arial; Dialog; Verdana; Times New Roman. The value is of type

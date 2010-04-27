@@ -299,8 +299,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 				}
 
 				// Draws the label background and border
-				Color bg = mxUtils.getColor(style,
-						mxConstants.STYLE_LABEL_BACKGROUNDCOLOR);
+				Color bg = mxUtils.getStyleLabelBackgroundColor(style,null);
 				Color border = mxUtils.getColor(style,
 						mxConstants.STYLE_LABEL_BORDERCOLOR);
 
@@ -1587,8 +1586,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 						: (align.equals(mxConstants.ALIGN_RIGHT)) ? StyleConstants.ALIGN_RIGHT
 								: StyleConstants.ALIGN_CENTER;
 				StyleConstants.setAlignment(sas, scAlign);
-				StyleConstants.setForeground(sas, mxUtils.getColor(style,
-						mxConstants.STYLE_FONTCOLOR, Color.black));
+				StyleConstants.setForeground(sas, mxUtils.getStyleFontColor(style,Color.black));
 
 				Font font = g.getFont();
 				StyleConstants.setFontFamily(sas, font.getFamily());
@@ -1639,8 +1637,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 				}
 
 				// Sets the color
-				Color fontColor = mxUtils.getColor(style,
-						mxConstants.STYLE_FONTCOLOR, Color.black);
+				Color fontColor = mxUtils.getStyleFontColor(style, Color.black);
 				g.setColor(fontColor);
 
 				// Draws the text line by line

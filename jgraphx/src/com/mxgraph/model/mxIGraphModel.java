@@ -125,6 +125,7 @@ public interface mxIGraphModel
 	 * @return Returns the inserted child.
 	 */
 	Object add(Object parent, Object child, int index);
+	Object add(Object parent, Object child, int index,boolean covert);
 
 	/**
 	 * Removes the specified cell from the model. This operation will remove
@@ -334,7 +335,9 @@ public interface mxIGraphModel
 	 */
 	void removeListener(mxIEventListener listener, String eventName);
 
-	void highlightCell(mxCell node, String string);
-	void highlightCell(mxCell node, String color, String width);
+	void highlightCell(mxCell node, String strokeColor);
+	void highlightCell(mxCell node, String strokeColor, String width);
+	void highlightCell(mxCell node, String strokeColor, String width,String fontColor);
+	void highlightCell(mxCell node, String strokeColor, String width,String fontColor,String labelBackground);
 
 }

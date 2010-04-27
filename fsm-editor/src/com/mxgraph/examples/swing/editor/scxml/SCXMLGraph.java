@@ -292,15 +292,16 @@ public class SCXMLGraph extends mxGraph
 	 */
 	public String getToolTipForCell(Object cell)
 	{
-		String tip = "<html>";
+		String tip = null;
 		if (cell instanceof mxCell) {
 			if (((mxCell)cell).isEdge()) {
+				tip="<html>";
 				SCXMLEdge v=(SCXMLEdge) ((mxCell)cell).getValue();
 				tip+="event: "+v.getEvent()+"<br>";
 				tip+="condition: "+v.getCondition()+"<br>";
+				tip += "</html>";
 			}
 		}
-		tip += "</html>";
 
 		return tip;
 	}

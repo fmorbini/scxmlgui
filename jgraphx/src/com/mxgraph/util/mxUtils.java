@@ -1286,7 +1286,20 @@ public class mxUtils
 		if (w==null||w<=0) w=defaultWidth;
 		return w;
 	}
-
+	public static Color getStyleFontColor(Map<String, Object> dict,Color defaultColor)
+	{
+		Color c=getColor(dict, mxConstants.STYLE_HIGHLIGHTFONTCOLOR, null);
+		if (c==null) c=getColor(dict, mxConstants.STYLE_FONTCOLOR, null);
+		if (c==null) c=defaultColor;
+		return c;
+	}
+	public static Color getStyleLabelBackgroundColor(Map<String, Object> dict,Color defaultColor)
+	{
+		Color c=getColor(dict, mxConstants.STYLE_HIGHLIGHT_LABEL_BACKGROUNDCOLOR, null);
+		if (c==null) c=getColor(dict, mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, null);
+		if (c==null) c=defaultColor;
+		return c;
+	}
 	/**
 	 * Returns the value for key in dictionary as a color or the given default
 	 * value if no value is defined for the key.

@@ -496,7 +496,6 @@ public class mxCellState extends mxRectangle
 	}
 	public mxRectangle relativizeRectangleToThisState(mxRectangle r, double s, mxPoint tr) {
 		// r is not normalized to the scale
-		System.out.println("scale="+s+" this.x="+getX()+" this.y="+getY());
 		return new mxRectangle((r.getX()-getX())/s, (r.getY()-getY())/s, r.getWidth()/s, r.getHeight()/s);
 	}
 	
