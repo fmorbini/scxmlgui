@@ -424,15 +424,19 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 				: null;
 	}
 
+	public Object add(Object parent, Object child, int index) {
+		return add(parent, child, index, false);
+	}
 	/* (non-Javadoc)
 	 * @see com.mxgraph.model.mxIGraphModel#add(Object, Object, int)
 	 */
-	public Object add(Object parent, Object child, int index)
+	public Object add(Object parent, Object child, int index,boolean covert)
 	{
 		if (child != parent && parent != null && child != null)
 		{
 			boolean parentChanged = parent != getParent(child);
-			execute(new mxChildChange(this, parent, child, index));
+			if (covert) executeCovert(new mxChildChange(this, parent, child, index));
+			else execute(new mxChildChange(this, parent, child, index));
 
 			// Maintains the edges parents by moving the edges
 			// into the nearest common ancestor of its
@@ -2349,15 +2353,51 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 	}
 
 	@Override
-	public void highlightCell(mxCell node, String color, String width) {
+	public void highlightCell(mxCell node, String strokeColor, String width) {
 		if (node!=null) {
 			String style=getStyle(node);
 			if (node.isVertex()) {
-				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, color);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, strokeColor);
 				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
 			} else {
-				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, color);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, strokeColor);
 				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+			}
+			setStyleCovert(node, style);
+		}
+	}
+
+	@Override
+	public void highlightCell(mxCell node, String strokeColor, String width,String fontColor) {
+		if (node!=null) {
+			String style=getStyle(node);
+			if (node.isVertex()) {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, strokeColor);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFONTCOLOR, fontColor);
+			} else {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, strokeColor);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFONTCOLOR, fontColor);
+			}
+			setStyleCovert(node, style);
+		}
+	}
+
+	@Override
+	public void highlightCell(mxCell node, String strokeColor, String width,String fontColor, String labelBackground) {
+		if (node!=null) {
+			String style=getStyle(node);
+			if (node.isVertex()) {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFILLCOLOR, strokeColor);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFONTCOLOR, fontColor);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHT_LABEL_BACKGROUNDCOLOR, labelBackground);
+			} else {
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKECOLOR, strokeColor);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTSTROKEWIDTH, width);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHTFONTCOLOR, fontColor);
+				style=mxUtils.setStyle(style, mxConstants.STYLE_HIGHLIGHT_LABEL_BACKGROUNDCOLOR, labelBackground);
 			}
 			setStyleCovert(node, style);
 		}

@@ -36,6 +36,8 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphComponent.mxMouseRedirector;
 import com.mxgraph.swing.util.mxGraphTransferable;
@@ -441,6 +443,28 @@ public class mxGraphHandler extends mxMouseControl implements
 		}
 	}
 
+	private mxCell highlightedCell=null;
+	private void highlightEdgeUnderMouse(MouseEvent e) {
+		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);
+		mxIGraphModel model = graphComponent.getGraph().getModel();
+		if (cell!=null) {
+			if (cell.isEdge()) {
+				if (cell==highlightedCell) return;
+				else {
+
+					Object parent = model.getParent(cell);
+					model.add(parent, cell,model.getChildCount(parent) - 1,true);
+
+					model.highlightCell(cell, "#ff9b88","3","#ff0000","#ffffff");
+					model.highlightCell(highlightedCell, null,null,null,null);
+					highlightedCell=cell;
+				}
+			}
+		} else if (highlightedCell!=null) {
+			model.highlightCell(highlightedCell, null,null,null,null);
+			highlightedCell=cell;
+		}
+	}
 	/**
 	 * 
 	 */
@@ -449,7 +473,7 @@ public class mxGraphHandler extends mxMouseControl implements
 		if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed())
 		{
 			Cursor cursor = getCursor(e);
-
+			highlightEdgeUnderMouse(e);
 			if (cursor != null)
 			{
 				graphComponent.getGraphControl().setCursor(cursor);
