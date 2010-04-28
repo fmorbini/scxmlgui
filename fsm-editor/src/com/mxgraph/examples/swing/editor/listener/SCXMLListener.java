@@ -68,10 +68,9 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 
 	private JButton saveButton,loadButton;
 	private JButton startStopButton;
-	private JTextField id;
+	private JTextField port;
 
 	ServerSocket socket = null;
-	private int port=4444;
 	private Socket clientSocket;
 	private SCXMLSocketListener listener;
 	private SCXMLGraphComponent graphComponent;
@@ -104,9 +103,11 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	
 	private void populateGUI(JPanel contentPane) {
 
-		id = new JTextField(10);
-		id.addActionListener(this);
-		id.getDocument().addDocumentListener(this);
+		JLabel portLabel = new JLabel("port:");
+		
+		port = new JTextField(10);
+		port.addActionListener(this);
+		port.getDocument().addDocumentListener(this);
 		
 		startStopButton=new JButton(mxResources.get("startSCXMLListener"));
 		startStopButton.setActionCommand("start");
@@ -114,7 +115,8 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				
 		JPanel startStopButtonPane = new JPanel();
 		startStopButtonPane.setLayout(new BoxLayout(startStopButtonPane,BoxLayout.LINE_AXIS));
-		startStopButtonPane.add(id);
+		startStopButtonPane.add(portLabel);
+		startStopButtonPane.add(port);
 		startStopButtonPane.add(Box.createHorizontalStrut(5));
 		startStopButtonPane.add(startStopButton);
 		startStopButtonPane.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -268,17 +270,23 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String cmd=e.getActionCommand();
-		if (cmd.equals("start")) {
-			id.setEnabled(false);
-			if (initiateListener(port)) {
+		Integer portValue;
+		if (cmd.equals("start") && ((portValue=validPort(port.getText()))!=null)) {
+			port.setEnabled(false);
+			if (initiateListener(portValue)) {
 				setStatus(WAITING);
-				if ((clientSocket=waitForConnection(socket))!=null) {
-					setStatus(STARTED);
-					listener=new SCXMLSocketListener(this,clientSocket);
-					listener.start();
-				} else {
-					setStatus(STOPPED);
-				}
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						if ((clientSocket=waitForConnection(socket))!=null) {
+							setStatus(STARTED);
+							listener=new SCXMLSocketListener(SCXMLListener.this,clientSocket);
+							listener.start();
+						} else {
+							setStatus(STOPPED);
+						}
+					}
+				});
 			}
 		} else if (cmd.equals("stop")) {
 			setStatus(STOPPED);
@@ -332,6 +340,16 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		}
 	}
 
+	private Integer validPort(String text) {
+		Integer port=null;
+		try {
+			port=Integer.parseInt(text);
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(this, "'"+text+"' is an invalid TCP port number.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		return port;
+	}
+
 	@Override
 	public void changedUpdate(DocumentEvent e) {
 		handleIDField(e);
@@ -379,10 +397,11 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			startStopButton.setActionCommand("start");
 			startStopButton.setText(mxResources.get("startSCXMLListener"));
 			startStopButton.setEnabled(false);
-			id.setText("");
-			id.setEnabled(true);			
+			port.setText("");
+			port.setEnabled(true);			
 			list.setEnabled(false);
 			saveButton.setEnabled(false);
+			loadButton.setEnabled(false);
 			break;
 		case STARTED:
 			status=STARTED;
@@ -390,9 +409,10 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			startStopButton.setActionCommand("stop");
 			startStopButton.setText(mxResources.get("stopSCXMLListener"));
 			startStopButton.setEnabled(true);
-			id.setEnabled(false);
+			port.setEnabled(false);
 			list.setEnabled(true);
 			saveButton.setEnabled(false);
+			loadButton.setEnabled(false);
 			break;
 		case STOPPED:
 			status=STOPPED;
@@ -400,21 +420,22 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			startStopButton.setActionCommand("start");
 			startStopButton.setText(mxResources.get("startSCXMLListener"));
 			startStopButton.setEnabled(true);
-			id.setEnabled(true);
+			port.setEnabled(true);
 			list.setEnabled(true);
 			if (listModel.size()>0) {
 				saveButton.setEnabled(true);
-				loadButton.setEnabled(true);
 			}
+			loadButton.setEnabled(true);
 			break;
 		case WAITING:
 			status=WAITING;
 			startStopButton.setActionCommand("wait");
 			startStopButton.setText(mxResources.get("waitForConnection"));
 			startStopButton.setEnabled(false);
-			id.setEnabled(false);
+			port.setEnabled(false);
 			list.setEnabled(false);
 			saveButton.setEnabled(false);
+			loadButton.setEnabled(false);
 			break;
 		case LOADING:
 			status=LOADING;
