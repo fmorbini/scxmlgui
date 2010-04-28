@@ -64,7 +64,6 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	private DefaultListModel listModel;
 	private JScrollPane listScrollPane;
 	private ArrayList<HashSet<mxCell>> highlightedCellsEachInstant;
-	private HashSet<mxCell> highlightedCells;
 
 	private JButton saveButton,loadButton;
 	private JButton startStopButton;
@@ -80,7 +79,6 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	public SCXMLListener(SCXMLEditor editor) {
 		super("ListDemo");
 		
-		highlightedCells=new HashSet<mxCell>();
 		highlightedCellsEachInstant=new ArrayList<HashSet<mxCell>>();
 		
 		graphComponent=editor.getGraphComponent();
@@ -177,10 +175,9 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			return this;
 		}
 	}
-
+	private int prevSelectedIndex=-1;
 	//This method is required by ListSelectionListener.
 	public void valueChanged(ListSelectionEvent e) {
-		int status=getStatus();
 		if (e.getValueIsAdjusting() == false) {
 			int lastIndex = listModel.size()-1;
 			int selectedIndex = list.getSelectedIndex();
@@ -194,25 +191,27 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				});
 			}
 			if (selectedIndex>=0) {
-				resetAllSCXMLEventExecutions();
+				resetAllSCXMLEventExecutions(prevSelectedIndex);
 				HashSet<mxCell> set = getHighlightAtIndex(selectedIndex);
 				if (set!=null) {
 					for(mxCell c:set) {
 						if (c!=null) {
-							if (c.isEdge()) doEdgeShow(model,c,true,highlightedCells);
-							else doNodeShow(model,c,true,highlightedCells);
+							if (c.isEdge()) doEdgeShow(model,c,true,null);
+							else doNodeShow(model,c,true,null);
 						}
 					}
 				}
+				prevSelectedIndex=selectedIndex;
 			}
 		}
 	}
 
 	private void setHighlightAtIndex(int index,HashSet<mxCell> highlightedCells) {
-		highlightedCellsEachInstant.add(index, new HashSet<mxCell>(highlightedCells));
+		highlightedCellsEachInstant.add(index, highlightedCells);
 	}
 	private HashSet<mxCell> getHighlightAtIndex(int index) {
-		return highlightedCellsEachInstant.get(index);
+		if ((index>=0) && (highlightedCellsEachInstant.size()>index)) return highlightedCellsEachInstant.get(index);
+		else return null;
 	}
 
 	public void showTool() {
@@ -238,7 +237,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	@Override
 	public void windowClosing(WindowEvent e) {
 		stopTool();
-		resetAllSCXMLEventExecutions();
+		resetAllSCXMLEventExecutions(list.getSelectedIndex());
 		setVisible(false);
 	}
 
@@ -272,7 +271,6 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		String cmd=e.getActionCommand();
 		Integer portValue;
 		if (cmd.equals("start") && ((portValue=validPort(port.getText()))!=null)) {
-			port.setEnabled(false);
 			if (initiateListener(portValue)) {
 				setStatus(WAITING);
 				SwingUtilities.invokeLater(new Runnable() {
@@ -287,6 +285,8 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 						}
 					}
 				});
+			} else {
+				setStatus(STOPPED);
 			}
 		} else if (cmd.equals("stop")) {
 			setStatus(STOPPED);
@@ -384,7 +384,9 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				socket = new ServerSocket(port);
 				return true;
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "impossible to listen to port "+port, "Warning", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(this, "impossible to listen to port '"+port+"'", "Error", JOptionPane.ERROR_MESSAGE);
+			} catch (IllegalArgumentException e) {
+				JOptionPane.showMessageDialog(this, "illegal port: '"+port+"'", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		return false;
@@ -446,8 +448,8 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	}
 	
 	private void resetEventList() {
+		resetAllSCXMLEventExecutions(list.getSelectedIndex());
 		listModel.clear();
-		resetAllSCXMLEventExecutions();
 		highlightedCellsEachInstant.clear();
 	}
 	private String getEventListToString() {
@@ -537,17 +539,17 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			int lastIndex = listModel.size()-1;
 			int selectedIndex = list.getSelectedIndex();
 			listModel.addElement(event);
+
+			HashSet<mxCell> prevHighlightedCells = getHighlightAtIndex(lastIndex);
+			HashSet<mxCell> newHighlightedCells = (prevHighlightedCells==null)? new HashSet<mxCell>():new HashSet<mxCell>(prevHighlightedCells);
+			// updates the highlight
+			event.execute(model,false,newHighlightedCells);
+			// store the new highlight state (without changing the display
+			setHighlightAtIndex(lastIndex+1,newHighlightedCells);
+
 			if ((lastIndex<0) || (selectedIndex>=lastIndex)) {
-				event.execute(model,false,highlightedCells);
-				setHighlightAtIndex(lastIndex+1,highlightedCells);
+				resetAllSCXMLEventExecutions(selectedIndex);
 				list.setSelectedIndex(lastIndex+1);
-			} else {
-				HashSet<mxCell> prevHighlightedCells = getHighlightAtIndex(lastIndex);
-				HashSet<mxCell> newHighlightedCells = (prevHighlightedCells==null)? new HashSet<mxCell>():new HashSet<mxCell>(prevHighlightedCells);
-				// updates the highlight
-				event.execute(model,false,newHighlightedCells);
-				// store the new highlight state (without changing the display
-				setHighlightAtIndex(lastIndex+1,newHighlightedCells);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -555,31 +557,33 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		}
 	}
 	
-	public void resetAllSCXMLEventExecutions() {
-		for (mxCell c:highlightedCells) {
-			if (c!=null) {
-				if (c.isEdge()) doEdgeHide(model, c,true,true,highlightedCells);
-				else doNodeHide(model, c,true,true,highlightedCells);
+	public void resetAllSCXMLEventExecutions(int i) {
+		if (i>0) {
+			HashSet<mxCell> highlightedCells = getHighlightAtIndex(i);
+			for (mxCell c:highlightedCells) {
+				if (c!=null) {
+					if (c.isEdge()) doEdgeHide(model, c,true,null);
+					else doNodeHide(model, c,true,null);
+				}
 			}
 		}
-		highlightedCells.clear();
 	}
 
 	private void doNodeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
 		if (show) model.highlightCell(n, "#ffe088");
-		highlightedCells.add(n);
+		if (highlightedCells!=null) highlightedCells.add(n);
 	}
 	private void doEdgeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
 		if (show) model.highlightCell(n, "#ff9b88","3");
-		highlightedCells.add(n);
+		if (highlightedCells!=null) highlightedCells.add(n);
 	}
-	private void doNodeHide(mxIGraphModel model,mxCell n,boolean delayRemoval,boolean show,HashSet<mxCell> highlightedCells) {
+	private void doNodeHide(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
 		if (show) model.highlightCell(n,null);
-		if (!delayRemoval) highlightedCells.remove(n);
+		if (highlightedCells!=null) highlightedCells.remove(n);
 	}
-	private void doEdgeHide(mxIGraphModel model,mxCell n,boolean delayRemoval,boolean show,HashSet<mxCell> highlightedCells) {
+	private void doEdgeHide(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
 		if (show) model.highlightCell(n,null,null);
-		if (!delayRemoval) highlightedCells.remove(n);
+		if (highlightedCells!=null) highlightedCells.remove(n);
 	}
 
 	public class SCXMLEvent {
@@ -628,12 +632,12 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				}
 				break;
 			case HIDENODE:
-				doNodeHide(model, arg1,false,show,highlightedCells);
+				doNodeHide(model, arg1,show,highlightedCells);
 				break;
 			case HIDEEDGE:
 				edges = mxGraphModel.getEdgesBetween(model, arg1, arg2, true);
 				for(Object edge:edges){
-					doEdgeHide(model,(mxCell) edge,false,show,highlightedCells);
+					doEdgeHide(model,(mxCell) edge,show,highlightedCells);
 				}
 				break;
 			}
