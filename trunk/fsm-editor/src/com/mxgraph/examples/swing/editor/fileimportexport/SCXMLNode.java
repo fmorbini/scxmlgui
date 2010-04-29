@@ -3,8 +3,8 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
 
 import com.mxgraph.model.mxGeometry;
@@ -76,7 +76,7 @@ public class SCXMLNode implements Serializable {
 		node.put(INTERNALID, internalID);
 	}
 	public String getID() {
-		AbstractDocument dmd = getSCXMLIDDoc();
+		Document dmd = getSCXMLIDDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -91,7 +91,7 @@ public class SCXMLNode implements Serializable {
 		node.put(ID, scxmlID);
 	}
 	public String getOnEntry() {
-		AbstractDocument dmd = getOnEntryDoc();
+		Document dmd = getOnEntryDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -103,7 +103,7 @@ public class SCXMLNode implements Serializable {
 			return (String)node.get(ONENTRYEXE);
 	}
 	public String getOnExit() {
-		AbstractDocument dmd = getOnExitDoc();
+		Document dmd = getOnExitDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -115,7 +115,7 @@ public class SCXMLNode implements Serializable {
 			return (String)node.get(ONEXITEXE);
 	}
 	public String getOnInitialEntry() {
-		AbstractDocument dmd = getInitialEntryDoc();
+		Document dmd = getInitialEntryDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -130,7 +130,7 @@ public class SCXMLNode implements Serializable {
 		node.put(FINALDATA, scxmlID);
 	}
 	public String getFinalData() {
-		AbstractDocument dmd = getFinalDataDoc();
+		Document dmd = getFinalDataDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -156,7 +156,7 @@ public class SCXMLNode implements Serializable {
 	}
 	public String getDoneData() {
 		assert(isFinal());
-		AbstractDocument dmd = getFinalDataDoc();
+		Document dmd = getFinalDataDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -175,7 +175,7 @@ public class SCXMLNode implements Serializable {
 		node.put(DATAMODEL,(pdm==null)?dm:pdm+dm);
 	}
 	public String getDataModel() {
-		AbstractDocument dmd = getDatamodelDoc();
+		Document dmd = getDatamodelDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -282,10 +282,10 @@ public class SCXMLNode implements Serializable {
 		node.put(DATAMODELUNDO,um);
 		return um;
 	}
-	public AbstractDocument getDatamodelDoc() {
-		return (AbstractDocument) node.get(DATAMODELDOC);
+	public Document getDatamodelDoc() {
+		return (Document) node.get(DATAMODELDOC);
 	}
-	public AbstractDocument setDatamodelDoc(AbstractDocument doc) {
+	public Document setDatamodelDoc(Document doc) {
 		node.put(DATAMODELDOC,doc);
 		return doc;
 	}
@@ -297,10 +297,10 @@ public class SCXMLNode implements Serializable {
 		node.put(ONENTRYUNDO,um);
 		return um;
 	}
-	public AbstractDocument getOnEntryDoc() {
-		return (AbstractDocument) node.get(ONENTRYDOC);
+	public Document getOnEntryDoc() {
+		return (Document) node.get(ONENTRYDOC);
 	}
-	public AbstractDocument setOnEntryDoc(AbstractDocument doc) {
+	public Document setOnEntryDoc(Document doc) {
 		node.put(ONENTRYDOC,doc);
 		return doc;
 	}
@@ -312,10 +312,10 @@ public class SCXMLNode implements Serializable {
 		node.put(ONEXITUNDO,um);
 		return um;
 	}
-	public AbstractDocument getOnExitDoc() {
-		return (AbstractDocument) node.get(ONEXITDOC);
+	public Document getOnExitDoc() {
+		return (Document) node.get(ONEXITDOC);
 	}
-	public AbstractDocument setOnExitDoc(AbstractDocument doc) {
+	public Document setOnExitDoc(Document doc) {
 		node.put(ONEXITDOC,doc);
 		return doc;
 	}
@@ -327,10 +327,10 @@ public class SCXMLNode implements Serializable {
 		node.put(ONINITIALENTRYUNDO,um);
 		return um;
 	}
-	public AbstractDocument getInitialEntryDoc() {
-		return (AbstractDocument) node.get(ONINITIALENTRYDOC);
+	public Document getInitialEntryDoc() {
+		return (Document) node.get(ONINITIALENTRYDOC);
 	}
-	public AbstractDocument setInitialEntryDoc(AbstractDocument doc) {
+	public Document setInitialEntryDoc(Document doc) {
 		node.put(ONINITIALENTRYDOC,doc);
 		return doc;
 	}
@@ -342,10 +342,10 @@ public class SCXMLNode implements Serializable {
 		node.put(FINALDONEDATAUNDO,um);
 		return um;
 	}
-	public AbstractDocument getFinalDataDoc() {
-		return (AbstractDocument) node.get(FINALDONEDATADOC);
+	public Document getFinalDataDoc() {
+		return (Document) node.get(FINALDONEDATADOC);
 	}
-	public AbstractDocument setFinalDataDoc(AbstractDocument doc) {
+	public Document setFinalDataDoc(Document doc) {
 		node.put(FINALDONEDATADOC,doc);
 		return doc;
 	}
@@ -357,10 +357,10 @@ public class SCXMLNode implements Serializable {
 		node.put(SCXMLIDUNDO,um);
 		return um;
 	}
-	public AbstractDocument getSCXMLIDDoc() {
-		return (AbstractDocument) node.get(SCXMLIDDOC);
+	public Document getSCXMLIDDoc() {
+		return (Document) node.get(SCXMLIDDOC);
 	}
-	public AbstractDocument setSCXMLIDDoc(AbstractDocument doc) {
+	public Document setSCXMLIDDoc(Document doc) {
 		node.put(SCXMLIDDOC,doc);
 		return doc;
 	}

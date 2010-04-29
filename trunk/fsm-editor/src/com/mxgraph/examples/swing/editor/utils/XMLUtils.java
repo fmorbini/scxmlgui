@@ -161,6 +161,7 @@ public class XMLUtils {
 	}
 
 	public static String prettyPrintXMLString(String xml,String indent) {
+		if (xml==null) return null;
 		// add surrounding top level node just in case
 		xml="<xml>"+xml+"</xml>";		
 		BI=indent;

@@ -50,6 +50,9 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor.AskToSaveIfRequired;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLDatamodelEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.layout.mxIGraphLayout;
@@ -140,7 +143,7 @@ public class SCXMLEditorActions
 			IImportExport fio = editor.getCurrentFileIO();
 			if (fio instanceof SCXMLImportExport) {
 				SCXMLNode root = ((SCXMLImportExport)fio).getRoot();
-				com.mxgraph.examples.swing.editor.scxml.SCXMLDatamodelEditor.createAndShowSCXMLDatamodelEditor(root,pos);
+				SCXMLDatamodelEditor.createAndShowSCXMLDatamodelEditor(editor,root,pos);
 			}
 		}
 	}
@@ -158,7 +161,7 @@ public class SCXMLEditorActions
 		{
 			assert(cell.isEdge());
 			SCXMLGraphEditor editor = getEditor(e);
-			com.mxgraph.examples.swing.editor.scxml.SCXMLEdgeEditor.createAndShowSCXMLEdgeEditor(editor,(SCXMLEdge)cell.getValue(),pos);
+			SCXMLEdgeEditor.createAndShowSCXMLEdgeEditor(editor,(SCXMLEdge)cell.getValue(),pos);
 		}
 	}
 
@@ -248,7 +251,7 @@ public class SCXMLEditorActions
 		{
 			assert(cell.isVertex());
 			SCXMLGraphEditor editor = getEditor(e);
-			com.mxgraph.examples.swing.editor.scxml.SCXMLNodeEditor.createAndShowSCXMLNodeEditor(editor,(SCXMLNode)cell.getValue(),pos);
+			SCXMLNodeEditor.createAndShowSCXMLNodeEditor(editor,(SCXMLNode)cell.getValue(),pos);
 		}
 	}
 	

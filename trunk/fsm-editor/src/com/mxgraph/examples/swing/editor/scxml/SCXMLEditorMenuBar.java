@@ -41,15 +41,11 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		// Creates the file menu
 		menu = add(new JMenu(mxResources.get("file")));
 
-		menu.add(editor.bind(mxResources.get("newscxml"), new NewSCXMLAction(),
-				"/com/mxgraph/examples/swing/images/new.gif"));
-		menu.add(editor.bind(mxResources.get("openFile"), new OpenAction(),
-				"/com/mxgraph/examples/swing/images/open.gif"));
+		menu.add(editor.bind(mxResources.get("newscxml"), new NewSCXMLAction(),"/com/mxgraph/examples/swing/images/new.gif"));
+		menu.add(editor.bind(mxResources.get("openFile"), new OpenAction(),"/com/mxgraph/examples/swing/images/open.gif"));
 		menu.addSeparator();
-		menu.add(editor.bind(mxResources.get("save"), new SaveAction(false),
-				"/com/mxgraph/examples/swing/images/save.gif"));
-		menu.add(editor.bind(mxResources.get("saveAs"), new SaveAction(true),
-				"/com/mxgraph/examples/swing/images/saveas.gif"));
+		menu.add(editor.bind(mxResources.get("save"), new SaveAction(false),"/com/mxgraph/examples/swing/images/save.gif"));
+		menu.add(editor.bind(mxResources.get("saveAs"), new SaveAction(true),"/com/mxgraph/examples/swing/images/saveas.gif"));
 
 		// Creates the edit menu
 		menu = add(new JMenu(mxResources.get("edit")));
@@ -65,26 +61,18 @@ public class SCXMLEditorMenuBar extends JMenuBar
 
 		menu.addSeparator();
 
-		menu.add(editor.bind(mxResources.get("cut"), TransferHandler
-				.getCutAction(), "/com/mxgraph/examples/swing/images/cut.gif"));
-		menu.add(editor
-				.bind(mxResources.get("copy"), TransferHandler.getCopyAction(),
-						"/com/mxgraph/examples/swing/images/copy.gif"));
-		menu.add(editor.bind(mxResources.get("paste"), TransferHandler.getPasteAction(),
-				"/com/mxgraph/examples/swing/images/paste.gif"));
+		menu.add(editor.bind(mxResources.get("cut"), TransferHandler.getCutAction(), "/com/mxgraph/examples/swing/images/cut.gif"));
+		menu.add(editor.bind(mxResources.get("copy"), TransferHandler.getCopyAction(),"/com/mxgraph/examples/swing/images/copy.gif"));
+		menu.add(editor.bind(mxResources.get("paste"), TransferHandler.getPasteAction(),"/com/mxgraph/examples/swing/images/paste.gif"));
 
 		menu.addSeparator();
 
-		menu.add(editor.bind(mxResources.get("delete"), mxGraphActions
-				.getDeleteAction(),
-				"/com/mxgraph/examples/swing/images/delete.gif"));
+		menu.add(editor.bind(mxResources.get("delete"), mxGraphActions.getDeleteAction(),"/com/mxgraph/examples/swing/images/delete.gif"));
 
 		menu.addSeparator();
 
-		menu.add(editor.bind(mxResources.get("selectAll"), mxGraphActions
-				.getSelectAllAction()));
-		menu.add(editor.bind(mxResources.get("selectNone"), mxGraphActions
-				.getSelectNoneAction()));
+		menu.add(editor.bind(mxResources.get("selectAll"), mxGraphActions.getSelectAllAction()));
+		menu.add(editor.bind(mxResources.get("selectNone"), mxGraphActions.getSelectNoneAction()));
 
 		menu = add(new JMenu(mxResources.get("tools")));
 		menu.add(editor.bind(mxResources.get("showSCXMLListener"), new ShowSCXMLListener()));
