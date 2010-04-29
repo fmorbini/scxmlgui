@@ -14,13 +14,12 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-public class UndoJTextPane extends JTextPane {
+public class UndoJTextField extends JTextField {
 
 	private static final long serialVersionUID = -5128499045192330958L;
 	private Document doc;
@@ -40,7 +39,7 @@ public class UndoJTextPane extends JTextPane {
     {
         return false;
     }
-	public UndoJTextPane(String initText,Document d, UndoManager u) {
+	public UndoJTextField(String initText,Document d, UndoManager u) {
 		super();
 		doc=d;
 		undo=u;
@@ -122,7 +121,7 @@ public class UndoJTextPane extends JTextPane {
 		public RedoAction() {
 			super("Redo");
 		}
-
+		
 		public void setExternalAction(Action ea) {
 			externalAction=ea;
 			externalAction.setEnabled(undo.canRedo());

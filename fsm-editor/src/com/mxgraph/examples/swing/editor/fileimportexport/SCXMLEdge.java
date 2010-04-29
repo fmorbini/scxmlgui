@@ -3,7 +3,7 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.swing.text.AbstractDocument;
+import javax.swing.text.Document;
 import javax.swing.text.BadLocationException;
 import javax.swing.undo.UndoManager;
 
@@ -44,7 +44,7 @@ public class SCXMLEdge implements Serializable {
 		edge.put(INTERNALID, internalID);
 	}
 	public String getEvent() {
-		AbstractDocument dmd = getEventDoc();
+		Document dmd = getEventDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -59,7 +59,7 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EVENT, e);
 	}
 	public String getCondition() {
-		AbstractDocument dmd = getConditionDoc();
+		Document dmd = getConditionDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -74,7 +74,7 @@ public class SCXMLEdge implements Serializable {
 		edge.put(CONDITION, c);
 	}
 	public String getExe() {
-		AbstractDocument dmd = getExeDoc();
+		Document dmd = getExeDoc();
 		if (dmd!=null) {
 			try {
 				return dmd.getText(0, dmd.getLength());
@@ -104,10 +104,10 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EVENTUNDO,um);
 		return um;
 	}
-	public AbstractDocument getEventDoc() {
-		return (AbstractDocument) edge.get(EVENTDOC);
+	public Document getEventDoc() {
+		return (Document) edge.get(EVENTDOC);
 	}
-	public AbstractDocument setEventDoc(AbstractDocument doc) {
+	public Document setEventDoc(Document doc) {
 		edge.put(EVENTDOC,doc);
 		return doc;
 	}
@@ -119,10 +119,10 @@ public class SCXMLEdge implements Serializable {
 		edge.put(CONDITIONUNDO,um);
 		return um;
 	}
-	public AbstractDocument getConditionDoc() {
-		return (AbstractDocument) edge.get(CONDITIONDOC);
+	public Document getConditionDoc() {
+		return (Document) edge.get(CONDITIONDOC);
 	}
-	public AbstractDocument setConditionDoc(AbstractDocument doc) {
+	public Document setConditionDoc(Document doc) {
 		edge.put(CONDITIONDOC,doc);
 		return doc;
 	}
@@ -134,10 +134,10 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EXEUNDO,um);
 		return um;
 	}
-	public AbstractDocument getExeDoc() {
-		return (AbstractDocument) edge.get(EXEDOC);
+	public Document getExeDoc() {
+		return (Document) edge.get(EXEDOC);
 	}
-	public AbstractDocument setExeDoc(AbstractDocument doc) {
+	public Document setExeDoc(Document doc) {
 		edge.put(EXEDOC,doc);
 		return doc;
 	}

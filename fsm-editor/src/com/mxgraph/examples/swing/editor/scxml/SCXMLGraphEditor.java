@@ -45,6 +45,7 @@ import com.mxgraph.examples.swing.editor.EditorPalette;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
+import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
@@ -634,17 +635,9 @@ public class SCXMLGraphEditor extends JPanel
 	 * @return
 	 */
 	@SuppressWarnings("serial")
-	public Action bind(String name, final Action action, String iconUrl)
+	public AbstractActionWrapper bind(String name, final Action a, String iconUrl)
 	{
-		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
-				SCXMLGraphEditor.class.getResource(iconUrl)) : null)
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				action.actionPerformed(new ActionEvent(getGraphComponent(), e
-						.getID(), e.getActionCommand()));
-			}
-		};
+		return new AbstractActionWrapper(getGraphComponent(),name, a,(iconUrl != null) ? new ImageIcon(SCXMLGraphEditor.class.getResource(iconUrl)) : null);
 	}
 
 	/**
