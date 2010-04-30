@@ -500,8 +500,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 			repaintTripleBuffer(rect);
 
 			// Repaints the control using the optional triple buffer
-			graphControl.repaint((rect != null) ? rect : getViewport()
-					.getViewRect());
+			graphControl.repaint((rect != null) ? rect : getViewport().getViewRect());
 
 			// ----------------------------------------------------------
 			// Shows the dirty region as a red rectangle (for debugging)
@@ -1483,7 +1482,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	public void zoom(double factor) {
 		zoom(factor,null);
 	}
-	public void zoom(double factor,Point centerPoint)
+	public void zoom(final double factor,final Point centerPoint)
 	{
 		mxGraphView view = graph.getView();
 		double newScale;
@@ -1504,8 +1503,14 @@ public class mxGraphComponent extends JScrollPane implements Printable
 			}
 			else
 			{
-				maintainScrollBar(true, factor, centerZoom,centerPoint);
-				maintainScrollBar(false, factor, centerZoom,centerPoint);
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						maintainScrollBar(true, factor, centerZoom,centerPoint);
+						maintainScrollBar(false, factor, centerZoom,centerPoint);
+					}
+				});
 			}
 		}
 	}
@@ -1696,14 +1701,12 @@ public class mxGraphComponent extends JScrollPane implements Printable
 					pos=model.getValue();
 				}
 			}
-			javax.swing.SwingUtilities.invokeLater(new Runnable() {
-				   public void run() {
-					   //System.out.println("v="+v+" ex="+ex+" pos="+pos+" f="+factor+" nex="+model.getExtent());
-					   final int newValue = (int) Math.round((double)v * factor)+computeDeltaForZoomCenterScroolbar(v,factor,pos,(double)model.getExtent()/(double)ex);
-					   //System.out.println("nv="+newValue+" delta="+computeDeltaForZoomCenterScroolbar(v,factor,pos,(double)model.getExtent()/(double)ex));
-					   model.setValue(newValue);
-				   }
-				});
+
+			//System.out.println("v="+v+" ex="+ex+" pos="+pos+" f="+factor+" nex="+model.getExtent());
+			final int newValue = (int) Math.round((double)v * factor)+computeDeltaForZoomCenterScroolbar(v,factor,pos,(double)model.getExtent()/(double)ex);
+			//System.out.println("nv="+newValue+" delta="+computeDeltaForZoomCenterScroolbar(v,factor,pos,(double)model.getExtent()/(double)ex));
+			model.setValue(newValue);
+
 			//model.setRangeProperties(newValue,model.getExtent(),0,(int)Math.round(model.getMaximum()*factor),true);
 		}
 	}

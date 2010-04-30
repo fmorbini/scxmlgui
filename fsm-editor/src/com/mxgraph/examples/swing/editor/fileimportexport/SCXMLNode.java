@@ -33,12 +33,12 @@ public class SCXMLNode implements Serializable {
 	public static final String DATAMODEL="datamodel";
 	public static final String DONEDATA="donedata";
 	
-	public static final String DEFAULTFILLCOLOR="#e3ffae";
+	public static final String DEFAULTFILLCOLOR="#fcd087";
 	public static final String DEFAULTSTROKECOLOR="#000000";
 	public static final String DEFAULTSHAPE="rounded=1";
-	public static final String PARALLELFILLCOLOR="#0074ff";
-	public static final String PARALLELSTROKECOLOR="#0074ff";
-	public static final String INITIALFILLCOLOR="#ff7eff";
+	public static final String PARALLELFILLCOLOR="#c2d200";
+	public static final String PARALLELSTROKECOLOR="#c2d200";
+	public static final String INITIALFILLCOLOR="#cffc87";
 	public static final String FINALSTROKECOLOR="#FF0000";
 	public static final String CLUSTERSHAPE="swimlane";
 
