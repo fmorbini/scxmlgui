@@ -130,11 +130,11 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
        }
 
         tabbedPane.setSelectedIndex(0);
-        actions=createActionTable(tabbedPane);
+        updateActionTable(tabbedPane,actions);
         editMenu=createEditMenu();
         tabbedPane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent changeEvent) {
-              actions=createActionTable(tabbedPane);
+              updateActionTable(tabbedPane,actions);
             }
           });
         

@@ -57,7 +57,7 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
 		tabbedPane.addTab("Data model", scrollPane);
         
         tabbedPane.setSelectedIndex(0);
-        actions=createActionTable(tabbedPane);
+        updateActionTable(tabbedPane,actions);
         
         //Add the components.
         getContentPane().add(tabbedPane, BorderLayout.CENTER);

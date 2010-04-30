@@ -532,7 +532,7 @@ public class SCXMLImportExport implements IImportExport {
 		assert(e.isEdge());
 		return null;
 	}
-	public mxCell followUniqueDescendantLineTillSCXMLValueIsFound(mxIGraphModel model) {
+	public static mxCell followUniqueDescendantLineTillSCXMLValueIsFound(mxIGraphModel model) {
 		mxCell n=(mxCell) model.getRoot();
 		while(true) {
 			Object v=n.getValue();

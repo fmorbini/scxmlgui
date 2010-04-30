@@ -99,10 +99,11 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         tabbedPane.addTab("Executable content", scrollPane);
 
         tabbedPane.setSelectedIndex(0);
-        actions=createActionTable(tabbedPane);
+        updateActionTable(tabbedPane,actions);
+        editMenu=createEditMenu();
         tabbedPane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent changeEvent) {
-              actions=createActionTable(tabbedPane);
+              updateActionTable(tabbedPane,actions);
             }
           });
         
@@ -111,7 +112,6 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
         //Set up the menu bar.
         //actions=createActionTable(textPane);
-        editMenu=createEditMenu();
         JMenuBar mb = new JMenuBar();
         mb.add(editMenu);
         setJMenuBar(mb);

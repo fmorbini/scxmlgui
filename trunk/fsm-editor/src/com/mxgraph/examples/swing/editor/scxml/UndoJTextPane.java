@@ -48,6 +48,8 @@ public class UndoJTextPane extends JTextPane {
 			doc=getDocument();
 			//Put the initial text into the text pane.
 			initDocument(initText);
+			//Start watching for undoable edits and caret changes.
+			doc.addUndoableEditListener(new MyUndoableEditListener());
 		} else {
 			setDocument(doc);
 		}
@@ -56,19 +58,17 @@ public class UndoJTextPane extends JTextPane {
 
 		undoAction=new UndoAction();
 		redoAction=new RedoAction();
-
-		//Start watching for undoable edits and caret changes.
-		doc.addUndoableEditListener(new MyUndoableEditListener());
 	}
 
 	//This one listens for edits that can be undone.
 	protected class MyUndoableEditListener
 	implements UndoableEditListener {
 		public void undoableEditHappened(UndoableEditEvent e) {
-			//Remember the edit and update the menus.
-			undo.addEdit(e.getEdit());
-			undoAction.updateUndoState();
-			redoAction.updateRedoState();
+			if (e.getEdit().isSignificant()) {
+				undo.addEdit(e.getEdit());
+				undoAction.updateUndoState();
+				redoAction.updateRedoState();
+			}
 		}
 	}
 
@@ -104,8 +104,6 @@ public class UndoJTextPane extends JTextPane {
 			try {
 				undo.undo();
 			} catch (CannotUndoException ex) {
-				System.out.println("Unable to undo: " + ex);
-				ex.printStackTrace();
 			}
 			updateUndoState();
 			redoAction.updateRedoState();
@@ -135,8 +133,6 @@ public class UndoJTextPane extends JTextPane {
 			try {
 				undo.redo();
 			} catch (CannotRedoException ex) {
-				System.out.println("Unable to redo: " + ex);
-				ex.printStackTrace();
 			}
 			updateRedoState();
 			undoAction.updateUndoState();
