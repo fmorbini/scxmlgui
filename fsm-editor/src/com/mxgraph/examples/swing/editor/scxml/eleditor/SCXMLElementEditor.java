@@ -28,20 +28,27 @@ public class SCXMLElementEditor extends JFrame {
 
 	private static final long serialVersionUID = 3563719047023065063L;
 	
-	private static final String undoAction="Undo"; 
-	private static final String redoAction="Redo"; 
+	public static final String undoAction="Undo"; 
+	public static final String redoAction="Redo"; 
 	
-    protected HashMap<Object, Action> actions;
+    protected HashMap<Object, Action> actions=new HashMap<Object, Action>();;
 
 	private SCXMLGraphEditor editor;
 
+	protected EditorKeyboardHandler keyboardHandler=null;
+    
+	private AbstractActionWrapper externalUndoAction,externalRedoAction;
+
     public SCXMLElementEditor(SCXMLGraphEditor e) {
     	editor=e;
+    	externalUndoAction = editor.bind(mxResources.get("undo"), null,"/com/mxgraph/examples/swing/images/undo.gif");
+    	externalRedoAction = editor.bind(mxResources.get("redo"), null,"/com/mxgraph/examples/swing/images/redo.gif");
+    	keyboardHandler=new EditorKeyboardHandler(this);
 	}
 
 	//The following two methods allow us to find an
     //action provided by the editor kit by its name.
-    protected HashMap<Object, Action> createActionTable(JTabbedPane tabbedPane) {
+    protected HashMap<Object, Action> updateActionTable(JTabbedPane tabbedPane,HashMap<Object, Action> actions) {
     	Object o=tabbedPane.getSelectedComponent();
     	if (o instanceof JScrollPane) {
     		JScrollPane scrollPane=(JScrollPane) o;
@@ -50,7 +57,6 @@ public class SCXMLElementEditor extends JFrame {
     		if (o instanceof UndoJTextPane) {
     	    	UndoJTextPane u;
     			u=(UndoJTextPane) o;
-    			HashMap<Object, Action> actions = new HashMap<Object, Action>();
     			ActionMap actionMap = u.getActionMap();
     			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
     			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
@@ -68,11 +74,11 @@ public class SCXMLElementEditor extends JFrame {
     		    	ua.updateUndoState();
     		    	ra.updateRedoState();
     			}
+    			if (keyboardHandler!=null) keyboardHandler.updateActionMap();
     			return actions;
     		} else if (o instanceof UndoJTextField) {
     	    	UndoJTextField u;
     			u=(UndoJTextField) o;
-    			HashMap<Object, Action> actions = new HashMap<Object, Action>();
     			ActionMap actionMap = u.getActionMap();
     			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
     			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
@@ -90,6 +96,7 @@ public class SCXMLElementEditor extends JFrame {
     		    	ua.updateUndoState();
     		    	ra.updateRedoState();
     			}
+    			if (keyboardHandler!=null) keyboardHandler.updateActionMap();
     			return actions;
     		}
     	}
@@ -113,18 +120,15 @@ public class SCXMLElementEditor extends JFrame {
         }
     }
 
-    protected Action getActionByName(String name) {
+    public Action getActionByName(String name) {
         return actions.get(name);
     }
     
-    AbstractActionWrapper externalUndoAction,externalRedoAction;
     
     protected JMenu createEditMenu() {
     	JMenu menu = new JMenu(mxResources.get("edit"));
     	menu.removeAll();
 
-    	externalUndoAction = editor.bind(mxResources.get("undo"), getActionByName(undoAction),"/com/mxgraph/examples/swing/images/undo.gif");
-    	externalRedoAction = editor.bind(mxResources.get("redo"), getActionByName(redoAction),"/com/mxgraph/examples/swing/images/redo.gif");
         menu.add(externalUndoAction);
         menu.add(externalRedoAction);
 
@@ -141,10 +145,7 @@ public class SCXMLElementEditor extends JFrame {
         menu.add(editor.bind(mxResources.get("selectAll"),getActionByName(DefaultEditorKit.selectAllAction),null));
         return menu;
     }
-    protected void updateEditMenu() {
-    	externalRedoAction.setInternalAction(getActionByName(redoAction));
-    	externalUndoAction.setInternalAction(getActionByName(undoAction));    	
-    }
+
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the
@@ -153,7 +154,7 @@ public class SCXMLElementEditor extends JFrame {
      * @param pos 
      */
     public void showSCXMLElementEditor(Point pos) {
-        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocation(pos);
         //Display the window.
         pack();

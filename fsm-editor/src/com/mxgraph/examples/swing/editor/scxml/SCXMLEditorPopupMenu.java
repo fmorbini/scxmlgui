@@ -9,6 +9,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.TransferHandler;
 
 import com.mxgraph.examples.swing.editor.EditorActions.HistoryAction;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditDatamodelAction;
@@ -23,6 +24,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParal
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.util.mxPoint;
@@ -43,12 +45,14 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 		mxGraphComponent gc = editor.getGraphComponent();
 		mxCell c=(mxCell) gc.getCellAt(graphPt.x, graphPt.y);
 		mxGraph graph=gc.getGraph();
+		mxIGraphModel model = graph.getModel();
 		
 		Point unscaledGraphPoint=gc.unscaledGraphCoordinates(graphPt);
 
 		// add node in case the cell under the pointer is a swimlane
 		boolean addNodeEnabled=graph.isSwimlane(c) && (editor.getCurrentFileIO()!=null);
 		add(editor.bind(mxResources.get("addNode"), new AddAction(mousePt,c))).setEnabled(addNodeEnabled);
+		addSeparator();
 
 		// edit node/transition (change text accordingly to type of element under cursor)
 		if (c!=null) {
@@ -58,6 +62,8 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				// -add control point if not on a control point
 				// -remove control point if on one that is neither the beginning nor the end.
 				add(editor.bind(mxResources.get("editEdge"), new EditEdgeAction(c,mousePt)));
+				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
+				addSeparator();
 				// if the edge is not a loop you can add/remove corners
 				if (c.getSource()!=c.getTarget()) {
 					mxCellState cellState=graph.getView().getState(c);
@@ -71,7 +77,9 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 						add(editor.bind(mxResources.get("removeCorner"), new RemoveCornerToEdgeAction(c,index-1)));
 				}
 			} else if (c.isVertex()) {
-				add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt)));
+				add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt))).setEnabled(c!=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model));
+				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
+				addSeparator();
 				JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());
 				add(menuItem);
@@ -88,9 +96,8 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 		} else {
 			add(editor.bind(mxResources.get("editNode/Edge"), null)).setEnabled(false);
 		}
+		addSeparator();
 
-		// edit scxml datamodel
-		add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
 		add(editor.bind(mxResources.get("doLayout"), new DoLayoutAction(graph,c)));
 	}
 }
