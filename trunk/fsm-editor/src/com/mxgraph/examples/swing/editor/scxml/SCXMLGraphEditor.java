@@ -718,7 +718,7 @@ public class SCXMLGraphEditor extends JPanel
 				}
 				saveA.actionPerformed(saveE);
 			}
-			if (answer!=JOptionPane.CANCEL_OPTION) {
+			if ((answer==JOptionPane.NO_OPTION) || (answer==JOptionPane.YES_OPTION)) {
 				return true;
 			}
 			return false;
