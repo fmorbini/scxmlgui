@@ -204,7 +204,7 @@ public class SCXMLGraphEditor extends JPanel
 		// Adds the command history to the model and view
 		graph.getModel().addListener(mxEvent.UNDO, undoHandler);
 		graph.getView().addListener(mxEvent.UNDO, undoHandler);
-
+		
 		// Keeps the selection in sync with the command history
 		mxIEventListener undoHandler = new mxIEventListener()
 		{
@@ -214,8 +214,7 @@ public class SCXMLGraphEditor extends JPanel
 				graph.setSelectionCells(graph.getSelectionCellsForChanges(changes));
 			}
 		};
-
-		// TODO: find out relation between undomanager listener and model and view listeners for the UNDO messages
+		
 		undoManager.addListener(mxEvent.UNDO, undoHandler);
 		undoManager.addListener(mxEvent.REDO, undoHandler);
 		

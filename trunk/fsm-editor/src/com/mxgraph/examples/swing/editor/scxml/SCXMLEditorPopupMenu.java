@@ -73,7 +73,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 			} else if (c.isVertex()) {
 				add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt))).setEnabled(c!=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model));
 				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
-				add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
+				add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,mousePt))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
 				addSeparator();
 				JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());

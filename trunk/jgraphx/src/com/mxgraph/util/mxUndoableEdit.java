@@ -46,6 +46,7 @@ public class mxUndoableEdit
 	 */
 	protected boolean undone, redone;
 	private boolean transparent;
+	private boolean undoable=true;
 
 	/**
 	 * Constructs a new undoable edit for the given source.
@@ -193,6 +194,12 @@ public class mxUndoableEdit
 	}
 	public boolean getTransparent() {
 		return transparent;
+	}
+	public void setUndoable(boolean u) {
+		undoable=u;
+	}
+	public boolean getUndoable() {
+		return undoable;
 	}
 	
 }

@@ -339,5 +339,6 @@ public interface mxIGraphModel
 	void highlightCell(mxCell node, String strokeColor, String width);
 	void highlightCell(mxCell node, String strokeColor, String width,String fontColor);
 	void highlightCell(mxCell node, String strokeColor, String width,String fontColor,String labelBackground);
+	void notUndoableEditHappened();
 
 }

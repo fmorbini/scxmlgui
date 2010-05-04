@@ -39,7 +39,20 @@ public class SCXMLImportExport implements IImportExport {
 		HashMap<String, ArrayList<SCXMLEdge>> toEdge=fromToEdges.get(SCXMLfromID);
 		return (toEdge==null)?null:toEdge.get(SCXMLtoID);
 	}
+	private int getNumEdgesFrom(String SCXMLfromID) {
+		assert(!SCXMLfromID.equals(""));
+		HashMap<String, ArrayList<SCXMLEdge>> toEdge=fromToEdges.get(SCXMLfromID);
+		if (toEdge==null) return 0;
+		else {
+			int tot=0;
+			for(ArrayList<SCXMLEdge> es:toEdge.values()) {
+				tot+=es.size();
+			}
+			return tot;
+		}
+	}
 	private void addEdge(HashMap<String,String> ec) {
+		//System.out.println("add edge: "+ec.get(SCXMLEdge.SOURCE)+"->"+ec.get(SCXMLEdge.TARGET));
 		addEdge(ec.get(SCXMLEdge.SOURCE),ec.get(SCXMLEdge.TARGET),ec.get(SCXMLEdge.CONDITION),ec.get(SCXMLEdge.EVENT),ec.get(SCXMLEdge.EDGEEXE));
 	}
 	private void addEdge(String SCXMLfromID,String SCXMLtoID,String cond,String event,String content) {
@@ -58,8 +71,8 @@ public class SCXMLImportExport implements IImportExport {
 		} else {
 			edges.add(edge);
 		}
-		assert(edges.size()>0);
-		edge.setOrder(edges.size()-1);
+		int oe=getNumEdgesFrom(SCXMLfromID);
+		edge.setOrder((oe<=0)?0:oe-1);
 	}
 	private void setNodeAsChildrenOf(SCXMLNode node,SCXMLNode pn) {
 		if (pn!=null) {
@@ -502,13 +515,15 @@ public class SCXMLImportExport implements IImportExport {
 		return null;
 	}
 	private String edgesOfmxVertex2SCXMLString(mxCell n, SCXMLNode value) {
-		String ret="";
 		int ec=n.getEdgeCount();
+		String[] sortedEdges=new String[ec];
+		int maxOutgoingEdge=-1;
 		for(int i=0;i<ec;i++) {
 			mxCell e=(mxCell) n.getEdgeAt(i);
 			mxCell source=(mxCell) e.getSource();
 			mxCell target=(mxCell) e.getTarget();
 			if (source==n) {
+				String ret="";
 				SCXMLNode targetValue=(SCXMLNode) target.getValue();
 				SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
 				assert((edgeValue!=null) && (targetValue!=null));
@@ -516,7 +531,7 @@ public class SCXMLImportExport implements IImportExport {
 				String cond=edgeValue.getCondition();
 				String event=edgeValue.getEvent();
 				String exe=edgeValue.getExe();
-				ret+="<transition";
+				ret="<transition";
 				if (!StringUtils.isEmptyString(event))
 					ret+=" event=\""+event+"\"";
 				if (!StringUtils.isEmptyString(cond))
@@ -526,7 +541,14 @@ public class SCXMLImportExport implements IImportExport {
 					ret+=">"+exe+"</transition>";
 				else
 					ret+="/>";
+				int order=edgeValue.getOrder();
+				if (maxOutgoingEdge<order) maxOutgoingEdge=order;
+				sortedEdges[order]=ret;
 			}
+		}
+		String ret="";
+		for (int i=0;i<=maxOutgoingEdge;i++) {
+			ret+=sortedEdges[i];
 		}
 		return ret;
 	}
