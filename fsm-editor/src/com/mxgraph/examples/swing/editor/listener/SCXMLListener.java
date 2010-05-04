@@ -77,7 +77,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	private SCXMLEditor editor;
 
 	public SCXMLListener(SCXMLEditor editor) {
-		super("ListDemo");
+		super("SCXML listener");
 		
 		highlightedCellsEachInstant=new ArrayList<HashSet<mxCell>>();
 		

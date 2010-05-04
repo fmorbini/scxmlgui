@@ -18,6 +18,7 @@ public class SCXMLEdge implements Serializable {
 	public static final String EDGEEXE="edgeexe";
 	public static final String TARGET="target";
 	public static final String SOURCE="source";
+	public static final String EDGEORDER="edgeOrder";
 
 	public static final String EVENTUNDO="EVENTundo";
 	public static final String EVENTDOC="EVENTdoc";
@@ -155,6 +156,13 @@ public class SCXMLEdge implements Serializable {
 		e.setExeUndoManager(null);
 		e.setExe(getExe());
 		return null;
+	}
+	public void setOrder(int o) {
+		assert(o>=0);
+		edge.put(EDGEORDER, o);
+	}
+	public Integer getOrder() {
+		return (Integer)edge.get(EDGEORDER);
 	}
 }
 

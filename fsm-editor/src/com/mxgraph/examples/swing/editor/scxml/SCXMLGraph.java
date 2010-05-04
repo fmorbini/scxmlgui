@@ -110,12 +110,14 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public Object insertEdge(Object parent, String id, Object value,Object source, Object target)
 	{		
+		int size=getAllOutgoingEdges(source).length;
 		if (value==null)
 			value=getEditor().getCurrentFileIO().buildEdgeValue();
 		else if (!(value instanceof SCXMLEdge)) {
 			System.out.println("WARNING: non NULL and non SCXMLEdge value passed for new edge (insertEdge in SCXMLGraph)");
 			value=getEditor().getCurrentFileIO().buildEdgeValue();
 		}
+		((SCXMLEdge)value).setOrder(size);
 		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight;strokeColor=#888888");
 	}
 	@Override
@@ -297,6 +299,7 @@ public class SCXMLGraph extends mxGraph
 			if (((mxCell)cell).isEdge()) {
 				tip="<html>";
 				SCXMLEdge v=(SCXMLEdge) ((mxCell)cell).getValue();
+				tip+="order: "+v.getOrder()+"<br>";
 				tip+="event: "+v.getEvent()+"<br>";
 				tip+="condition: "+v.getCondition()+"<br>";
 				tip += "</html>";

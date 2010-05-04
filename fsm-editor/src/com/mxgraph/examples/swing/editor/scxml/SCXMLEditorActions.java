@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 
 import com.mxgraph.analysis.mxDistanceCostFunction;
 import com.mxgraph.analysis.mxGraphAnalysis;
+import com.mxgraph.examples.swing.SCXMLEditor;
 import com.mxgraph.examples.swing.editor.EditorRuler;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
@@ -53,6 +54,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor.AskToSaveIfRequi
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLDatamodelEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.layout.mxIGraphLayout;
@@ -85,19 +87,19 @@ public class SCXMLEditorActions
 	 * @param e
 	 * @return Returns the graph for the given action event.
 	 */
-	public static final SCXMLGraphEditor getEditor(ActionEvent e)
+	public static final SCXMLEditor getEditor(ActionEvent e)
 	{
 		if (e.getSource() instanceof Component)
 		{
 			Component component = (Component) e.getSource();
 
 			while (component != null
-					&& !(component instanceof SCXMLGraphEditor))
+					&& !(component instanceof SCXMLEditor))
 			{
 				component = component.getParent();
 			}
 
-			return (SCXMLGraphEditor) component;
+			return (SCXMLEditor) component;
 		}
 
 		return null;
@@ -145,6 +147,20 @@ public class SCXMLEditorActions
 				SCXMLNode root = ((SCXMLImportExport)fio).getRoot();
 				SCXMLDatamodelEditor.createAndShowSCXMLDatamodelEditor(editor,root,pos);
 			}
+		}
+	}
+	
+	public static class EditEdgeOrderAction extends AbstractAction
+	{
+		private mxCell source;
+		
+		public EditEdgeOrderAction(mxCell s) {
+			source=s;
+		}
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLEditor editor = getEditor(e);
+			new SCXMLOutEdgeOrderEditor(source,editor);
 		}
 	}
 
