@@ -1,33 +1,27 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.Point;
-import java.util.List;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
-import javax.swing.TransferHandler;
 
-import com.mxgraph.examples.swing.editor.EditorActions.HistoryAction;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddCornerToEdgeAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditDatamodelAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddCornerToEdgeAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.RemoveCornerToEdgeAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeOrderAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNodeAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.RemoveCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsCluster;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsFinal;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsInitial;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction;
 import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.swing.util.mxGraphActions;
-import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
@@ -79,6 +73,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 			} else if (c.isVertex()) {
 				add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt))).setEnabled(c!=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model));
 				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
+				add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
 				addSeparator();
 				JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());

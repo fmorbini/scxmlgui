@@ -58,6 +58,8 @@ public class SCXMLImportExport implements IImportExport {
 		} else {
 			edges.add(edge);
 		}
+		assert(edges.size()>0);
+		edge.setOrder(edges.size()-1);
 	}
 	private void setNodeAsChildrenOf(SCXMLNode node,SCXMLNode pn) {
 		if (pn!=null) {

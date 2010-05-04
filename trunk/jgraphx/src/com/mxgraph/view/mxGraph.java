@@ -6411,7 +6411,10 @@ public class mxGraph extends mxEventSource
 	{
 		return getEdges(cell, parent, false, true, false);
 	}
-
+	public Object[] getAllOutgoingEdges(Object cell)
+	{
+		return getEdges(cell, null, false, true, true);
+	}
 	/**
 	 * Returns all visible edges connected to the given cell including loops.
 	 *
@@ -6480,11 +6483,10 @@ public class mxGraph extends mxEventSource
 			Object source = view.getVisibleTerminal(edge, true);
 			Object target = view.getVisibleTerminal(edge, false);
 
-			if (includeLoops
-					|| ((source != target) && ((incoming && target == cell && (parent == null || model
-							.getParent(source) == parent)) || (outgoing
-							&& source == cell && (parent == null || model
-							.getParent(target) == parent)))))
+			if (((source == target) && includeLoops) ||
+				((source != target) &&
+				 (incoming && (target == cell) && ((parent == null) || (model.getParent(source) == parent))) ||
+				 (outgoing && (source == cell) && ((parent == null) || (model.getParent(target) == parent)))))
 			{
 				result.add(edge);
 			}
