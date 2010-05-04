@@ -2403,4 +2403,11 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 		}
 	}
 
+	@Override
+	public void notUndoableEditHappened() {
+		mxUndoableEdit tmp = new mxUndoableEdit(this);
+		tmp.setUndoable(false);
+		fireEvent(new mxEventObject(mxEvent.UNDO, "edit", tmp));
+	}
+
 }

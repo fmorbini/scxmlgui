@@ -138,7 +138,10 @@ public class mxUndoManager extends mxEventSource
 	 */
 	public void undoableEditHappened(mxUndoableEdit undoableEdit)
 	{
-		if (!undoableEdit.getTransparent()) {
+		if (undoableEdit.getTransparent()) {}
+		else if (!undoableEdit.getUndoable()) {
+			notUndoableEditHappened();
+		} else {
 			trim();
 	
 			if (size > 0 && size == history.size())
@@ -151,6 +154,10 @@ public class mxUndoManager extends mxEventSource
 			indexOfNextAdd = history.size();
 			fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 		}
+	}
+	private boolean notUndoableEdits=false;
+	public void notUndoableEditHappened() {
+		notUndoableEdits=true;
 	}
 
 	/**
@@ -167,12 +174,15 @@ public class mxUndoManager extends mxEventSource
 		}
 	}
 
+	
+	
 	public void resetUnmodifiedState() {
 		//System.out.println("reset= "+indexOfNextAdd+" "+unmodifiedPosition);
 		unmodifiedPosition=indexOfNextAdd;
+		notUndoableEdits=false;
 	}
 	public boolean isUnmodifiedState() {
 		//System.out.println("check= "+indexOfNextAdd+" "+unmodifiedPosition);
-		return indexOfNextAdd==unmodifiedPosition;
+		return (!notUndoableEdits && (indexOfNextAdd==unmodifiedPosition));
 	}
 }

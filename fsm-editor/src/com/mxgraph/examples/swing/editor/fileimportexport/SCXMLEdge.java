@@ -162,7 +162,8 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EDGEORDER, o);
 	}
 	public Integer getOrder() {
-		return (Integer)edge.get(EDGEORDER);
+		if (edge.containsKey(EDGEORDER)) return (Integer)edge.get(EDGEORDER);
+		else return null;
 	}
 }
 

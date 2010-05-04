@@ -2,6 +2,7 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -55,7 +56,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 	
 	private static final String title="Edge order editor";
 	
-	public SCXMLOutEdgeOrderEditor(mxCell source, SCXMLEditor e) {
+	public SCXMLOutEdgeOrderEditor(mxCell source, SCXMLEditor e, Point pos) {
 		editor=e;
 		gc=editor.getGraphComponent();
 		graph=gc.getGraph();
@@ -76,6 +77,8 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setContentPane(contentPane);
 
+		setLocation(pos);
+		
 		//Display the window.
 		pack();
 		setModal(true);
@@ -295,6 +298,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 
 			setModified(true);
 		} else if (cmd.equals("ok")) {
+			graph.getModel().notUndoableEditHappened();
 			exitTool();
 		} else if (cmd.equals("cancel")) {
 			if (!getModified())

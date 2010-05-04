@@ -117,7 +117,7 @@ public class SCXMLGraph extends mxGraph
 			System.out.println("WARNING: non NULL and non SCXMLEdge value passed for new edge (insertEdge in SCXMLGraph)");
 			value=getEditor().getCurrentFileIO().buildEdgeValue();
 		}
-		((SCXMLEdge)value).setOrder(size);
+		if (((SCXMLEdge)value).getOrder()==null) ((SCXMLEdge)value).setOrder(size);
 		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight;strokeColor=#888888");
 	}
 	@Override

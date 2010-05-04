@@ -153,14 +153,16 @@ public class SCXMLEditorActions
 	public static class EditEdgeOrderAction extends AbstractAction
 	{
 		private mxCell source;
+		private Point pos;
 		
-		public EditEdgeOrderAction(mxCell s) {
+		public EditEdgeOrderAction(mxCell s, Point pt) {
 			source=s;
+			pos=pt;
 		}
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLEditor editor = getEditor(e);
-			new SCXMLOutEdgeOrderEditor(source,editor);
+			new SCXMLOutEdgeOrderEditor(source,editor,pos);
 		}
 	}
 

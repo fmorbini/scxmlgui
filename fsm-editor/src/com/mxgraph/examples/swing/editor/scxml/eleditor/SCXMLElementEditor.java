@@ -110,13 +110,13 @@ public class SCXMLElementEditor extends JFrame {
     		this.editor=e;
 		}
 		public void insertUpdate(DocumentEvent e) {
-			editor.setModified(true);
+			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
         }
         public void removeUpdate(DocumentEvent e) {
-			editor.setModified(true);
+			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
         }
         public void changedUpdate(DocumentEvent e) {
-			editor.setModified(true);
+			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
         }
     }
 
