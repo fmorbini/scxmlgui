@@ -6,8 +6,11 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
  */
 
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowListener;
 import java.util.HashMap;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JFrame;
@@ -17,6 +20,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.undo.CannotUndoException;
 
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
@@ -30,6 +34,8 @@ public class SCXMLElementEditor extends JFrame {
 	
 	public static final String undoAction="Undo"; 
 	public static final String redoAction="Redo"; 
+	public static final String closeActionName="close"; 
+	public final CloseAction closeAction; 
 	
     protected HashMap<Object, Action> actions=new HashMap<Object, Action>();;
 
@@ -40,6 +46,7 @@ public class SCXMLElementEditor extends JFrame {
 	private AbstractActionWrapper externalUndoAction,externalRedoAction;
 
     public SCXMLElementEditor(SCXMLGraphEditor e) {
+    	closeAction=new CloseAction();
     	editor=e;
     	externalUndoAction = editor.bind(mxResources.get("undo"), null,"/com/mxgraph/examples/swing/images/undo.gif");
     	externalRedoAction = editor.bind(mxResources.get("redo"), null,"/com/mxgraph/examples/swing/images/redo.gif");
@@ -58,6 +65,7 @@ public class SCXMLElementEditor extends JFrame {
     	    	UndoJTextPane u;
     			u=(UndoJTextPane) o;
     			ActionMap actionMap = u.getActionMap();
+    			actions.put(closeActionName, closeAction);
     			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
     			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
     			actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
@@ -80,6 +88,7 @@ public class SCXMLElementEditor extends JFrame {
     	    	UndoJTextField u;
     			u=(UndoJTextField) o;
     			ActionMap actionMap = u.getActionMap();
+    			actions.put(closeActionName, closeAction);
     			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
     			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
     			actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
@@ -102,6 +111,12 @@ public class SCXMLElementEditor extends JFrame {
     	}
     	return null;
     }
+    
+	public class CloseAction extends AbstractAction {
+		public void actionPerformed(ActionEvent e) {
+			dispose();
+		}
+	}
     
     // any time a change is made to the document, the scxml editor "modified" flag is set 
     protected class DocumentChangeListener implements DocumentListener {
