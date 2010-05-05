@@ -65,22 +65,23 @@ public class SCXMLGraph extends mxGraph
 	public String validateCell(Object cell, Hashtable<Object, Object> context)
 	{
 		if (model.isVertex(cell)) {
-			mxCell parent=(mxCell)cell;
-			if (parent.isVertex()) {
-				int numChildren=parent.getChildCount();			
-				SCXMLNode parentValue = (SCXMLNode)parent.getValue();
+			mxCell node=(mxCell)cell;
+			if (node.isVertex()) {
+				SCXMLNode nodeValue = (SCXMLNode)node.getValue();
+				//if (nodeValue.getID().matches(".*[\\s]+.*")) return "node name contains spaces.";
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
-				if (!StringUtils.isEmptyString(parentValue.getID()))
-					if (gc.isSCXMLNodeAlreadyThere(parentValue)) return "duplicated node name.";
-					else gc.addSCXMLNode(parentValue,parent);
-				if (parentValue.isClusterNode()) {
+				if (!StringUtils.isEmptyString(nodeValue.getID()))
+					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name.";
+					else gc.addSCXMLNode(nodeValue,node);
+				if (nodeValue.isClusterNode()) {
 					int numInitialChildren=0;
+					int numChildren=node.getChildCount();			
 					for (int i=0;i<numChildren;i++) {
-						mxCell c=(mxCell) parent.getChildAt(i);
+						mxCell c=(mxCell) node.getChildAt(i);
 						if (c.isVertex()) {
 							SCXMLNode cValue = (SCXMLNode)c.getValue();
 							if (cValue.isInitial()) numInitialChildren++;
-							if ((numInitialChildren>0) && parentValue.isParallel()) return "Parallel nodes don't support a child marked as intiial.";
+							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes don't support a child marked as intiial.";
 							if (numInitialChildren>1) return "More than 1 children is marked as initial.";
 						}
 					}

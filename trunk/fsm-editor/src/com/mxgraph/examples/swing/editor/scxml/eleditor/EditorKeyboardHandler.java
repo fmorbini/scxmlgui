@@ -26,6 +26,7 @@ public class EditorKeyboardHandler {
 		map.put(KeyStroke.getKeyStroke("COPY"), "copy");
 		map.put(KeyStroke.getKeyStroke("control V"), "paste");
 		map.put(KeyStroke.getKeyStroke("PASTE"), "paste");
+		map.put(KeyStroke.getKeyStroke("ESCAPE"), "close");
 	}
 
 	ActionMap map=null;
@@ -42,5 +43,6 @@ public class EditorKeyboardHandler {
 		map.put("cut", editor.getActionByName(DefaultEditorKit.cutAction));
 		map.put("copy", editor.getActionByName(DefaultEditorKit.copyAction));
 		map.put("paste", editor.getActionByName(DefaultEditorKit.pasteAction));
+		map.put("close", editor.getActionByName(SCXMLElementEditor.closeActionName));
 	}
 }

@@ -8,16 +8,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 
 import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -32,10 +34,8 @@ import javax.swing.event.ListSelectionListener;
 
 import com.mxgraph.examples.swing.SCXMLEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxResources;
 
@@ -79,10 +79,27 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 
 		setLocation(pos);
 		
+		// set ESCAPE key to close the dialog box.
+		updateInputMap(getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW));
+		ActionMap map = new ActionMap();
+		getRootPane().setActionMap(map);
+		map.put("close",new CloseAction());
+		
 		//Display the window.
 		pack();
 		setModal(true);
 		setVisible(true);
+	}
+	
+	protected void updateInputMap(InputMap map)
+	{
+		map.put(KeyStroke.getKeyStroke("ESCAPE"), "close");
+	}
+	
+	public class CloseAction extends AbstractAction {
+		public void actionPerformed(ActionEvent e) {
+			SCXMLOutEdgeOrderEditor.this.actionPerformed(new ActionEvent(this, 0, "cancel"));
+		}
 	}
 	
 	private void populateEdgeList(mxCell source) {

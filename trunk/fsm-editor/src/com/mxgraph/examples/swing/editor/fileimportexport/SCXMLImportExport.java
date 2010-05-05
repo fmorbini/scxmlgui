@@ -127,7 +127,7 @@ public class SCXMLImportExport implements IImportExport {
 	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel) {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
-		String nodeIDString=(nodeID==null)?"":nodeID.getNodeValue().replaceAll("^[\\s]+|[\\s]+$", "");
+		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());
 		SCXMLNode node;
 		if (nodeIDString.equals("") || ((node=scxmlID2nodes.get(nodeIDString))==null)) {
 			node=new SCXMLNode();
@@ -144,7 +144,7 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		if (((isInitial=att.getNamedItem("initial"))!=null)||
 				((isInitial=att.getNamedItem("initialstate"))!=null)) {
-			String[] initialStates=isInitial.getNodeValue().split("[\\s]");
+			String[] initialStates=StringUtils.cleanupSpaces(isInitial.getNodeValue()).split("[\\s]");
 			for (String initialStateID:initialStates) {
 				SCXMLNode in =getNodeFromSCXMLID(initialStateID);
 				if (in==null) in=new SCXMLNode();
@@ -237,12 +237,12 @@ public class SCXMLImportExport implements IImportExport {
 		//event, cond and target attributes
 		NamedNodeMap att = n.getAttributes();
 		Node condNode = att.getNamedItem("cond");
-		String cond=(condNode!=null)?condNode.getNodeValue().replaceAll("[\\s]", ""):"";
+		String cond=(condNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(condNode.getNodeValue()):"";
 		Node eventNode = att.getNamedItem("event");
-		String event=(eventNode!=null)?eventNode.getNodeValue().replaceAll("[\\s]", ""):"";
+		String event=(eventNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(eventNode.getNodeValue()):"";
 		Node targetNode = att.getNamedItem("target");					
-		String target=(targetNode!=null)?targetNode.getNodeValue().replaceAll("[\\s]", ""):pn.getID();
-		String exe=collectAllChildrenInString(n).replaceAll("[\\s]{2,}|^[\\s]+|[\\s]+$", "");
+		String target=(targetNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(targetNode.getNodeValue()):pn.getID();
+		String exe=collectAllChildrenInString(n);
 		ret.put(SCXMLEdge.CONDITION,cond);
 		ret.put(SCXMLEdge.EVENT,event);
 		ret.put(SCXMLEdge.TARGET,target);
@@ -257,7 +257,7 @@ public class SCXMLImportExport implements IImportExport {
 		for (int i=0;i<listLength;i++) {
 			content+=XMLUtils.domNode2String(list.item(i));
 		}
-		return content.replaceAll("[\\s]+", " ").replaceAll("^[\\s]*|[\\s]*$", "");
+		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
 	@Override
 	public void read(String from, mxGraphComponent graphComponent) throws IOException {
@@ -408,7 +408,7 @@ public class SCXMLImportExport implements IImportExport {
 		} else return null;
 	}
 
-	private final static String scxml1="<scxml xmlns=\"http://www.w3.org/2005/07/scxml\" version=\"1.0\" profile=\"ecmascript\"";
+	private final static String scxml1="<scxml xmlns=\"http://www.w3.org/2005/07/scxml\" version=\"1.0\"";
 	@Override
 	public void write(mxGraphComponent from, String into) throws IOException {
 		// find the starting point: root. as the last descendant from the root of the model (single line descendant) and the first with a value that is an SCXMLNode.
