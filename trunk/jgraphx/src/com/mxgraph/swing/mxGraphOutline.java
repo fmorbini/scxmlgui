@@ -244,7 +244,9 @@ public class mxGraphOutline extends JComponent
 		setGraphComponent(graphComponent);
 		setEnabled(true);
 		setOpaque(true);
-		this.setBounds(0,0,h,w);
+		setMaximumSize(new Dimension(2*w, h));
+		setPreferredSize(new Dimension(w, h));
+		setMinimumSize(new Dimension(w/2, h));
 	}
 
 	/**

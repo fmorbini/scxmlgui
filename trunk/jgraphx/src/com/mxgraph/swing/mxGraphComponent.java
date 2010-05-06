@@ -1831,19 +1831,12 @@ public class mxGraphComponent extends JScrollPane implements Printable
 					{
 						return result;
 					}
-					else if (graph.isCellVisible(cell))
-					{
-						mxCellState state = view.getState(cell);
-
-						if (state != null
-								&& canvas.intersects(this, hit, state)
-								&& (!graph.isSwimlane(cell)
-										|| hitSwimlaneContent || (transparentSwimlaneContent && !canvas
-										.hitSwimlaneContent(this, state, x, y))))
-						{
-							return cell;
-						}
+					else if (doesThisRectangleIntersectThisCell(hit, cell, hitSwimlaneContent, view)) {
+						return cell;
 					}
+				}
+				if (doesThisRectangleIntersectThisCell(hit, parent, hitSwimlaneContent, view)) {
+					return parent;
 				}
 			}
 			finally
@@ -1856,6 +1849,23 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		return null;
 	}
 
+	public boolean doesThisRectangleIntersectThisCell(Rectangle hit,Object cell,boolean hitSwimlaneContent,mxGraphView view) {
+		if (graph.isCellVisible(cell)) {			
+			if (view==null) view = graph.getView();
+			mxCellState state = view.getState(cell);
+
+			if (state != null
+					&& canvas.intersects(this, hit, state)
+					&& (!graph.isSwimlane(cell)
+							|| hitSwimlaneContent || (transparentSwimlaneContent && !canvas
+									.hitSwimlaneContent(this, state, hit.x, hit.y))))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * 
 	 */

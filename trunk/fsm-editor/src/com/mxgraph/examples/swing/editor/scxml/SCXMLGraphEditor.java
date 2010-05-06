@@ -765,10 +765,10 @@ public class SCXMLGraphEditor extends JPanel
 		errorStatus.add(new JLabel("Validation errors:"));
 		errorStatus.add(new JScrollPane(scxmlErrorsDialog));
 		
-		JSplitPane inner = new JSplitPane(JSplitPane.VERTICAL_SPLIT,errorStatus, graphOutline);
-		inner.setDividerLocation(320);
-		inner.setDividerSize(6);
-		inner.setBorder(null);
+		JPanel inner = new JPanel();
+		inner.setLayout(new BoxLayout(inner,BoxLayout.Y_AXIS));
+		inner.add(errorStatus);
+		inner.add(graphOutline);
 		
 		JSplitPane outer = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inner,graphComponent);
 		outer.setDividerLocation(200);

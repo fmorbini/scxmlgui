@@ -298,6 +298,7 @@ public class SCXMLImportExport implements IImportExport {
 		// set the SCXML (this.root) mxCell as not deletable.
 		gr=internalID2cell.get(root.getInternalID());
 		graph.setCellAsDeletable(gr, false);
+		graph.setDefaultParent(gr);
 	}
 
 	private HashMap<String,mxCell> internalID2cell=new HashMap<String, mxCell>();
