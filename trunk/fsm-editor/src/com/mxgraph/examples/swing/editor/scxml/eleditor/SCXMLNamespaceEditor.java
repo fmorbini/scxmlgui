@@ -24,43 +24,38 @@ import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.Docum
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.util.mxResources;
 
-public class SCXMLDatamodelEditor extends SCXMLElementEditor {
+public class SCXMLNamespaceEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
-	private UndoJTextPane undoTextPane;
+	private UndoJTextPane namespaceTextPane;
 	private UndoManager undo;
 	private Document doc;
-    private SCXMLNode root;
+    private SCXMLNode node;
 	private JTabbedPane tabbedPane;
     
-    public SCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode r) {
+    public SCXMLNamespaceEditor(SCXMLGraphEditor editor, SCXMLNode n) {
     	super(editor);
-        setTitle("SCXML datamodel editor");
+        setTitle("SCXML namespace editor");
 
         DocumentChangeListener changeListener = new DocumentChangeListener(editor);
 
         tabbedPane = new JTabbedPane();
 
-        root=r;        
-        undo=root.getDatamodelUndoManager();
-        doc=root.getDatamodelDoc();
-        // undo and doc must be both either null or not null.
-        assert(!((undo==null) ^ (doc==null)));
-        undoTextPane=new UndoJTextPane(XMLUtils.prettyPrintXMLString(root.getDataModel()," "), doc, undo);
-        if (doc==null) {
-        	root.setDatamodelDoc(doc=undoTextPane.getDocument());
-        	root.setDatamodelUndoManager(undo=undoTextPane.getUndoManager());
-        }
-        doc.addDocumentListener(changeListener);
-        // configure the undo text pane.
-        undoTextPane.setCaretPosition(0);
-        undoTextPane.setMargin(new Insets(5,5,5,5));
-
-        JScrollPane scrollPane = new JScrollPane(undoTextPane);
-        scrollPane.setPreferredSize(new Dimension(400, 200));
-
-        tabbedPane.addTab("Data model", scrollPane);
+        node=n;
         
-        tabbedPane.setSelectedIndex(0);
+    	undo=node.getNAMESPACEUndoManager();
+    	doc=node.getNAMESPACEDoc();
+    	namespaceTextPane=new UndoJTextPane(node.getNAMESPACE(), doc, undo);
+    	if (doc==null) {
+    		node.setNAMESPACEDoc(doc=namespaceTextPane.getDocument());
+    		node.setNAMESPACEUndoManager(undo=namespaceTextPane.getUndoManager());
+    	}
+    	doc.addDocumentListener(changeListener);
+    	namespaceTextPane.setCaretPosition(0);
+    	namespaceTextPane.setMargin(new Insets(5,5,5,5));
+    	JScrollPane scrollPane = new JScrollPane(namespaceTextPane);
+    	scrollPane.setPreferredSize(new Dimension(400, 200));
+    	tabbedPane.addTab("Namespace", scrollPane);
+    	tabbedPane.setSelectedIndex(0);
         updateActionTable(tabbedPane,actions);
         
         //Add the components.
@@ -80,9 +75,9 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
      * @param editor 
      * @param pos 
      */
-    public static void createAndShowSCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode root, Point pos) {
+    public static void createAndShowSCXMLNamespaceEditor(SCXMLGraphEditor editor, SCXMLNode root, Point pos) {
         //Create and set up the window.
-        final SCXMLDatamodelEditor frame = new SCXMLDatamodelEditor(editor,root);
+        final SCXMLNamespaceEditor frame = new SCXMLNamespaceEditor(editor,root);
         frame.showSCXMLElementEditor(pos);
     }
 }

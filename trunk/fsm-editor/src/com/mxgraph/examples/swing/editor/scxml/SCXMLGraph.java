@@ -307,6 +307,14 @@ public class SCXMLGraph extends mxGraph
 				tip+="event: "+v.getEvent()+"<br>";
 				tip+="condition: "+v.getCondition()+"<br>";
 				tip += "</html>";
+			} else if (((mxCell)cell).isVertex()) {
+				SCXMLNode v=(SCXMLNode) ((mxCell)cell).getValue();
+				String src=v.getSRC();
+				if (!StringUtils.isEmptyString(src)) {
+					tip="<html>";
+					tip+="src: "+src+"<br>";
+					tip += "</html>";
+				}
 			}
 		}
 

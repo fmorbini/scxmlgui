@@ -11,6 +11,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditDatamodelAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNamespaceAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeOrderAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNodeAction;
@@ -56,7 +57,6 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				// -add control point if not on a control point
 				// -remove control point if on one that is neither the beginning nor the end.
 				add(editor.bind(mxResources.get("editEdge"), new EditEdgeAction(c,mousePt)));
-				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
 				addSeparator();
 				// if the edge is not a loop you can add/remove corners
 				if (c.getSource()!=c.getTarget()) {
@@ -71,8 +71,10 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 						add(editor.bind(mxResources.get("removeCorner"), new RemoveCornerToEdgeAction(c,index-1)));
 				}
 			} else if (c.isVertex()) {
-				add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt))).setEnabled(c!=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model));
-				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(mousePt))).setEnabled((editor.getCurrentFileIO()==null)?false:true);
+				mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
+				add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt))).setEnabled(c!=root);
+				add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(mousePt))).setEnabled(c==root);
+				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,mousePt)));
 				add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,mousePt))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
 				addSeparator();
 				JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));

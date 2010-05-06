@@ -71,6 +71,6 @@ public class SCXMLEditor extends SCXMLGraphEditor
 		mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
 		SCXMLEditor editor = new SCXMLEditor();
 		editor.createFrame(editor).setVisible(true);
-		//editor.createFrame(new FSMEditorMenuBar(editor)).setVisible(true);
+		editor.getGraphComponent().requestFocusInWindow();
 	}
 }

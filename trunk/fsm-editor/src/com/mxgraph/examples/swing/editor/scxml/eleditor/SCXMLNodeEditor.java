@@ -23,7 +23,6 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
-import com.mxgraph.util.mxResources;
 
 public class SCXMLNodeEditor extends SCXMLElementEditor {
 
@@ -32,7 +31,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	private static final String undoAction="Undo"; 
 	private static final String redoAction="Redo"; 
 	
-	private UndoJTextField SCXMLIDTextPane;
+	private UndoJTextField SCXMLIDTextPane,scrTextPane;
 	private UndoJTextPane onentryTextPane;
 	private UndoJTextPane onexitTextPane;
 	private UndoJTextPane initialTextPane;
@@ -69,6 +68,22 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         scrollPane.setPreferredSize(new Dimension(400, 200));
         tabbedPane.addTab("SCXML ID", scrollPane);
         doc.addDocumentListener(changeListener);
+
+        if (!node.isClusterNode()) {
+        	undo=node.getSRCUndoManager();
+        	doc=node.getSRCDoc();
+        	scrTextPane=new UndoJTextField(node.getSRC(), doc, undo);
+        	if (doc==null) {
+        		node.setSRCDoc(doc=scrTextPane.getDocument());
+        		node.setSRCUndoManager(undo=scrTextPane.getUndoManager());
+        	}
+        	scrTextPane.setCaretPosition(0);
+        	scrTextPane.setMargin(new Insets(5,5,5,5));
+        	scrollPane = new JScrollPane(scrTextPane);
+        	scrollPane.setPreferredSize(new Dimension(400, 200));
+        	tabbedPane.addTab("Source url", scrollPane);
+        	doc.addDocumentListener(changeListener);
+        }
 
         undo=node.getOnEntryUndoManager();
         doc=node.getOnEntryDoc();

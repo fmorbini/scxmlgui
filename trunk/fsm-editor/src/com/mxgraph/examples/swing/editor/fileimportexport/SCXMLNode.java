@@ -50,7 +50,7 @@ public class SCXMLNode implements Serializable {
 	public static final String ONENTRYUNDO="ENTRYundo";
 	public static final String ONENTRYDOC="ENTRYdoc";
 	public static final String ONEXITUNDO="EXITundo";
-	public static final String ONEXITDOC="EXItdoc";
+	public static final String ONEXITDOC="EXITdoc";
 	// only initial states
 	public static final String ONINITIALENTRYUNDO="INITIALundo";
 	public static final String ONINITIALENTRYDOC="INITIALdoc";
@@ -58,6 +58,18 @@ public class SCXMLNode implements Serializable {
 	public static final String FINALDONEDATAUNDO="FINALundo";
 	public static final String FINALDONEDATADOC="FINALdoc";
 
+	// all non root states
+	public static final String SRC="src";
+	public static final String SRCUNDO="SRCundo";
+	public static final String SRCDOC="SRCdoc";
+	
+	// only root state
+	public static final String NAMESPACE="namespace";
+	public static final String NAMESPACEUNDO="namespaceundo";
+	public static final String NAMESPACEDOC="namespacedoc";
+	
+	public static final String ROOTID="SCXML";
+	
 	private HashMap<String,Object> node;
 	public SCXMLNode() {
 		node=new HashMap<String, Object>();
@@ -69,11 +81,74 @@ public class SCXMLNode implements Serializable {
 		this.setFinal(false);
 		this.setParallel(false);
 	}
+	public boolean isRoot() {
+		return getID().equals(ROOTID);
+	}
 	public String getInternalID() {
 		return (String)node.get(INTERNALID);
 	}
 	public void setInternalID(String internalID) {
 		node.put(INTERNALID, internalID);
+	}
+	public String getSRC() {
+		Document dmd = getSRCDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(SRC);
+			}
+		}
+		else
+			return (String)node.get(SRC);
+	}
+	public void setSRC(String src) {
+		node.put(SRC, src);
+	}
+	// getter and setter for document and undomanager for the SRC field of a node
+	public UndoManager getSRCUndoManager() {
+		return (UndoManager) node.get(SRCUNDO);
+	}
+	public UndoManager setSRCUndoManager(UndoManager um) {
+		node.put(SRCUNDO,um);
+		return um;
+	}
+	public Document getSRCDoc() {
+		return (Document) node.get(SRCDOC);
+	}
+	public Document setSRCDoc(Document doc) {
+		node.put(SRCDOC,doc);
+		return doc;
+	}
+	public String getNAMESPACE() {
+		Document dmd = getNAMESPACEDoc();
+		if (dmd!=null) {
+			try {
+				return dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				return (String)node.get(NAMESPACE);
+			}
+		}
+		else
+			return (String)node.get(NAMESPACE);
+	}
+	public void setNAMESPACE(String namespace) {
+		node.put(NAMESPACE, namespace);
+	}
+	// getter and setter for document and undomanager for the NAMESPACE field of a node
+	public UndoManager getNAMESPACEUndoManager() {
+		return (UndoManager) node.get(NAMESPACEUNDO);
+	}
+	public UndoManager setNAMESPACEUndoManager(UndoManager um) {
+		node.put(NAMESPACEUNDO,um);
+		return um;
+	}
+	public Document getNAMESPACEDoc() {
+		return (Document) node.get(NAMESPACEDOC);
+	}
+	public Document setNAMESPACEDoc(Document doc) {
+		node.put(NAMESPACEDOC,doc);
+		return doc;
 	}
 	public String getID() {
 		Document dmd = getSCXMLIDDoc();

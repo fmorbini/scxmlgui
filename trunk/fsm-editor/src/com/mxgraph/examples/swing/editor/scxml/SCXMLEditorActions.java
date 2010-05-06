@@ -53,6 +53,7 @@ import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor.AskToSaveIfRequired;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLDatamodelEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNamespaceEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.io.mxCodec;
@@ -135,21 +136,41 @@ public class SCXMLEditorActions
 	public static class EditDatamodelAction extends AbstractAction
 	{
 		private Point pos;
+		private mxCell node;
 		
-		public EditDatamodelAction(Point pt) {
+		public EditDatamodelAction(mxCell c, Point pt) {
+			pos=pt;
+			node=c;
+		}
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			Object nodeValue = node.getValue();
+			if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
+				SCXMLDatamodelEditor.createAndShowSCXMLDatamodelEditor(editor,(SCXMLNode) nodeValue,pos);
+			}
+		}
+	}
+	public static class EditNamespaceAction extends AbstractAction
+	{
+		private Point pos;
+		
+		public EditNamespaceAction(Point pt) {
 			pos=pt;
 		}
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
-			IImportExport fio = editor.getCurrentFileIO();
-			if (fio instanceof SCXMLImportExport) {
-				SCXMLNode root = ((SCXMLImportExport)fio).getRoot();
-				SCXMLDatamodelEditor.createAndShowSCXMLDatamodelEditor(editor,root,pos);
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			mxCell root = SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
+			if (root!=null) {
+				Object nodeValue = root.getValue();
+				if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
+					SCXMLNamespaceEditor.createAndShowSCXMLNamespaceEditor(editor,(SCXMLNode) nodeValue,pos);
+				}
 			}
 		}
 	}
-	
 	public static class EditEdgeOrderAction extends AbstractAction
 	{
 		private mxCell source;
@@ -1498,7 +1519,8 @@ public class SCXMLEditorActions
 					
 					SCXMLNode value=(SCXMLNode)editor.getCurrentFileIO().buildNodeValue();
 					((SCXMLImportExport)editor.getCurrentFileIO()).setRoot(value);
-					value.setID("SCXML");
+					value.setID(SCXMLNode.ROOTID);
+					value.setNAMESPACE("xmlns=\"http://www.w3.org/2005/07/scxml\"");
 					value.setCluster(true);
 					mxCell p = (mxCell) graph.insertVertex(null, value.getInternalID(), value, 0, 0, gc.getSize().width, gc.getSize().height, value.getStyle());
 					p.setValue(value);
