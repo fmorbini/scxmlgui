@@ -23,6 +23,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -33,7 +34,9 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -71,6 +74,7 @@ import com.mxgraph.view.mxGraph;
 
 public class SCXMLGraphEditor extends JPanel
 {
+	private JTextArea scxmlErrorsDialog;
 	private ImportExportPicker iep;
 	public ImportExportPicker getIOPicker() {return iep;}
 	/**
@@ -97,11 +101,6 @@ public class SCXMLGraphEditor extends JPanel
 	protected mxGraphOutline graphOutline;
 
 	private SCXMLListener scxmlListener;
-
-	/**
-	 * the toolbar with shapes and stuff that can be added to the graph
-	 */
-	protected JTabbedPane libraryPane;
 
 	/**
 	 * 
@@ -280,37 +279,6 @@ public class SCXMLGraphEditor extends JPanel
 						}
 					}
 				});
-	}
-
-	/**
-	 * 
-	 */
-	public EditorPalette insertPalette(String title)
-	{
-		final EditorPalette palette = new EditorPalette();
-		final JScrollPane scrollPane = new JScrollPane(palette);
-		scrollPane
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane
-				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		libraryPane.add(title, scrollPane);
-
-		// Updates the widths of the palettes if the container size changes
-		libraryPane.addComponentListener(new ComponentAdapter()
-		{
-			/**
-			 * 
-			 */
-			public void componentResized(ComponentEvent e)
-			{
-				int w = scrollPane.getWidth()
-						- scrollPane.getVerticalScrollBar().getWidth();
-				palette.setPreferredWidth(w);
-			}
-
-		});
-
-		return palette;
 	}
 
 	/**
@@ -783,13 +751,33 @@ public class SCXMLGraphEditor extends JPanel
 		WindowEventDemo frame = new WindowEventDemo(this);
 		// the contentPane of the JRootPane is a JPanel (that is the FSMGraphEditor)
 		//frame.setContentPane(this);
-		frame.getContentPane().add(this);
+
+		//frame.getContentPane().add(this);
 		// TODO: create menu bar
 
 		// Creates the graph outline component
 		graphOutline = new mxGraphOutline(graphComponent,200,200);
-		JLayeredPane lp = frame.getLayeredPane();
-		lp.add(graphOutline, JLayeredPane.POPUP_LAYER);
+		
+		scxmlErrorsDialog=new JTextArea();
+		scxmlErrorsDialog.setEditable(false);
+		JPanel errorStatus=new JPanel();
+		errorStatus.setLayout(new BoxLayout(errorStatus, BoxLayout.Y_AXIS));
+		errorStatus.add(new JLabel("Validation errors:"));
+		errorStatus.add(new JScrollPane(scxmlErrorsDialog));
+		
+		JSplitPane inner = new JSplitPane(JSplitPane.VERTICAL_SPLIT,errorStatus, graphOutline);
+		inner.setDividerLocation(320);
+		inner.setDividerSize(6);
+		inner.setBorder(null);
+		
+		JSplitPane outer = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inner,graphComponent);
+		outer.setDividerLocation(200);
+		outer.setDividerSize(6);
+		outer.setBorder(null);	
+
+		// Puts everything together
+		setLayout(new BorderLayout());
+		add(outer, BorderLayout.CENTER);
 		
 		scxmlListener=new SCXMLListener(editor);
 		
@@ -797,17 +785,6 @@ public class SCXMLGraphEditor extends JPanel
 		frame.setJMenuBar(new SCXMLEditorMenuBar(editor));
 		frame.setSize(870, 640);
 
-		AdjustmentListener outlinePositionAdjuster = new AdjustmentListener()
-		{
-			public void adjustmentValueChanged(AdjustmentEvent e)
-			{
-				// keep the outline panel stuck to the bottom-left corner of the window.
-				Rectangle paneBounds = graphComponent.getRootPane().getContentPane().getBounds();
-				graphOutline.setBounds(0, paneBounds.height-graphOutline.getHeight()-((graphComponent.getHorizontalScrollBar().isVisible())?graphComponent.getHorizontalScrollBar().getHeight():0), graphOutline.getWidth(), graphOutline.getHeight());
-			}
-		};
-		graphComponent.getHorizontalScrollBar().addAdjustmentListener(outlinePositionAdjuster);
-		graphComponent.getVerticalScrollBar().addAdjustmentListener(outlinePositionAdjuster);
 		
 		// Updates the frame title
 		// Installs rubberband selection and handling for some special
@@ -824,10 +801,12 @@ public class SCXMLGraphEditor extends JPanel
 			public void invoke(Object sender, mxEventObject evt)
 			{
 				warnings.setLength(0);
-				if (!graphComponent.validateGraph(warnings))
-					JOptionPane.showMessageDialog(graphComponent, warnings.toString());
+				if (graphComponent.validateGraph(warnings)) scxmlErrorsDialog.setText("");
+				else scxmlErrorsDialog.setText(warnings.toString());
 			}
 		});
+		
+		frame.getContentPane().add(this);
 		
 		return frame;
 	}

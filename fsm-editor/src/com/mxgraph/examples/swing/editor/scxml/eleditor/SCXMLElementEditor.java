@@ -46,6 +46,7 @@ public class SCXMLElementEditor extends JFrame {
 	private AbstractActionWrapper externalUndoAction,externalRedoAction;
 
     public SCXMLElementEditor(SCXMLGraphEditor e) {
+    	setAlwaysOnTop(true);
     	closeAction=new CloseAction();
     	editor=e;
     	externalUndoAction = editor.bind(mxResources.get("undo"), null,"/com/mxgraph/examples/swing/images/undo.gif");
