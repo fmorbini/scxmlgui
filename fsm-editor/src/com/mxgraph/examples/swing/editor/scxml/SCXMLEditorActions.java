@@ -1524,6 +1524,9 @@ public class SCXMLEditorActions
 					value.setCluster(true);
 					mxCell p = (mxCell) graph.insertVertex(null, value.getInternalID(), value, 0, 0, gc.getSize().width, gc.getSize().height, value.getStyle());
 					p.setValue(value);
+
+					graph.setDefaultParent(p);
+
 					graph.setCellAsDeletable(p, false);
 					editor.setModified(false);
 					editor.undoManager.clear();
