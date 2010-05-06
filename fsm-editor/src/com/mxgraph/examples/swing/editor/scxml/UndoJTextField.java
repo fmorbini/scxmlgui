@@ -73,11 +73,8 @@ public class UndoJTextField extends JTextField {
 
 	protected void initDocument(String init) {
 		if (init!=null) {
-			String initString[] =init.split("\n");
 			try {
-				for (int i = 0; i < initString.length; i ++) {
-					doc.insertString(doc.getLength(), initString[i] + newline,null);
-				}
+				doc.insertString(0,init.replaceAll("\n", " "),null);
 			} catch (BadLocationException ble) {
 				System.err.println("Couldn't insert initial text.");
 			}

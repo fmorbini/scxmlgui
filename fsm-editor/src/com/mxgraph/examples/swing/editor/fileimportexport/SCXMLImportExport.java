@@ -127,7 +127,7 @@ public class SCXMLImportExport implements IImportExport {
 	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel) {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
-		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());
+		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());		
 		SCXMLNode node;
 		if (nodeIDString.equals("") || ((node=scxmlID2nodes.get(nodeIDString))==null)) {
 			node=new SCXMLNode();
@@ -153,6 +153,18 @@ public class SCXMLImportExport implements IImportExport {
 				addSCXMLNode(in);
 			}
 		}
+		// set namespace attribute
+		int na=att.getLength();
+		String namespace="";
+		for(int i=0;i<na;i++) {
+			Node a=att.item(i);
+			String name=a.getNodeName().toLowerCase();
+			if (name.startsWith("xmlns")) {
+				namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
+			} else if (name.equals("src")) node.setSRC(a.getNodeValue());
+		}
+		if (!StringUtils.isEmptyString(namespace)) node.setNAMESPACE(namespace);		
+		// set src attribute
 		return node;
 	}
 
@@ -209,7 +221,7 @@ public class SCXMLImportExport implements IImportExport {
 					pn.setDoneData(content);
 				} else if (name.equals("datamodel")) {
 					String content=collectAllChildrenInString(n);
-					root.addToDataModel(content);
+					pn.addToDataModel(content);
 				}
 				break;
 			case Node.COMMENT_NODE:
@@ -273,7 +285,7 @@ public class SCXMLImportExport implements IImportExport {
 		Document doc = mxUtils.parse(mxUtils.readFile(from));
 		doc.getDocumentElement().normalize();
 		root=handleSCXMLNode(doc.getDocumentElement(),null,false);
-		root.setID("SCXML");
+		root.setID(SCXMLNode.ROOTID);
 		getNodeHier(doc.getDocumentElement(),root);
 
 		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
@@ -408,7 +420,6 @@ public class SCXMLImportExport implements IImportExport {
 		} else return null;
 	}
 
-	private final static String scxml1="<scxml xmlns=\"http://www.w3.org/2005/07/scxml\" version=\"1.0\"";
 	@Override
 	public void write(mxGraphComponent from, String into) throws IOException {
 		// find the starting point: root. as the last descendant from the root of the model (single line descendant) and the first with a value that is an SCXMLNode.
@@ -433,6 +444,7 @@ public class SCXMLImportExport implements IImportExport {
 	
 	private String mxVertex2SCXMLString(mxGraphView view, mxCell n, boolean isRoot) {
 		String ret="";
+		String src=null;
 		String ID=null;
 		String datamodel=null;
 		String onentry=null;
@@ -442,9 +454,10 @@ public class SCXMLImportExport implements IImportExport {
 		String transitions=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
+		src=value.getSRC();
 		assert(value==root);
 		ID=value.getID();
-		if (isRoot)	datamodel=value.getDataModel();
+		datamodel=value.getDataModel();
 		if (value.isFinal()) donedata=value.getDoneData();
 		onentry=value.getOnEntry();
 		onexit=value.getOnExit();
@@ -453,7 +466,7 @@ public class SCXMLImportExport implements IImportExport {
 		if (initialChild!=null) oninitialentry=initialChild.getOnInitialEntry();
 		String close;
 		if (isRoot) {
-			ret=scxml1;
+			ret="<scxml "+StringUtils.removeLeadingAndTrailingSpaces(value.getNAMESPACE().replace("\n", " "));
 			close="</scxml>";
 		} else if (value.isParallel()) {
 			ret="<parallel";
@@ -465,6 +478,8 @@ public class SCXMLImportExport implements IImportExport {
 			ret="<state";
 			close="</state>";
 		}
+		if (!StringUtils.isEmptyString(src))
+			ret+=" src=\""+src+"\"";
 		if (!StringUtils.isEmptyString(ID))
 			ret+=" id=\""+ID+"\"";
 		if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null))
