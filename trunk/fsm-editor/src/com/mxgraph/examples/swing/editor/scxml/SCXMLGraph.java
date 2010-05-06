@@ -67,11 +67,12 @@ public class SCXMLGraph extends mxGraph
 		if (model.isVertex(cell)) {
 			mxCell node=(mxCell)cell;
 			if (node.isVertex()) {
+				assert(node.getValue() instanceof SCXMLNode);
 				SCXMLNode nodeValue = (SCXMLNode)node.getValue();
-				//if (nodeValue.getID().matches(".*[\\s]+.*")) return "node name contains spaces.";
+				if (nodeValue.getID().matches(".*[\\s]+.*")) return "node name contains spaces.\n";
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
 				if (!StringUtils.isEmptyString(nodeValue.getID()))
-					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name.";
+					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name.\n";
 					else gc.addSCXMLNode(nodeValue,node);
 				if (nodeValue.isClusterNode()) {
 					int numInitialChildren=0;
@@ -81,8 +82,8 @@ public class SCXMLGraph extends mxGraph
 						if (c.isVertex()) {
 							SCXMLNode cValue = (SCXMLNode)c.getValue();
 							if (cValue.isInitial()) numInitialChildren++;
-							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes don't support a child marked as intiial.";
-							if (numInitialChildren>1) return "More than 1 children is marked as initial.";
+							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes don't support a child marked as intiial.\n";
+							if (numInitialChildren>1) return "More than 1 children is marked as initial.\n";
 						}
 					}
 				}
@@ -90,6 +91,8 @@ public class SCXMLGraph extends mxGraph
 		} else if (model.isEdge(cell)) {
 			// check that source and target have non null SCXML ids.
 			mxCell edge=(mxCell)cell;
+			assert(edge.getValue() instanceof SCXMLEdge);
+			if ((edge.getSource()==null) || (edge.getTarget()==null)) return "unconnected edge.";
 			SCXMLNode source=(SCXMLNode)edge.getSource().getValue();
 			SCXMLNode target=(SCXMLNode)edge.getTarget().getValue();
 			if (StringUtils.isEmptyString(source.getID()) || StringUtils.isEmptyString(target.getID())) {

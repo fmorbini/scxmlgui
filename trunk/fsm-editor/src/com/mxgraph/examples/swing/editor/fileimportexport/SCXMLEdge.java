@@ -155,7 +155,7 @@ public class SCXMLEdge implements Serializable {
 		e.setExeDoc(null);
 		e.setExeUndoManager(null);
 		e.setExe(getExe());
-		return null;
+		return e;
 	}
 	public void setOrder(int o) {
 		assert(o>=0);

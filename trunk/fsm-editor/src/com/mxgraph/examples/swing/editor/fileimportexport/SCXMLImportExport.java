@@ -382,7 +382,7 @@ public class SCXMLImportExport implements IImportExport {
 	public Object buildNodeValue() {
 		SCXMLNode n=new SCXMLNode();
 		String internalID=getNextInternalID();
-		n.setID("new node"+getNextInternalID());
+		n.setID("new_node"+getNextInternalID());
 		n.setInternalID(internalID);
 		return n;
 	}
