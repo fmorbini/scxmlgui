@@ -1,5 +1,7 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -7,6 +9,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
 
+import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxGeometry;
 
 public class SCXMLNode implements Serializable {
@@ -440,8 +443,8 @@ public class SCXMLNode implements Serializable {
 		return doc;
 	}
 
-	public SCXMLNode cloneNode(SCXMLImportExport scxmlImportExport) {
-		SCXMLNode n=(SCXMLNode) scxmlImportExport.buildNodeValue();
+	public SCXMLNode cloneNode() {
+		SCXMLNode n=new SCXMLNode();
 		n.node=(HashMap<String, Object>) this.node.clone();
 		// removes the documents in the original value (if there). But get their values (because if there they have the
 		// real value of the property they represent (the document)
@@ -481,6 +484,18 @@ public class SCXMLNode implements Serializable {
 			return new mxGeometry(x, y, w, h);
 		}
 		else return null;
+	}
+	public boolean isOutsourcedNode() {
+		return !StringUtils.isEmptyString(getSRC());
+	}
+	
+	private void writeObject(ObjectOutputStream out) throws IOException
+	{
+		SCXMLNode newn = cloneNode();
+		HashMap<String, Object> hash = node;
+		node=newn.node;
+		out.defaultWriteObject();
+		node=hash;
 	}
 }
 

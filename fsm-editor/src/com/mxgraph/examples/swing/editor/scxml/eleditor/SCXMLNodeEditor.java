@@ -142,17 +142,18 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
             scrollPane.setPreferredSize(new Dimension(400, 200));
             tabbedPane.addTab("On initial entry", scrollPane);
             doc.addDocumentListener(changeListener);
-       }
+        }
 
         tabbedPane.setSelectedIndex(0);
         updateActionTable(tabbedPane,actions);
         editMenu=createEditMenu();
         tabbedPane.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent changeEvent) {
-              updateActionTable(tabbedPane,actions);
-            }
-          });
-        
+        	public void stateChanged(ChangeEvent changeEvent) {
+        		//System.out.println("stateChanged in scxmlnodeeditor");
+        		updateActionTable(tabbedPane,actions);
+        	}
+        });
+
         //Add the components.
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
 

@@ -415,9 +415,9 @@ public class SCXMLImportExport implements IImportExport {
 	@Override
 	public Object cloneValue(Object value) {
 		if (value instanceof SCXMLNode) {
-			return ((SCXMLNode) value).cloneNode(this);
+			return ((SCXMLNode) value).cloneNode();
 		} else if (value instanceof SCXMLEdge) {
-			return ((SCXMLEdge) value).cloneEdge(this);
+			return ((SCXMLEdge) value).cloneEdge();
 		} else return null;
 	}
 
