@@ -1,5 +1,7 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -142,8 +144,8 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EXEDOC,doc);
 		return doc;
 	}
-	public Object cloneEdge(SCXMLImportExport scxmlImportExport) {
-		SCXMLEdge e=(SCXMLEdge) scxmlImportExport.buildEdgeValue();
+	public SCXMLEdge cloneEdge() {
+		SCXMLEdge e=new SCXMLEdge();
 		e.edge=(HashMap<String, Object>) this.edge.clone();
 		// as for the node, set all documents to null, but gets the values they contain because it's the most updated.
 		e.setConditionDoc(null);
@@ -164,6 +166,14 @@ public class SCXMLEdge implements Serializable {
 	public Integer getOrder() {
 		if (edge.containsKey(EDGEORDER)) return (Integer)edge.get(EDGEORDER);
 		else return null;
+	}
+	private void writeObject(ObjectOutputStream out) throws IOException
+	{
+		SCXMLEdge newe = cloneEdge();
+		HashMap<String, Object> hash = edge;
+		edge=newe.edge;
+		out.defaultWriteObject();
+		edge=hash;
 	}
 }
 

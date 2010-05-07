@@ -85,6 +85,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				add(menuItem);
 				menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsClusterNode"), new SetNodeAsCluster(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
+				menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
 				add(menuItem);
 				menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());

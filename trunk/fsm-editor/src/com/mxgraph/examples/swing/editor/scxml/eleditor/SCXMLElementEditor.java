@@ -75,9 +75,11 @@ public class SCXMLElementEditor extends JFrame {
     			UndoJTextPane.RedoAction ra=u.getRedoAction();
     			actions.put(undoAction,ua);
     			actions.put(redoAction,ra);
+    			//System.out.println("update actions, pane side, before");
     			if ((externalUndoAction!=null) && (externalRedoAction!=null)) {
-    				if (u.getUndoAction().getExternalAction()==null) ua.setExternalAction(externalUndoAction);
-    				if (u.getRedoAction().getExternalAction()==null) ra.setExternalAction(externalRedoAction);
+        			//System.out.println("update actions, pane side, after");
+    				if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
+    				if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
     		    	externalUndoAction.setInternalAction(ua);    	
     		    	externalRedoAction.setInternalAction(ra);
     		    	ua.updateUndoState();
@@ -98,9 +100,11 @@ public class SCXMLElementEditor extends JFrame {
     			UndoJTextField.RedoAction ra=u.getRedoAction();
     			actions.put(undoAction,ua);
     			actions.put(redoAction,ra);
+    			//System.out.println("update actions, field side, before");
     			if ((externalUndoAction!=null) && (externalRedoAction!=null)) {
-    				if (u.getUndoAction().getExternalAction()==null) ua.setExternalAction(externalUndoAction);
-    				if (u.getRedoAction().getExternalAction()==null) ra.setExternalAction(externalRedoAction);
+        			//System.out.println("update actions, field side, after");
+    				if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
+    				if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
     		    	externalUndoAction.setInternalAction(ua);    	
     		    	externalRedoAction.setInternalAction(ra);
     		    	ua.updateUndoState();
