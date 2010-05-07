@@ -46,6 +46,7 @@ import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLDocument;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -62,6 +63,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.mxgraph.io.mxCodecRegistry;
 import com.mxgraph.model.mxCellPath;
@@ -2018,23 +2020,17 @@ public class mxUtils
 	 * 
 	 * @param xml String that represents the XML data.
 	 * @return Returns a new XML document.
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
 	 */
-	public static Document parse(String xml)
+	public static Document parse(String xml) throws ParserConfigurationException, SAXException, IOException
 	{
-		try
-		{
-			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
+		.newInstance();
+		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 
-			return docBuilder.parse(new InputSource(new StringReader(xml)));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		return null;
+		return docBuilder.parse(new InputSource(new StringReader(xml)));
 	}
 
 	/**

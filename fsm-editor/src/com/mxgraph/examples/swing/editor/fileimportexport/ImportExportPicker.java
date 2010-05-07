@@ -78,7 +78,7 @@ public class ImportExportPicker {
 		fc.setFileFilter(defaultSaveFilter);
 	}
 
-	public IImportExport read(JFileChooser fc, SCXMLGraphEditor editor) throws IOException {
+	public IImportExport read(JFileChooser fc, SCXMLGraphEditor editor) throws Exception {
 		FileFilter ff = fc.getFileFilter();
 		String fileName=fc.getSelectedFile().getAbsolutePath();
 		mxGraphComponent graphComponent = editor.getGraphComponent();
@@ -103,7 +103,7 @@ public class ImportExportPicker {
 		}
 	}
 
-	public void write(JFileChooser fc, SCXMLGraphEditor editor) throws IOException {
+	public void write(JFileChooser fc, SCXMLGraphEditor editor) throws Exception {
 		String filename;
 		FileFilter selectedFilter;
 		mxGraphComponent graphComponent = editor.getGraphComponent();

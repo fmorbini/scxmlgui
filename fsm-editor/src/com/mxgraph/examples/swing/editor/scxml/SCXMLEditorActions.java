@@ -1619,10 +1619,12 @@ public class SCXMLEditorActions
 								editor.undoManager.clear();
 								editor.undoManager.resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
-							}
-							catch (IOException e1)
-							{
-								e1.printStackTrace();
+							} catch (Exception ex) {
+								//ex.printStackTrace();
+								JOptionPane.showMessageDialog(editor.getGraphComponent(),
+										ex.toString(),
+										mxResources.get("error"),
+										JOptionPane.ERROR_MESSAGE);
 							}
 
 						}

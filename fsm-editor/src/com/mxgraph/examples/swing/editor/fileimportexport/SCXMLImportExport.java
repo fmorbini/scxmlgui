@@ -272,7 +272,7 @@ public class SCXMLImportExport implements IImportExport {
 		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
 	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent) throws Exception {
 		SCXMLGraphComponent gc=(SCXMLGraphComponent)graphComponent;
 		// clean importer data-structures
 		internalID2cell.clear();
@@ -422,7 +422,7 @@ public class SCXMLImportExport implements IImportExport {
 	}
 
 	@Override
-	public void write(mxGraphComponent from, String into) throws IOException {
+	public void write(mxGraphComponent from, String into) throws Exception {
 		// find the starting point: root. as the last descendant from the root of the model (single line descendant) and the first with a value that is an SCXMLNode.
 		// for root: get datamodel and write that
 		// for any state/node: check that there is a children marked as initial, see if it has oninitialentry data. if yes add an initial node, otherwise add an initial attribute.
