@@ -21,7 +21,7 @@ public class MXEImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent) throws Exception {
 		Document document = mxUtils.parse(mxUtils.readFile(from));
 		mxCodec codec = new mxCodec(document);
 		codec.decode(document.getDocumentElement(),graphComponent.getGraph().getModel());

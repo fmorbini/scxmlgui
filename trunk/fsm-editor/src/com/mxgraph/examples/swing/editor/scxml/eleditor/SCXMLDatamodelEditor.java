@@ -32,7 +32,7 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
     private SCXMLNode root;
 	private JTabbedPane tabbedPane;
     
-    public SCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode r) {
+    public SCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode r) throws Exception {
     	super(editor);
         setTitle("SCXML datamodel editor");
 
@@ -82,8 +82,13 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
      */
     public static void createAndShowSCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode root, Point pos) {
         //Create and set up the window.
-        final SCXMLDatamodelEditor frame = new SCXMLDatamodelEditor(editor,root);
-        frame.showSCXMLElementEditor(pos);
+        SCXMLDatamodelEditor frame;
+		try {
+			frame = new SCXMLDatamodelEditor(editor,root);
+	        frame.showSCXMLElementEditor(pos);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 }
 
