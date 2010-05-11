@@ -1,6 +1,7 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,7 +18,8 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
-import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxCellState;
@@ -242,6 +244,117 @@ public class SCXMLGraph extends mxGraph
 		}
 
 		return clones;
+	}
+	@Override
+	public void cellsRemoved(Object[] cells)
+	{
+		if (cells != null && cells.length > 0)
+		{
+			double scale = view.getScale();
+			mxPoint tr = view.getTranslate();
+
+			model.beginUpdate();
+			try
+			{
+				Collection<Object> cellSet = new HashSet<Object>();
+				cellSet.addAll(Arrays.asList(cells));
+				for (int i = 0; i < cells.length; i++)
+				{
+					mxCell cell=(mxCell) cells[i];
+					// Disconnects edges which are not in cells
+					Object[] edges = getConnections(cell);
+
+					for (int j = 0; j < edges.length; j++)
+					{
+						if (!cellSet.contains(edges[j]))
+						{
+							mxGeometry geo = model.getGeometry(edges[j]);
+
+							if (geo != null)
+							{
+								mxCellState state = view.getState(edges[j]);
+
+								if (state != null)
+								{
+									geo = (mxGeometry) geo.clone();
+									boolean source = view.getVisibleTerminal(
+											edges[j], true) == cell;
+									int n = (source) ? 0 : state
+											.getAbsolutePointCount() - 1;
+									mxPoint pt = state.getAbsolutePoint(n);
+
+									geo.setTerminalPoint(new mxPoint(pt.getX()
+											/ scale - tr.getX(), pt.getY()
+											/ scale - tr.getY()), source);
+									model.setTerminal(edges[j], null, source);
+									model.setGeometry(edges[j], geo);
+								}
+							}
+						}
+					}
+					model.remove(cell);
+					if (cell.isEdge()) {
+						// check if this edge has a source with other outgoing edges and
+						// the source is not going to be deleted. In that case reorder the
+						// remaining outgoing edges closing the potential hole that
+						// removing this edge may be causing.
+						mxCell source=(mxCell) cell.getSource();						
+						if (!cellSet.contains(source) && getAllOutgoingEdges(source).length>0) {
+							reOrderOutgoingEdges(source);
+						}
+					}				}
+
+				fireEvent(new mxEventObject(mxEvent.CELLS_REMOVED, "cells",
+						cells));
+			}
+			finally
+			{
+				model.endUpdate();
+			}
+		}
+	}
+	public void reOrderOutgoingEdges(mxCell source) {
+		HashMap<Integer,ArrayList<SCXMLEdge>> pos=new HashMap<Integer, ArrayList<SCXMLEdge>>();
+		int min=0,max=0;
+		for(Object s:getAllOutgoingEdges(source)) {
+			mxCell c=(mxCell) s;
+			SCXMLEdge v = (SCXMLEdge) c.getValue();
+			int o=v.getOrder();
+			ArrayList<SCXMLEdge> l = pos.get(o);
+			if (l==null) pos.put(o, l=new ArrayList<SCXMLEdge>());
+			l.add(v);
+			if (o<min) min=o;
+			if (o>max) max=o;			
+		}
+		int neworder=0;
+		for(int i=min;i<=max;i++) {
+			if (pos.containsKey(i)) {
+				for (SCXMLEdge e:pos.get(i)) {
+					e.setOrder(neworder++);
+				}
+			}
+		}
+	}
+	@Override
+	public Object connectCell(Object edge, Object terminal, boolean source)
+	{
+		model.beginUpdate();
+		try
+		{			
+			Object previous = model.getTerminal(edge, source);			
+			cellConnected(edge, terminal, source);
+			fireEvent(new mxEventObject(mxEvent.CONNECT_CELL, "edge", edge,
+					"terminal", terminal, "source", source, "previous",
+					previous));
+			reOrderOutgoingEdges((mxCell) previous);
+			reOrderOutgoingEdges((mxCell) terminal);
+		}
+		finally
+		{
+			model.endUpdate();
+		}
+
+		return edge;
 	}
 	public void setEditor(SCXMLEditor editor) {
 		this.editor=editor;

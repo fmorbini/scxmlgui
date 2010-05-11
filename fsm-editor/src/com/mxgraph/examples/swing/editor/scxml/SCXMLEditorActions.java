@@ -20,9 +20,9 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -1356,13 +1356,19 @@ public class SCXMLEditorActions
 
 			if (editor != null)
 			{
+				Collection<Object> modifiedObjects;
 				if (undo)
 				{
-					editor.getUndoManager().undo();
+					modifiedObjects=editor.getUndoManager().undo();
 				}
 				else
 				{
-					editor.getUndoManager().redo();
+					modifiedObjects=editor.getUndoManager().redo();
+				}
+				for (Object o:modifiedObjects) {
+					if ((o instanceof mxCell) && ((mxCell)o).isEdge()) {
+						editor.getGraphComponent().getGraph().reOrderOutgoingEdges((mxCell) ((mxCell)o).getSource());
+					}
 				}
 				editor.updateUndoRedoActionState();
 			}
@@ -1516,7 +1522,8 @@ public class SCXMLEditorActions
 					mxCell root = new mxCell();
 					root.insert(new mxCell());
 					graph.getModel().setRoot(root);
-					
+					graph.setDefaultParent(null);
+
 					SCXMLNode value=(SCXMLNode)editor.getCurrentFileIO().buildNodeValue();
 					((SCXMLImportExport)editor.getCurrentFileIO()).setRoot(value);
 					value.setID(SCXMLNode.ROOTID);
@@ -1620,7 +1627,7 @@ public class SCXMLEditorActions
 								editor.undoManager.resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
 							} catch (Exception ex) {
-								//ex.printStackTrace();
+								ex.printStackTrace();
 								JOptionPane.showMessageDialog(editor.getGraphComponent(),
 										ex.toString(),
 										mxResources.get("error"),

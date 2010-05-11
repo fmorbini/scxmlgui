@@ -5,7 +5,12 @@
 package com.mxgraph.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+
+import com.mxgraph.model.mxGraphModel.mxChildChange;
+import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
 /**
  * Implements an undo history.
@@ -90,12 +95,19 @@ public class mxUndoManager extends mxEventSource
 	/**
 	 * Undoes the last change.
 	 */
-	public void undo()
+	public Collection<Object> undo()
 	{
+		HashSet<Object> modifiedObjects=new HashSet<Object>();
 		while (indexOfNextAdd > 0)
 		{
 			mxUndoableEdit edit = history.get(--indexOfNextAdd);
 			edit.undo();
+			for (mxUndoableChange c:edit.getChanges()) {
+				if (c instanceof mxChildChange) {
+					Object o = ((mxChildChange) c).getChild();
+					if (o!=null) modifiedObjects.add(o);
+				}
+			}
 
 			if (edit.isSignificant())
 			{
@@ -103,6 +115,7 @@ public class mxUndoManager extends mxEventSource
 				break;
 			}
 		}
+		return modifiedObjects;
 	}
 
 	/**
@@ -116,21 +129,29 @@ public class mxUndoManager extends mxEventSource
 	/**
 	 * Redoes the last change.
 	 */
-	public void redo()
+	public Collection<Object> redo()
 	{
+		HashSet<Object> modifiedObjects=new HashSet<Object>();
 		int n = history.size();
 
 		while (indexOfNextAdd < n)
 		{
 			mxUndoableEdit edit = history.get(indexOfNextAdd++);
 			edit.redo();
-
+			for (mxUndoableChange c:edit.getChanges()) {
+				if (c instanceof mxChildChange) {
+					Object o = ((mxChildChange) c).getChild();
+					if (o!=null) modifiedObjects.add(o);
+				}
+			}
+			
 			if (edit.isSignificant())
 			{
 				fireEvent(new mxEventObject(mxEvent.REDO, "edit", edit));
 				break;
 			}
 		}
+		return modifiedObjects;
 	}
 
 	/**
