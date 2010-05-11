@@ -177,6 +177,8 @@ public class mxSubHandler extends mxMouseControl
 	{
 		if (graphComponent.isEnabled() && isEnabled())
 		{
+			//System.out.println("mouse moved in mxSubHandler");
+			
 			Iterator<mxCellHandler> it = handlers.values().iterator();
 
 			while (it.hasNext() && !e.isConsumed())

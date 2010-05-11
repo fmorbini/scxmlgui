@@ -293,11 +293,16 @@ public class SCXMLImportExport implements IImportExport {
 		mxCell gr = new mxCell();
 		gr.insert(new mxCell());
 		graph.getModel().setRoot(gr);
+		graph.setDefaultParent(null);
 
 		populateGraph(graph);
 		// set the SCXML (this.root) mxCell as not deletable.
 		gr=internalID2cell.get(root.getInternalID());
 		graph.setCellAsDeletable(gr, false);
+
+		// apply layout to each cluster from the leaves up:
+		mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+		clusterLayout.execute(graph.getDefaultParent());
 		graph.setDefaultParent(gr);
 	}
 
@@ -347,9 +352,6 @@ public class SCXMLImportExport implements IImportExport {
 		} finally {
 			model.endUpdate();
 		}
-		// apply layout to each cluster from the leaves up:
-		mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-		clusterLayout.execute(graph.getDefaultParent());
 	}
 	
 	private mxCell addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge) {

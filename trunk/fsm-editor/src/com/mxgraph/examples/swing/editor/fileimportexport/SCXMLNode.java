@@ -44,7 +44,7 @@ public class SCXMLNode implements Serializable {
 	public static final String INITIALFILLCOLOR="#cffc87";
 	public static final String FINALSTROKECOLOR="#FF0000";
 	public static final String CLUSTERSHAPE="swimlane";
-
+	
 	public static final String DATAMODELUNDO="DMundo";
 	public static final String DATAMODELDOC="DMdoc";
 	
@@ -343,13 +343,31 @@ public class SCXMLNode implements Serializable {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
 		return (sh==null)?null:sh.get("strokeColor");
 	}
+	public void setStrokeWidth(String w) {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		if (sh==null) {
+			node.put(STYLE,sh=new HashMap<String, String>());
+		}
+		if (w==null)
+			sh.remove("strokeWidth");
+		else
+			sh.put("strokeWidth",w);
+	}
+	public String getStrokeWidth() {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		return (sh==null)?null:sh.get("strokeWidth");
+	}
 	public String getStyle() {
 		HashMap<String, String> sh = (HashMap<String, String>)node.get(STYLE);
 		String ret=sh.get("root")+";";
+		boolean outSourced=isOutsourcedNode();
 		for (String k:sh.keySet()) {
-			if (!k.equals("root"))
-				ret+=k+"="+sh.get(k)+";";
+			if (!k.equals("root")) {
+				if (!outSourced || (!k.equals("strokeWidth") && !k.equals("dashed")))
+					ret+=k+"="+sh.get(k)+";";
+			}
 		}
+		if (outSourced) ret+="strokeWidth=3;dashed=1;";
 		return ret;
 	}
 	// getter and setter for document and undomanager for the datamodel editor
@@ -465,6 +483,12 @@ public class SCXMLNode implements Serializable {
 		n.setOnExit(getOnExit());
 		n.setSCXMLIDDoc(null);
 		n.setSCXMLIDUndoManager(null);
+		n.setSRC(getSRC());
+		n.setSRCDoc(null);
+		n.setSRCUndoManager(null);
+		n.setNAMESPACE(getNAMESPACE());
+		n.setNAMESPACEDoc(null);
+		n.setNAMESPACEUndoManager(null);
 		n.setID(getID());
 		return n;
 	}

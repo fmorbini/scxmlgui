@@ -802,50 +802,11 @@ public class mxEdgeHandler extends mxCellHandler
 	 * 
 	 */
 	public void paint(Graphics g)
-	{/*
-		HashMap<String,Object> pp=new HashMap<String,Object>();
-		pp.put("endArrow","classic");
-		pp.put("shape","connector");
-		pp.put("fontColor","#446299");
-		pp.put("strokeColor","#6482B9");
-		pp.put("align","center");
-		pp.put("labelBackgroundColor","#6482B9");
-		pp.put("verticalAlign", "middle");/*
-		graphComponent.getCanvas().drawLabel("aaaaaaaasssssssssssssssssssss", 0, 0, 100, 100, pp, false);
-		g.drawString("aaaaaaaaaaaaaaaaaaaaaaaaa", 100, 100);
-		mxGraph graph = graphComponent.getGraph();
-		graph.drawStateWithLabel(graphComponent.getCanvas(), getState(), "aaaaaaaaaaaaaaaaaaa");
-		//mxCell d = (mxCell)state.getCell();
-		//graphComponent.startEditingAtCell(d);
-*/
+	{
 		Graphics2D g2 = (Graphics2D) g;
 
-		mxCell d = (mxCell)(state.getCell());
-		
 		graphComponent.getCanvas().setGraphics(g2);
 		
-		//graphComponent.redraw(state);
-		
-		mxGraph graph = graphComponent.getGraph();
-		Map<String,Object> tmp=new HashMap<String, Object>();
-		Map<String,Object> pp=getState().getStyle();
-		for (String k:pp.keySet())
-			tmp.put(k,pp.get(k));
-		//pp.put("textOpacity", 0);
-		tmp.put("labelBackgroundColor","#6482B9");
-		mxCellState newstate = (mxCellState) state.clone();
-		newstate.setStyle(tmp);
-		String label="11111111111111111111111111";
-		newstate.setLabelBounds(mxUtils.getLabelPaintBounds(label, pp,
-				graph.isHtmlLabel(d), newstate.getAbsoluteOffset(),
-				null, graph.getView().getScale()));
-		
-		//graph.drawStateWithLabel(graphComponent.getCanvas(), newstate, label);
-		/*System.out.println(state.getBoundingBox().getX());
-		System.out.println(state.getBoundingBox().getY());
-		System.out.println(state.getBoundingBox().getWidth());
-		System.out.println(state.getBoundingBox().getHeight());*/
-
 		Stroke stroke = g2.getStroke();
 		g2.setStroke(getSelectionStroke());
 		g.setColor(getSelectionColor());

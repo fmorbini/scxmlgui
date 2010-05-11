@@ -728,6 +728,7 @@ public class mxConnectionHandler extends mxMouseControl
 	{
 		if (!e.isConsumed() && graphComponent.isEnabled() && isEnabled())
 		{
+			//System.out.println("mouse moved in mxConnectionHandler");
 			source = marker.process(e);
 
 			if (isHighlighting() && !marker.hasValidState())

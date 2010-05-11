@@ -2610,12 +2610,13 @@ public class mxGraph extends mxEventSource
 			model.beginUpdate();
 			try
 			{
+				Collection<Object> cellSet = new HashSet<Object>();
+				cellSet.addAll(Arrays.asList(cells));
 				for (int i = 0; i < cells.length; i++)
 				{
+					mxCell cell=(mxCell) cells[i];
 					// Disconnects edges which are not in cells
-					Collection<Object> cellSet = new HashSet<Object>();
-					cellSet.addAll(Arrays.asList(cells));
-					Object[] edges = getConnections(cells[i]);
+					Object[] edges = getConnections(cell);
 
 					for (int j = 0; j < edges.length; j++)
 					{
@@ -2631,7 +2632,7 @@ public class mxGraph extends mxEventSource
 								{
 									geo = (mxGeometry) geo.clone();
 									boolean source = view.getVisibleTerminal(
-											edges[j], true) == cells[i];
+											edges[j], true) == cell;
 									int n = (source) ? 0 : state
 											.getAbsolutePointCount() - 1;
 									mxPoint pt = state.getAbsolutePoint(n);
@@ -2645,8 +2646,7 @@ public class mxGraph extends mxEventSource
 							}
 						}
 					}
-
-					model.remove(cells[i]);
+					model.remove(cell);
 				}
 
 				fireEvent(new mxEventObject(mxEvent.CELLS_REMOVED, "cells",
