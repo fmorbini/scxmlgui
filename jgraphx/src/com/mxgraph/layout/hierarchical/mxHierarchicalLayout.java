@@ -7,6 +7,7 @@ package com.mxgraph.layout.hierarchical;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -184,6 +185,8 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 	{
 		roots = graph.findTreeRootsForEachConnectedComponent(parent,true,false);
 		this.roots = roots;
+		//System.out.println("roots found for parent: "+((mxCell)parent).getValue());
+		//for(Object r:roots) System.out.println("root: "+((mxCell)r).getValue());
 		mxIGraphModel model = graph.getModel();
 
 		model.beginUpdate();
@@ -234,7 +237,7 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 			// sets
 			boolean newHierarchy = true;
 			Iterator<Set<Object>> iter = hierarchyVertices.iterator();
-
+			//System.out.println("processing root: "+((mxCell)roots[i]).getValue());
 			while (newHierarchy && iter.hasNext())
 			{
 				if (iter.next().contains(roots[i]))
@@ -259,7 +262,7 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 				}
 
 				Set<Object> vertexSet = new HashSet<Object>();
-
+				HashMap<Object,HashSet<Object>> descendants4cell=new HashMap<Object, HashSet<Object>>();
 				while (!cellsStack.isEmpty())
 				{
 					Object cell = cellsStack.pop();
@@ -273,22 +276,32 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 							edgeSet.addAll(Arrays.asList(graph
 									.getIncomingEdges(cell, parent)));
 						}
-
-						Object[] conns = graph.getConnections(cell, parent);
-						Object[] cells = graph.getOpposites(conns, cell);
+						HashSet<Object> descendants = new HashSet<Object>();
+						Object[] conns = graph.getEdgesForSwimlane(cell, parent, true,true,true,descendants);						
+						Object[] cells = graph.getTerminalsOutsideSet(conns, descendants);
 
 						for (int j = 0; j < cells.length; j++)
 						{
-							if (!vertexSet.contains(cells[j]))
+							//System.out.println("  considering this cell: "+((mxCell)cells[j]).getValue());
+							HashSet<Object> oppositeDescendants=descendants4cell.get(cell);
+							if (!vertexSet.contains(cells[j]) && ((oppositeDescendants==null) || !oppositeDescendants.contains(cells[j])))
 							{
+								//System.out.println("   adding this cell: "+((mxCell)cells[j]).getValue());
 								cellsStack.push(cells[j]);
+								descendants4cell.put(cells[j], descendants);
 							}
 						}
 					}
 				}
 
 				hierarchyVertices.add(vertexSet);
-
+				//for(Object v:vertexSet){
+				//	System.out.println("  vertex: "+((mxCell)v).getValue());
+				//}
+				//if (edgeSet!=null)
+				//for(Object e:edgeSet){
+				//	System.out.println("  edge: "+((mxCell)e).getValue());
+				//}
 				if (fixRoots)
 				{
 					affectedEdges.add(edgeSet);
@@ -301,13 +314,13 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 		double initialX = 0;
 		Iterator<Set<Object>> iter = hierarchyVertices.iterator();
 		int i = 0;
-
+		
 		while (iter.hasNext())
 		{
 			Set<Object> vertexSet = iter.next();
-
-			model = new mxGraphHierarchyModel(this, vertexSet.toArray(), Arrays
-					.asList(roots), parent, false, deterministic,
+			
+			ArrayList<Object> rootsList=new ArrayList<Object>(Arrays.asList(roots));
+			model = new mxGraphHierarchyModel(this, vertexSet.toArray(), rootsList, parent, false, deterministic,
 					layoutFromSinks);
 
 			cycleStage(parent);

@@ -24,7 +24,7 @@ public class mxGraphHierarchyNode extends mxGraphAbstractHierarchyCell
 	/**
 	 * Shared empty connection map to return instead of null in applyMap.
 	 */
-	public static Collection<mxGraphHierarchyEdge> emptyConnectionMap = new ArrayList<mxGraphHierarchyEdge>(0);
+	//public static Collection<mxGraphHierarchyEdge> emptyConnectionMap = new ArrayList<mxGraphHierarchyEdge>(0);
 
 	/**
 	 * The graph cell this object represents.
@@ -34,12 +34,12 @@ public class mxGraphHierarchyNode extends mxGraphAbstractHierarchyCell
 	/**
 	 * Collection of hierarchy edges that have this node as a target
 	 */
-	public Collection<mxGraphHierarchyEdge> connectsAsTarget = emptyConnectionMap;
+	public Collection<mxGraphHierarchyEdge> connectsAsTarget = new ArrayList<mxGraphHierarchyEdge>(0);
 
 	/**
 	 * Collection of hierarchy edges that have this node as a source
 	 */
-	public Collection<mxGraphHierarchyEdge> connectsAsSource = emptyConnectionMap;
+	public Collection<mxGraphHierarchyEdge> connectsAsSource = new ArrayList<mxGraphHierarchyEdge>(0);
 
 	/**
 	 * Assigns a unique hashcode for each node. Used by the model dfs instead

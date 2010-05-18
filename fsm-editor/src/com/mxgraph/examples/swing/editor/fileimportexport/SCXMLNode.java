@@ -15,10 +15,10 @@ import com.mxgraph.model.mxGeometry;
 public class SCXMLNode implements Serializable {
 	private static final long serialVersionUID = -2136349535452806563L;
 
-	public static final String GEOX="geomtryX";
-	public static final String GEOY="geomtryY";
-	public static final String GEOW="geomtryW";
-	public static final String GEOH="geomtryH";
+	public static final String GEOX="geometryX";
+	public static final String GEOY="geometryY";
+	public static final String GEOW="geometryW";
+	public static final String GEOH="geometryH";
 	
 	public static final String INTERNALID="internalID";
 	public static final String ID="id";

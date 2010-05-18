@@ -13,6 +13,7 @@ package com.mxgraph.layout.hierarchical.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -314,62 +315,33 @@ public class mxGraphHierarchyModel
 			vertexMapper.put(vertices[i], internalVertices[i]);
 
 			// If the layout is deterministic, order the cells
-			Object[] conns = graph.getConnections(vertices[i], parent);
-			List<Object> outgoingCells = Arrays.asList(graph.getOpposites(
-					conns, vertices[i]));
-			internalVertices[i].connectsAsSource = new LinkedHashSet<mxGraphHierarchyEdge>(
-					outgoingCells.size());
+			HashSet<Object> descendants = new HashSet<Object>();
+			Object[] conns = graph.getEdgesForSwimlane(vertices[i], parent, false,true,false,descendants);
+			
+			HashMap<Object,ArrayList<Object>> outgoingEdgesToSameTarget =new HashMap<Object,ArrayList<Object>>();
+			for (Object edge:conns) {
+				Object otherSide=graph.getTerminalOutsideSet(edge, descendants);
+				ArrayList<Object> list = outgoingEdgesToSameTarget.get(otherSide);
+				if (list==null) outgoingEdgesToSameTarget.put(otherSide,list=new ArrayList<Object>());
+				list.add(edge);
+			}
+			for(Object target:outgoingEdgesToSameTarget.keySet()) {
+				ArrayList<Object> list = outgoingEdgesToSameTarget.get(target);
+				mxGraphHierarchyEdge internalEdge = new mxGraphHierarchyEdge(list);
+				for (Object edge:list) {
+					edgeMapper.put(edge, internalEdge);
 
-			// Create internal edges, but don't do any rank assignment yet
-			// First use the information from the greedy cycle remover to
-			// invert the leftward edges internally
-			Iterator<Object> iter = outgoingCells.iterator();
+					// Resets all point on the edge and disables the edge style
+					// without deleting it from the cell style
+					graph.resetEdge(edge);
 
-			while (iter.hasNext())
-			{
-				// Don't add self-loops
-				Object cell = iter.next();
-
-				if (cell != vertices[i] && graph.getModel().isVertex(cell)
-						&& !layout.isVertexIgnored(cell))
-				{
-					// Allow for parallel edges
-					Object[] edges = graph.getEdgesBetween(vertices[i], cell,
-							true);
-
-					if (edges != null && edges.length > 0)
+					if (layout.isDisableEdgeStyle())
 					{
-						ArrayList<Object> listEdges = new ArrayList<Object>(
-								edges.length);
-
-						for (int j = 0; j < edges.length; j++)
-						{
-							listEdges.add(edges[j]);
-						}
-
-						mxGraphHierarchyEdge internalEdge = new mxGraphHierarchyEdge(
-								listEdges);
-						Iterator<Object> iter2 = listEdges.iterator();
-
-						while (iter2.hasNext())
-						{
-							Object edge = iter2.next();
-							edgeMapper.put(edge, internalEdge);
-
-							// Resets all point on the edge and disables the edge style
-							// without deleting it from the cell style
-							graph.resetEdge(edge);
-
-							if (layout.isDisableEdgeStyle())
-							{
-								layout.setEdgeStyleEnabled(edge, false);
-							}
-						}
-
-						internalEdge.source = internalVertices[i];
-						internalVertices[i].connectsAsSource.add(internalEdge);
+						layout.setEdgeStyleEnabled(edge, false);
 					}
 				}
+				internalEdge.source = internalVertices[i];
+				internalVertices[i].connectsAsSource.add(internalEdge);
 			}
 
 			// Ensure temp variable is cleared from any previous use

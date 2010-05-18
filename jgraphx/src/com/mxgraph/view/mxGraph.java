@@ -6480,21 +6480,107 @@ public class mxGraph extends mxEventSource
 		while (it.hasNext())
 		{
 			Object edge = it.next();
-			Object source = view.getVisibleTerminal(edge, true);
-			Object target = view.getVisibleTerminal(edge, false);
-
-			if (((source == target) && includeLoops) ||
-				((source != target) &&
-				 (incoming && (target == cell) && ((parent == null) || (model.getParent(source) == parent))) ||
-				 (outgoing && (source == cell) && ((parent == null) || (model.getParent(target) == parent)))))
-			{
+			if (doesEdgeSatisfyFilter(edge,cell,parent,incoming, outgoing, includeLoops)) {
 				result.add(edge);
 			}
 		}
 
 		return result.toArray();
 	}
+	public Object[] getEdgesForSwimlane(Object cell, Object parent, boolean incoming,boolean outgoing, boolean includeLoops,Set<Object> descendants) {
+		// get loops on cell if includeLoops is true
+		// get all incoming edges to cell if incoming is true
+		// get all outgoing edges from cell if outgoing is true
+		// if incoming || outgoing is true
+		//  find all descendants of cell
+		//  for each of them get the incoming edges (if incoming is true)
+		//   for each edge, if it comes NOT from a descendant, include it
+		//  get all outgoing edges (if outgoing is true)
+		//   for each edge, if it goes NOT to a descendant, include it
+		HashSet<Object> result = new HashSet<Object>();
 
+		for (Object edge:mxGraphModel.getEdges(model,cell,incoming, outgoing, includeLoops))
+			if (doesEdgeSatisfyFilter(edge,cell,parent,incoming, outgoing, includeLoops)) {
+				result.add(edge);
+			}
+		
+		if (incoming || outgoing) {
+			getAllDescendants(cell,descendants);
+
+			for (Object d:descendants) {
+				for (Object edge:mxGraphModel.getEdges(model,d,incoming, outgoing, false)) {
+					Object source = view.getVisibleTerminal(edge, true);
+					Object target = view.getVisibleTerminal(edge, false);
+					if (incoming && (target == d) && !descendants.contains(source) && ((parent==null) || hasThisAsAntecedent(source, parent)))
+						result.add(edge);
+					else if (outgoing && (source == d) && !descendants.contains(target) && ((parent==null) || hasThisAsAntecedent(target, parent)))
+						result.add(edge);
+				}
+			}
+		}
+		//System.out.println("edges found: "+result);
+		return result.toArray();
+	}
+	
+	
+	public boolean doesEdgeSatisfyFilter(Object edge,Object cell,Object parent,boolean incoming,boolean outgoing, boolean includeLoops) {
+		Object source = view.getVisibleTerminal(edge, true);
+		Object target = view.getVisibleTerminal(edge, false);
+
+		return (((source == target) && includeLoops) ||
+				((source != target) &&
+				 ((incoming && (target == cell) && ((parent == null) || hasThisAsAntecedent(source,parent))) ||
+				  (outgoing && (source == cell) && ((parent == null) || hasThisAsAntecedent(target,parent))))));
+	}
+	
+	public void getAllDescendants(Object cell,Set<Object> set) {
+		set.add(cell);
+		if (isSwimlane(cell)) {
+			int nc=model.getChildCount(cell);
+			for (int i=0;i<nc;i++) {
+				Object child=model.getChildAt(cell, i);
+				getAllDescendants(child,set);
+			}
+		}
+	}
+	
+	public boolean hasThisAsAntecedent(Object des,Object ant) {
+		Object parent=des;
+		if (ant==des) return true;
+		while ((parent=model.getParent(parent))!=null) {
+			if (parent==ant) return true;
+		}
+		return false;
+	}
+	
+	public Object[] getTerminalsOutsideSet(Object[] edges, Set<Object> set) {
+		Collection<Object> terminals = new LinkedHashSet<Object>();
+
+		if (edges != null)
+		{
+			for (int i = 0; i < edges.length; i++)
+			{
+				Object term=getTerminalOutsideSet(edges[i], set);
+				if (term!=null) terminals.add(term);
+			}
+		}
+		return terminals.toArray();
+	}
+	
+	public Object getTerminalOutsideSet(Object edge, Set<Object> set) {
+		Object source = view.getVisibleTerminal(edge, true);
+		Object target = view.getVisibleTerminal(edge, false);
+		
+		boolean sourceInSet=(source!=null) && (set.contains(source));
+		boolean targetInSet=(target!=null) && (set.contains(target));
+
+		if (!sourceInSet && (source!=null) && (target!=null) && targetInSet)
+			return source;
+		else if (!targetInSet && (source!=null) && (target!=null) && sourceInSet)
+			return target;
+		else return null;
+	}
+	
 	/**
 	 * Returns all distinct visible opposite cells of the terminal on the given
 	 * edges.
@@ -6686,7 +6772,7 @@ public class mxGraph extends mxEventSource
 	}
 
 	public Object[] findTreeRootsForEachConnectedComponent(Object parent, boolean isolate, boolean invert) {
-		List<Set<Object>> cc = this.connectedComponents(parent,isolate);
+		List<Set<Object>> cc = connectedComponents(parent,isolate);
 		List<Object> ret=new ArrayList<Object>();
 		for(Set<Object> s:cc) {
 			ret.addAll(findTreeRootsInSet(s,parent,invert));
@@ -6823,11 +6909,19 @@ public class mxGraph extends mxEventSource
 		HashMap<Object,Integer> components=new HashMap<Object, Integer>();
 		int currentComponent=0; 
 		Stack<Object> cells=new Stack<Object>();
+		ArrayList<Object> sortedChildren=new ArrayList<Object>();
+		ArrayList<Object> normalChildren=new ArrayList<Object>();
 				
 		int childCount = model.getChildCount(parent);
 		for (int i = 0; i < childCount; i++)
 		{
 			Object childCell = model.getChildAt(parent, i);
+			if (isSwimlane(childCell)) sortedChildren.add(childCell);
+			else normalChildren.add(childCell);
+		}
+		sortedChildren.addAll(normalChildren);
+		
+		for (Object childCell:sortedChildren) {
 			cells.push(childCell);
 			boolean added=false;
 			while (!cells.isEmpty()) {
@@ -6837,11 +6931,22 @@ public class mxGraph extends mxEventSource
 					{
 						added = true;
 						components.put(cell, currentComponent);
+						// add all nodes connected to cell
 						Object[] conns = getConnections(cell, (isolate) ? parent : null);
 						for (int j = 0; j < conns.length; j++)
 						{
 							Object connCell = view.getOppositeVisibleTerminal(conns[j], cell);
 							cells.push(connCell);
+						}
+						// if cell has children nodes, then add also those.
+						int cellChildCount;
+						if (isSwimlane(cell) && ((cellChildCount = model.getChildCount(cell))>0)) {
+							for (int j=0;j<cellChildCount;j++) {
+								mxCell child=(mxCell) model.getChildAt(cell, j);
+								if (child.isVertex() && child.isVisible()) {
+									cells.push(child);
+								}
+							}
 						}
 					}
 				}
@@ -6854,7 +6959,8 @@ public class mxGraph extends mxEventSource
 		}
 		for(Object v:components.keySet()) {
 			int i=components.get(v);
-			verticesInComponents[i].add(v);
+			if (model.getParent(v)==parent)
+				verticesInComponents[i].add(v);
 		}
 		ArrayList<Set<Object>> listVerticesInComponents = new ArrayList<Set<Object>>();
 		for (int i=0;i<currentComponent;i++) {
