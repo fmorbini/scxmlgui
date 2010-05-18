@@ -20,6 +20,7 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -845,12 +846,20 @@ public class SCXMLEditorActions
 					{
 						lastDir = fc.getSelectedFile().getParent();
 					}
+				} else {
+					File file = editor.getCurrentFile();
+					Long newDate = file.lastModified();
+					Long prevDate=editor.getLastModifiedDate();
+					if ((prevDate!=null) && (newDate>prevDate) && (JOptionPane.showConfirmDialog(editor, mxResources.get("fileModified")) != JOptionPane.YES_OPTION)) {
+						return;
+					}
 				}
 
 				try
 				{
 					fileIO.write(fc,editor);
 					editor.undoManager.resetUnmodifiedState();
+					editor.setLastModifiedDate();
 				}
 				catch (Throwable ex)
 				{

@@ -109,6 +109,7 @@ public class SCXMLGraphEditor extends JPanel
 	 */
 	protected File currentFile;
 	protected IImportExport currentFileIOMethod;
+	protected Long lastModifiedDate;
 
 	/**
 	 * 
@@ -507,6 +508,16 @@ public class SCXMLGraphEditor extends JPanel
 		{
 			updateTitle();
 		}
+		setLastModifiedDate();
+	}
+	
+	public void setLastModifiedDate() {
+		File file=getCurrentFile();
+		if (file!=null) lastModifiedDate=file.lastModified();
+		else lastModifiedDate=null;
+	}
+	public Long getLastModifiedDate() {
+		return lastModifiedDate;
 	}
 
 	/**
