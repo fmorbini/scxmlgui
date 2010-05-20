@@ -197,7 +197,6 @@ public class SCXMLImportExport implements IImportExport {
 						if ((c.getNodeType()==Node.ELEMENT_NODE) &&
 								c.getNodeName().toLowerCase().equals("transition")) {
 							HashMap<String, String> edgeContent = processEdge(pn,c);
-							assert(!(edgeContent.containsKey(SCXMLEdge.EVENT) || edgeContent.containsKey(SCXMLEdge.CONDITION)) && edgeContent.containsKey(SCXMLEdge.EDGEEXE));
 							pn.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
 							String inName=edgeContent.get(SCXMLEdge.TARGET);
 							if (inName!=null) {
@@ -458,7 +457,7 @@ public class SCXMLImportExport implements IImportExport {
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
 		src=value.getSRC();
-		assert(value==root);
+		assert(!isRoot || (value==root));
 		ID=value.getID();
 		datamodel=value.getDataModel();
 		if (value.isFinal()) donedata=value.getDoneData();

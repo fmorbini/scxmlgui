@@ -13,6 +13,7 @@ package com.mxgraph.layout.hierarchical.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -34,12 +35,12 @@ public class mxGraphHierarchyNode extends mxGraphAbstractHierarchyCell
 	/**
 	 * Collection of hierarchy edges that have this node as a target
 	 */
-	public Collection<mxGraphHierarchyEdge> connectsAsTarget = new ArrayList<mxGraphHierarchyEdge>(0);
+	public Collection<mxGraphHierarchyEdge> connectsAsTarget = new LinkedHashSet<mxGraphHierarchyEdge>();
 
 	/**
 	 * Collection of hierarchy edges that have this node as a source
 	 */
-	public Collection<mxGraphHierarchyEdge> connectsAsSource = new ArrayList<mxGraphHierarchyEdge>(0);
+	public Collection<mxGraphHierarchyEdge> connectsAsSource = new LinkedHashSet<mxGraphHierarchyEdge>();
 
 	/**
 	 * Assigns a unique hashcode for each node. Used by the model dfs instead
