@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.canvas.mxICanvas;
 import com.mxgraph.canvas.mxImageCanvas;
+import com.mxgraph.layout.hierarchical.model.mxGraphHierarchyNode;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
@@ -6771,13 +6772,17 @@ public class mxGraph extends mxEventSource
 		return findTreeRoots(parent, isolate, false);
 	}
 
-	public Object[] findTreeRootsForEachConnectedComponent(Object parent, boolean isolate, boolean invert) {
+	// returns a map with keys being the roots in the given graph and the value
+	// associated to each of them being the set of immediate children connected
+	// to that root (immediate to parent)
+	public HashMap<Object,Set<Object>> findTreeRootsForEachConnectedComponent(Object parent, boolean isolate, boolean invert) {
 		List<Set<Object>> cc = connectedComponents(parent,isolate);
-		List<Object> ret=new ArrayList<Object>();
+		HashMap<Object,Set<Object>> ret=new HashMap<Object,Set<Object>>();
 		for(Set<Object> s:cc) {
-			ret.addAll(findTreeRootsInSet(s,parent,invert));
+			List<Object> roots = findTreeRootsInSet(s,parent,invert);
+			for (Object r:roots) ret.put(r, s);
 		}
-		return ret.toArray();
+		return ret;
 	}
 	/**
 	 * Returns all visible children in the given parent which do not have
@@ -6863,21 +6868,23 @@ public class mxGraph extends mxEventSource
 		
 		for (Object cell:objects) {
 			if (model.isVertex(cell) && isCellVisible(cell)) {
-				Object[] conns = getConnections(cell, parent);
+								
+				HashSet<Object> descendants=new HashSet<Object>();
+				Object[] conns = getEdgesForSwimlane(cell, parent, true, true, false, descendants);
 				int fanOut = 0;
 				int fanIn = 0;
 
 				for (int j = 0; j < conns.length; j++)
 				{
-					Object src = view.getVisibleTerminal(conns[j], true);
+					Object src = getTerminalOutsideSet(conns[j], descendants);
 
-					if (src == cell)
+					if (((mxCell)conns[j]).getSource()==src)
 					{
-						fanOut++;
+						fanIn++;
 					}
 					else
 					{
-						fanIn++;
+						fanOut++;
 					}
 				}
 
@@ -6909,19 +6916,28 @@ public class mxGraph extends mxEventSource
 		HashMap<Object,Integer> components=new HashMap<Object, Integer>();
 		int currentComponent=0; 
 		Stack<Object> cells=new Stack<Object>();
-		ArrayList<Object> sortedChildren=new ArrayList<Object>();
-		ArrayList<Object> normalChildren=new ArrayList<Object>();
-				
+
+		HashMap<Object,HashSet<Object>> descendants4vertex=new HashMap<Object, HashSet<Object>>();
+		HashMap<Object,Object[]> connections4vertex=new HashMap<Object, Object[]>();
+		HashMap<Object,Object> descendant2ancestor=new HashMap<Object, Object>();
 		int childCount = model.getChildCount(parent);
-		for (int i = 0; i < childCount; i++)
-		{
+		for (int i = 0; i < childCount; i++) {
 			Object childCell = model.getChildAt(parent, i);
-			if (isSwimlane(childCell)) sortedChildren.add(childCell);
-			else normalChildren.add(childCell);
+			if (model.isVertex(childCell)) {
+				HashSet<Object> descendants = new HashSet<Object>();
+				Object[] conns = getEdgesForSwimlane(childCell, parent, true,true,false,descendants);
+				descendants4vertex.put(childCell, descendants);
+				connections4vertex.put(childCell, conns);
+				for (Object d:descendants) {
+					assert(!descendant2ancestor.containsKey(d));
+					descendant2ancestor.put(d, childCell);
+				}
+			}
 		}
-		sortedChildren.addAll(normalChildren);
 		
-		for (Object childCell:sortedChildren) {
+		
+		for (int i = 0; i < childCount; i++) {
+			Object childCell = model.getChildAt(parent, i);
 			cells.push(childCell);
 			boolean added=false;
 			while (!cells.isEmpty()) {
@@ -6932,21 +6948,14 @@ public class mxGraph extends mxEventSource
 						added = true;
 						components.put(cell, currentComponent);
 						// add all nodes connected to cell
-						Object[] conns = getConnections(cell, (isolate) ? parent : null);
+						HashSet<Object> descendants=descendants4vertex.get(cell);
+						Object[] conns = connections4vertex.get(cell);
 						for (int j = 0; j < conns.length; j++)
 						{
-							Object connCell = view.getOppositeVisibleTerminal(conns[j], cell);
+							Object connCell = getTerminalOutsideSet(conns[j], descendants);
+							connCell=descendant2ancestor.get(connCell);
+							assert(connCell!=null);
 							cells.push(connCell);
-						}
-						// if cell has children nodes, then add also those.
-						int cellChildCount;
-						if (isSwimlane(cell) && ((cellChildCount = model.getChildCount(cell))>0)) {
-							for (int j=0;j<cellChildCount;j++) {
-								mxCell child=(mxCell) model.getChildAt(cell, j);
-								if (child.isVertex() && child.isVisible()) {
-									cells.push(child);
-								}
-							}
 						}
 					}
 				}
@@ -6959,7 +6968,7 @@ public class mxGraph extends mxEventSource
 		}
 		for(Object v:components.keySet()) {
 			int i=components.get(v);
-			if (model.getParent(v)==parent)
+			//if (model.getParent(v)==parent)
 				verticesInComponents[i].add(v);
 		}
 		ArrayList<Set<Object>> listVerticesInComponents = new ArrayList<Set<Object>>();

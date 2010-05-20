@@ -172,27 +172,16 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 	 */
 	public void execute(Object parent)
 	{
-		execute(parent, null);
-	}
-
-	/**
-	 * Executes the layout for the children of the specified parent.
-	 * 
-	 * @param parent Parent cell that contains the children to be laid out.
-	 * @param roots the starting roots of the layout
-	 */
-	public void execute(Object parent, Object[] roots)
-	{
-		roots = graph.findTreeRootsForEachConnectedComponent(parent,true,false);
-		this.roots = roots;
 		//System.out.println("roots found for parent: "+((mxCell)parent).getValue());
+		HashMap<Object, Set<Object>> rootsAndChildren = graph.findTreeRootsForEachConnectedComponent(parent,true,false);
+		this.roots = rootsAndChildren.keySet().toArray();
 		//for(Object r:roots) System.out.println("root: "+((mxCell)r).getValue());
-		mxIGraphModel model = graph.getModel();
 
+		mxIGraphModel model = graph.getModel();
 		model.beginUpdate();
 		try
 		{
-			run(graph,parent);
+			run(graph,parent,rootsAndChildren);
 			
 			if (isResizeParent() &&
 				!graph.isCellCollapsed(parent))
@@ -212,8 +201,29 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 	 * and produce a separate description of the vertex position and edge
 	 * routing changes made.
 	 * @param parent 
+	 * @param rootsAndChildren 
 	 */
-	public void run(mxGraph graph, Object parent)
+	public void run(mxGraph graph, Object parent, HashMap<Object, Set<Object>> rootsAndChildren)
+	{
+		// Perform a layout for each seperate hierarchy
+		// Track initial coordinate x-positioning
+		double initialX = 0;
+		
+		for(Object r:rootsAndChildren.keySet()) {
+			Set<Object> vertexSet = rootsAndChildren.get(r);
+			
+			ArrayList<Object> rootsList=new ArrayList<Object>();
+			rootsList.add(r);
+			model = new mxGraphHierarchyModel(this, vertexSet.toArray(), rootsList, parent, false, deterministic,
+					layoutFromSinks);
+
+			cycleStage(parent);
+			layeringStage();
+			crossingStage(parent);
+			initialX = placementStage(initialX, parent);
+		}
+	}
+	public void oldrun(mxGraph graph, Object parent)
 	{
 		// Separate out unconnected hierarchies
 		List<Set<Object>> hierarchyVertices = new ArrayList<Set<Object>>(); //graph.connectedComponents(parent,true);
@@ -232,7 +242,6 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 
 		for (int i = 0; i < roots.length; i++)
 		{
-			//System.out.println("root: "+((mxCell)roots[i]).getValue());
 			// First check if this root appears in any of the previous vertex
 			// sets
 			boolean newHierarchy = true;

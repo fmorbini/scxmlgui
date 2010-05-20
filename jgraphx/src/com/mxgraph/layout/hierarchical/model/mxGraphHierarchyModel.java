@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 
 /**
@@ -123,6 +124,7 @@ public class mxGraphHierarchyModel
 
 		if (ordered)
 		{
+			assert(false);
 			formOrderedHierarchy(layout, vertices, parent);
 		}
 		else
@@ -144,49 +146,6 @@ public class mxGraphHierarchyModel
 			}
 			mxGraphHierarchyNode[] internalVertices = new mxGraphHierarchyNode[vertices.length];
 			createInternalCells(layout, vertices, internalVertices);
-
-			// Go through edges set their sink values. Also check the
-			// ordering if and invert edges if necessary
-			for (int i = 0; i < vertices.length; i++)
-			{
-				Collection<mxGraphHierarchyEdge> edges = internalVertices[i].connectsAsSource;
-				Iterator<mxGraphHierarchyEdge> iter = edges.iterator();
-
-				while (iter.hasNext())
-				{
-					mxGraphHierarchyEdge internalEdge = iter.next();
-					Collection<Object> realEdges = internalEdge.edges;
-					Iterator<Object> iter2 = realEdges.iterator();
-
-					if (iter2.hasNext())
-					{
-						Object realEdge = iter2.next();
-						Object targetCell = graph.getView().getVisibleTerminal(
-								realEdge, false);
-						mxGraphHierarchyNode internalTargetCell = (mxGraphHierarchyNode) vertexMapper
-								.get(targetCell);
-
-						if (internalTargetCell != null
-								&& internalVertices[i] != internalTargetCell)
-						{
-							internalEdge.target = internalTargetCell;
-
-							if (internalTargetCell.connectsAsTarget.size() == 0)
-							{
-								internalTargetCell.connectsAsTarget = new LinkedHashSet<mxGraphHierarchyEdge>(
-										4);
-							}
-
-							internalTargetCell.connectsAsTarget
-									.add(internalEdge);
-						}
-					}
-				}
-
-				// Use the temp variable in the internal nodes to mark this
-				// internal vertex as having been visited.
-				internalVertices[i].temp[0] = 1;
-			}
 		}
 	}
 
@@ -308,25 +267,57 @@ public class mxGraphHierarchyModel
 	{
 		mxGraph graph = layout.getGraph();
 
+		HashMap<Object,HashSet<Object>> descendants4vertex=new HashMap<Object, HashSet<Object>>();
+		HashMap<Object,Object[]> connections4vertex=new HashMap<Object, Object[]>();
+		HashMap<Object,Object> descendant2ancestor=new HashMap<Object, Object>();
+		//System.out.println(vertices.length);
+		for (int i = 0; i < vertices.length; i++) {
+			internalVertices[i] = new mxGraphHierarchyNode(vertices[i]);
+			vertexMapper.put(vertices[i], internalVertices[i]);
+			HashSet<Object> descendants = new HashSet<Object>();
+			Object[] conns = graph.getEdgesForSwimlane(vertices[i], parent, false,true,false,descendants);
+			descendants4vertex.put(vertices[i], descendants);
+			connections4vertex.put(vertices[i], conns);
+			//System.out.println("descendants for "+((mxCell)vertices[i]).getValue());
+			for (Object d:descendants) {
+				//System.out.println("  "+((mxCell)d).getValue());
+				assert(!descendant2ancestor.containsKey(d));
+				descendant2ancestor.put(d, vertices[i]);
+			}
+			// Ensure temp variable is cleared from any previous use
+			internalVertices[i].temp[0] = 1;
+		}
+		
+		// for every vertice v
+		//  get the outgoing edges from v, e
+		//   find the target of e, t, normalize it (i.e. get the immediate child of parent that contains t, t'
+		//   build a list of all edges going from v to t', l(v,t')={e,...}
+		//  
+		
+		
 		// Create internal edges
 		for (int i = 0; i < vertices.length; i++)
 		{
-			internalVertices[i] = new mxGraphHierarchyNode(vertices[i]);
-			vertexMapper.put(vertices[i], internalVertices[i]);
-
-			// If the layout is deterministic, order the cells
-			HashSet<Object> descendants = new HashSet<Object>();
-			Object[] conns = graph.getEdgesForSwimlane(vertices[i], parent, false,true,false,descendants);
+			//key: tar, value: list of edges leaving this source
+			HashMap<Object,ArrayList<Object>> outgoingEdgesToSameTargetFromHere =new HashMap<Object,ArrayList<Object>>();
 			
-			HashMap<Object,ArrayList<Object>> outgoingEdgesToSameTarget =new HashMap<Object,ArrayList<Object>>();
+			Object[] conns = connections4vertex.get(vertices[i]);
+			HashSet<Object> descendants=descendants4vertex.get(vertices[i]);
+			assert(conns!=null);
+			assert(descendants!=null);
 			for (Object edge:conns) {
 				Object otherSide=graph.getTerminalOutsideSet(edge, descendants);
-				ArrayList<Object> list = outgoingEdgesToSameTarget.get(otherSide);
-				if (list==null) outgoingEdgesToSameTarget.put(otherSide,list=new ArrayList<Object>());
+				Object normalizedOtherSide=descendant2ancestor.get(otherSide);
+				//System.out.println("otherside: "+((mxCell)otherSide).getValue());
+				assert(normalizedOtherSide!=null);
+				//outgoing from vertices[i] to normalizedOtherSide
+				ArrayList<Object> list = outgoingEdgesToSameTargetFromHere.get(normalizedOtherSide);
+				if (list==null) outgoingEdgesToSameTargetFromHere.put(normalizedOtherSide,list=new ArrayList<Object>());
 				list.add(edge);
 			}
-			for(Object target:outgoingEdgesToSameTarget.keySet()) {
-				ArrayList<Object> list = outgoingEdgesToSameTarget.get(target);
+			
+			for(Object target:outgoingEdgesToSameTargetFromHere.keySet()) {
+				ArrayList<Object> list = outgoingEdgesToSameTargetFromHere.get(target);
 				mxGraphHierarchyEdge internalEdge = new mxGraphHierarchyEdge(list);
 				for (Object edge:list) {
 					edgeMapper.put(edge, internalEdge);
@@ -340,12 +331,14 @@ public class mxGraphHierarchyModel
 						layout.setEdgeStyleEnabled(edge, false);
 					}
 				}
+				mxGraphHierarchyNode targetInternalVertice = vertexMapper.get(target);
+				assert(targetInternalVertice!=null);
 				internalEdge.source = internalVertices[i];
+				internalEdge.target = targetInternalVertice;
 				internalVertices[i].connectsAsSource.add(internalEdge);
+				targetInternalVertice.connectsAsTarget.add(internalEdge);
 			}
 
-			// Ensure temp variable is cleared from any previous use
-			internalVertices[i].temp[0] = 0;
 		}
 	}
 
@@ -646,8 +639,8 @@ public class mxGraphHierarchyModel
 
 				if (seen == 0 && node.maxRank < 0 && node.minRank < 0)
 				{
-					rankList[node.temp[0]]
-							.add((mxGraphAbstractHierarchyCell) cell);
+					//System.out.println("in fixRanks.visit: "+((mxCell)node.cell).getValue());
+					rankList[node.temp[0]].add((mxGraphAbstractHierarchyCell) cell);
 					node.maxRank = node.temp[0];
 					node.minRank = node.temp[0];
 
