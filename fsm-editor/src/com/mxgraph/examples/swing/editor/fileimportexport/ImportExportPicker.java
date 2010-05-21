@@ -10,8 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.DefaultFileFilter;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxResources;
 

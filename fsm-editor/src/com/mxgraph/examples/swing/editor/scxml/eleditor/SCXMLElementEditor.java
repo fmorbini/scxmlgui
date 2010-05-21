@@ -13,6 +13,7 @@ import java.util.HashMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JScrollPane;
@@ -22,13 +23,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.undo.CannotUndoException;
 
-import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.util.mxResources;
 
-public class SCXMLElementEditor extends JFrame {
+public class SCXMLElementEditor extends JDialog {
 
 	private static final long serialVersionUID = 3563719047023065063L;
 	

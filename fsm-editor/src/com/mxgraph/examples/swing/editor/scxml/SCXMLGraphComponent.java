@@ -8,17 +8,15 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 
-import com.mxgraph.examples.swing.SCXMLEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
-import com.mxgraph.view.mxGraphView;
 
 /**
  * 
@@ -52,7 +50,7 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 
 		// Loads the defalt stylesheet from an external file
 		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.loadDocument(SCXMLEditor.class.getResource(
+		Document doc = mxUtils.loadDocument(SCXMLGraphEditor.class.getResource(
 				"/com/mxgraph/examples/swing/resources/default-style.xml")
 				.toString());
 		codec.decode(doc.getDocumentElement(), graph.getStylesheet());

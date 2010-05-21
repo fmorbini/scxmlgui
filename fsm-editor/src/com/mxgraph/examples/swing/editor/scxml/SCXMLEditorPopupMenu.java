@@ -3,8 +3,10 @@ package com.mxgraph.examples.swing.editor.scxml;
 import java.awt.Point;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
@@ -20,6 +22,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsClust
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsFinal;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsInitial;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsOutsourced;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
@@ -37,10 +40,13 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 
 	public SCXMLEditorPopupMenu(SCXMLGraphEditor editor,Point mousePt, Point graphPt)
 	{
-		mxGraphComponent gc = editor.getGraphComponent();
+		SCXMLGraphComponent gc = editor.getGraphComponent();
 		mxCell c=(mxCell) gc.getCellAt(graphPt.x, graphPt.y);
-		mxGraph graph=gc.getGraph();
+		SCXMLGraph graph = gc.getGraph();
 		mxIGraphModel model = graph.getModel();
+		
+		// if the cell is not editable set it back to null so the menu doesn't allow editing.
+		if ((c!=null) && !graph.isCellEditable(c)) c=null;
 		
 		Point unscaledGraphPoint=gc.unscaledGraphCoordinates(graphPt);
 
@@ -87,6 +93,9 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
 				menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
 				add(menuItem);
+				JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,mousePt)));
+				menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
+				add(menuItem2);
 				menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
 				add(menuItem);

@@ -1,6 +1,5 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -27,7 +26,6 @@ import com.mxgraph.view.mxGraphView;
 public class SCXMLImportExport implements IImportExport {
 	
 	private SCXMLNode root=null;
-
 	private HashMap<String,SCXMLNode> internalID2nodes=new HashMap<String, SCXMLNode>();
 	private HashMap<String,ArrayList<SCXMLNode>> internalID2clusters=new HashMap<String, ArrayList<SCXMLNode>>();
 	private HashMap<String,SCXMLNode> scxmlID2nodes=new HashMap<String, SCXMLNode>();
@@ -106,6 +104,10 @@ public class SCXMLImportExport implements IImportExport {
 	public SCXMLNode getNodeFromSCXMLID(String scxmlID) {
 		assert(!scxmlID.equals(""));
 		return scxmlID2nodes.get(scxmlID);
+	}
+	public mxCell getCellFromInternalID(String internalID) {
+		assert(!internalID.equals(""));
+		return internalID2cell.get(internalID);
 	}
 	
 	public String getNextInternalID() {
@@ -270,9 +272,7 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
-	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws Exception {
-		SCXMLGraphComponent gc=(SCXMLGraphComponent)graphComponent;
+	public void readInGraph(SCXMLGraph graph, String filename) throws Exception {
 		// clean importer data-structures
 		internalID2cell.clear();
 		internalID2clusters.clear();
@@ -280,29 +280,32 @@ public class SCXMLImportExport implements IImportExport {
 		fromToEdges.clear();
 		scxmlID2nodes.clear();
 		internalIDcounter=11;
-		
-		Document doc = mxUtils.parse(mxUtils.readFile(from));
+				
+		Document doc = mxUtils.parse(mxUtils.readFile(filename));
 		doc.getDocumentElement().normalize();
 		root=handleSCXMLNode(doc.getDocumentElement(),null,false);
 		root.setID(SCXMLNode.ROOTID);
 		getNodeHier(doc.getDocumentElement(),root);
 
-		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
 		// empty the graph
 		mxCell gr = new mxCell();
 		gr.insert(new mxCell());
 		graph.getModel().setRoot(gr);
 		graph.setDefaultParent(null);
+		graph.clearOutsourcedIndex();
 
 		populateGraph(graph);
 		// set the SCXML (this.root) mxCell as not deletable.
 		gr=internalID2cell.get(root.getInternalID());
 		graph.setCellAsDeletable(gr, false);
 
-		// apply layout to each cluster from the leaves up:
-		mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-		clusterLayout.execute(graph.getDefaultParent());
 		graph.setDefaultParent(gr);
+	}
+	@Override
+	public void read(String from, mxGraphComponent graphComponent) throws Exception {
+		SCXMLGraphComponent gc=(SCXMLGraphComponent)graphComponent;
+		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
+		readInGraph(graph,from);
 	}
 
 	private HashMap<String,mxCell> internalID2cell=new HashMap<String, mxCell>();
@@ -380,6 +383,7 @@ public class SCXMLImportExport implements IImportExport {
 				n.removeFromParent();
 				graph.addCell(n, p);
 			}
+		if (node.isOutsourcedNode()) graph.addToOutsourced(n);
 		return n;
 	}
 	
@@ -457,7 +461,6 @@ public class SCXMLImportExport implements IImportExport {
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
 		src=value.getSRC();
-		assert(!isRoot || (value==root));
 		ID=value.getID();
 		datamodel=value.getDataModel();
 		if (value.isFinal()) donedata=value.getDoneData();
@@ -503,11 +506,14 @@ public class SCXMLImportExport implements IImportExport {
 			ret+="<onexit>"+onexit+"</onexit>";
 		if (!StringUtils.isEmptyString(transitions))
 			ret+=transitions;
-		int nc=n.getChildCount();
-		for(int i=0;i<nc;i++) {
-			mxCell c=(mxCell) n.getChildAt(i);
-			if (c.isVertex())
-				ret+=mxVertex2SCXMLString(view,c,false);
+		// add the children only if the node is not outsourced
+		if (StringUtils.isEmptyString(src)) {
+			int nc=n.getChildCount();
+			for(int i=0;i<nc;i++) {
+				mxCell c=(mxCell) n.getChildAt(i);
+				if (c.isVertex())
+					ret+=mxVertex2SCXMLString(view,c,false);
+			}
 		}
 		ret+=close;
 		return ret;

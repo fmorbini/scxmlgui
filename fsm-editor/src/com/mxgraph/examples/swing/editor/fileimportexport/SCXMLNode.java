@@ -108,6 +108,9 @@ public class SCXMLNode implements Serializable {
 	public void setSRC(String src) {
 		node.put(SRC, src);
 	}
+	public boolean isOutsourcedNode() {
+		return !StringUtils.isEmptyString(getSRC());
+	}
 	// getter and setter for document and undomanager for the SRC field of a node
 	public UndoManager getSRCUndoManager() {
 		return (UndoManager) node.get(SRCUNDO);
@@ -508,9 +511,6 @@ public class SCXMLNode implements Serializable {
 			return new mxGeometry(x, y, w, h);
 		}
 		else return null;
-	}
-	public boolean isOutsourcedNode() {
-		return !StringUtils.isEmptyString(getSRC());
 	}
 	
 	private void writeObject(ObjectOutputStream out) throws IOException

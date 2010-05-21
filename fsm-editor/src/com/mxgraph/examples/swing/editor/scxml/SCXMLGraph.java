@@ -10,8 +10,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
-import com.mxgraph.examples.swing.SCXMLEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
@@ -36,10 +37,31 @@ public class SCXMLGraph extends mxGraph
 	 * @see NumberFormat#getInstance()
 	 */
 	public static final NumberFormat numberFormat = NumberFormat.getInstance();
-	private SCXMLEditor editor;
+	private SCXMLGraphEditor editor;
 	private HashSet<Object> immovable=new HashSet<Object>();
 	private HashSet<Object> undeletable=new HashSet<Object>();
+	private HashSet<Object> uneditable=new HashSet<Object>();
+	private HashSet<mxCell> outsourced=new HashSet<mxCell>();
+	private HashMap<mxCell,HashSet<mxCell>> original2clones=new HashMap<mxCell, HashSet<mxCell>>();
+	private HashMap<String,SCXMLImportExport> ourced=new HashMap<String, SCXMLImportExport>();
 
+	public void addToOutsourced(mxCell n) {
+		assert(((SCXMLNode)n.getValue()).isOutsourcedNode());
+		outsourced.add(n);
+	}
+	public void removeFromOutsourced(mxCell n) {
+		outsourced.remove(n);
+	}
+	public HashSet<mxCell> getOutsourcedNodes() {
+		return outsourced;
+	}
+	public HashMap<mxCell,HashSet<mxCell>> getOriginal2Clones() {
+		return original2clones;
+	}
+	public void clearOutsourcedIndex() {
+		outsourced.clear();
+	}
+	
 	public void setCellAsMovable(Object cell,Boolean m) {
 		if (m) immovable.remove(cell);
 		else immovable.add(cell);
@@ -47,6 +69,10 @@ public class SCXMLGraph extends mxGraph
 	public void setCellAsDeletable(Object cell,Boolean d) {
 		if (d) undeletable.remove(cell);
 		else undeletable.add(cell);
+	}
+	public void setCellAsEditable(Object cell,boolean e) {
+		if (e) uneditable.remove(cell);
+		else uneditable.add(cell);
 	}
 	@Override
 	public mxRectangle getPaintBounds(Object[] cells)
@@ -114,6 +140,10 @@ public class SCXMLGraph extends mxGraph
 		return isCellsDeletable() && !undeletable.contains(cell);
 	}
 	@Override
+	public boolean isCellEditable(Object cell) {
+		return isCellsEditable() && !uneditable.contains(cell);
+	}
+	@Override
 	public Object insertEdge(Object parent, String id, Object value,Object source, Object target)
 	{		
 		int size=getAllOutgoingEdges(source).length;
@@ -127,7 +157,7 @@ public class SCXMLGraph extends mxGraph
 		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight;strokeColor=#888888");
 	}
 	@Override
-	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges)
+	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges,Map<Object,Object> mapping)
 	{
 		Object[] clones = null;
 
@@ -140,7 +170,7 @@ public class SCXMLGraph extends mxGraph
 			{
 				double scale = view.getScale();
 				mxPoint trans = view.getTranslate();
-				clones = model.cloneCells(cells, true);
+				clones = model.cloneCells(cells, true,mapping);
 				
 				for (int i = 0; i < cells.length; i++)
 				{
@@ -356,10 +386,10 @@ public class SCXMLGraph extends mxGraph
 
 		return edge;
 	}
-	public void setEditor(SCXMLEditor editor) {
-		this.editor=editor;
+	public void setEditor(SCXMLGraphEditor scxmlGraphEditor) {
+		this.editor=scxmlGraphEditor;
 	}
-	public SCXMLEditor getEditor() {
+	public SCXMLGraphEditor getEditor() {
 		return this.editor;
 	}
 	public mxCell findCellContainingAllOtherCells() {

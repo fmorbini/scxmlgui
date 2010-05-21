@@ -6,17 +6,19 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.TransferHandler;
 
-import com.mxgraph.examples.swing.SCXMLEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.HistoryAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.NewSCXMLAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLListener;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContent;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.util.mxResources;
@@ -31,7 +33,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 	private static final long serialVersionUID = 4060203894740766714L;
 
 	@SuppressWarnings("serial")
-	public SCXMLEditorMenuBar(final SCXMLEditor editor)
+	public SCXMLEditorMenuBar(final SCXMLGraphEditor editor)
 	{
 		final mxGraphComponent graphComponent = editor.getGraphComponent();
 		final mxGraph graph = graphComponent.getGraph();
@@ -77,6 +79,13 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		menu = add(new JMenu(mxResources.get("tools")));
 		menu.add(editor.bind(mxResources.get("showSCXMLListener"), new ShowSCXMLListener()));
 		
+		menu = add(new JMenu(mxResources.get("view")));
+		internalAction=new ToggleDisplayOutsourcedContent();
+		JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(externalAction=editor.bind(mxResources.get("toggleDisplayContentOutsourced"), internalAction));
+		menu.add(menuItem);
+		editor.setDisplayOutsourcedContentMenuItem(menuItem);
+		editor.setDisplayOfOutsourcedContentSelected(editor.isDisplayOfOutsourcedContentSelected());
+
 		add(Box.createHorizontalGlue());
 		
 		// Creates the help menu

@@ -28,7 +28,6 @@ import org.w3c.dom.Element;
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.canvas.mxICanvas;
 import com.mxgraph.canvas.mxImageCanvas;
-import com.mxgraph.layout.hierarchical.model.mxGraphHierarchyNode;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
@@ -2056,7 +2055,7 @@ public class mxGraph extends mxEventSource
 	 */
 	public Object[] cloneCells(Object[] cells)
 	{
-		return cloneCells(cells, true);
+		return cloneCells(cells, true,null);
 	}
 
 	/**
@@ -2070,7 +2069,7 @@ public class mxGraph extends mxEventSource
 	 * @param cells Array of mxCells to be cloned.
 	 * @return Returns the clones of the given cells.
 	 */
-	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges)
+	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges,Map<Object,Object> mapping)
 	{
 		Object[] clones = null;
 
@@ -2083,7 +2082,7 @@ public class mxGraph extends mxEventSource
 			{
 				double scale = view.getScale();
 				mxPoint trans = view.getTranslate();
-				clones = model.cloneCells(cells, true);
+				clones = model.cloneCells(cells, true,mapping);
 
 				for (int i = 0; i < cells.length; i++)
 				{
@@ -3483,7 +3482,7 @@ public class mxGraph extends mxEventSource
 			{
 				if (clone)
 				{
-					cells = cloneCells(cells, isCloneInvalidEdges());
+					cells = cloneCells(cells, isCloneInvalidEdges(),null);
 
 					if (target == null)
 					{
