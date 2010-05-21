@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
@@ -19,6 +21,7 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxPoint;
@@ -96,8 +99,34 @@ public class SCXMLGraph extends mxGraph
 			mxCell node=(mxCell)cell;
 			if (node.isVertex()) {
 				assert(node.getValue() instanceof SCXMLNode);
-				SCXMLNode nodeValue = (SCXMLNode)node.getValue();
+				SCXMLNode nodeValue = (SCXMLNode)node.getValue();				
 				if (nodeValue.getID().matches(".*[\\s]+.*")) return "node name contains spaces.\n";
+				// check if the namespace has been included
+				String SCXMLid=nodeValue.getID();
+				int pos=SCXMLid.indexOf(':');
+				boolean namespaceGood=true;
+				String namespace="";
+				if (pos>0) {
+					namespaceGood=false;
+					namespace=SCXMLid.substring(0,pos);
+					mxIGraphModel model = getModel();
+					mxCell root = SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
+					SCXMLNode rootValue=(SCXMLNode) root.getValue();
+					String[] namespaces=rootValue.getNAMESPACE().split("\n");
+
+					Pattern p = Pattern.compile("^[\\s]*xmlns:([^\\s=:]+)[\\s]*=.*$");
+					for(String ns:namespaces) {
+						Matcher m = p.matcher(ns);
+						if (m.matches() && (m.groupCount()==1)) {
+							ns=m.group(1);
+							if (namespace.equals(ns)) {
+								namespaceGood=true;
+								break;
+							}
+						}
+					}
+				}
+				if (!namespaceGood) return "Namespace '"+namespace+"' is used but not defined.\n";
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
 				if (!StringUtils.isEmptyString(nodeValue.getID()))
 					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name.\n";

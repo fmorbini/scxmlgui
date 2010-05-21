@@ -82,6 +82,9 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(mousePt))).setEnabled(c==root);
 				add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,mousePt)));
 				add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,mousePt))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
+				JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,mousePt)));
+				menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
+				add(menuItem2);
 				addSeparator();
 				JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());
@@ -93,9 +96,6 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
 				menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
 				add(menuItem);
-				JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,mousePt)));
-				menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
-				add(menuItem2);
 				menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
 				menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
 				add(menuItem);

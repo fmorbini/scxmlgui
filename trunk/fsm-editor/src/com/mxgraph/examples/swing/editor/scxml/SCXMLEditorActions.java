@@ -1576,6 +1576,7 @@ public class SCXMLEditorActions
 					editor.getUndoManager().clear();
 					editor.getUndoManager().resetUnmodifiedState();
 					editor.updateUndoRedoActionState();
+					editor.clearDisplayOutsourcedContentStatus();
 				}
 			}
 		}
@@ -1657,6 +1658,7 @@ public class SCXMLEditorActions
 							lastDir = fc.getSelectedFile().getParent();
 							try
 							{
+								editor.clearDisplayOutsourcedContentStatus();
 								IImportExport fie=fileIO.read(fc,editor);
 								
 								if (editor.isDisplayOfOutsourcedContentSelected()) editor.displayOutsourcedContent(graph, true,true);
@@ -2185,11 +2187,13 @@ public class SCXMLEditorActions
 			if (editor.isDisplayOfOutsourcedContentSelected()) {
 				//disable
 				try {
+					editor.getUndoManager().setEnabled(false);
 					editor.displayOutsourcedContent(graph, false,true);
 					// apply layout to each cluster from the leaves up:
 					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
 					clusterLayout.execute(graph.getDefaultParent());
 					editor.setDisplayOfOutsourcedContentSelected(false);
+					editor.getUndoManager().setEnabled(true);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					editor.setDisplayOfOutsourcedContentSelected(true);
@@ -2197,11 +2201,13 @@ public class SCXMLEditorActions
 			} else {
 				//enable
 				try {
+					editor.getUndoManager().setEnabled(false);
 					editor.displayOutsourcedContent(graph, true,true);
 					// apply layout to each cluster from the leaves up:
 					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
 					clusterLayout.execute(graph.getDefaultParent());
 					editor.setDisplayOfOutsourcedContentSelected(true);
+					editor.getUndoManager().setEnabled(true);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					editor.setDisplayOfOutsourcedContentSelected(false);

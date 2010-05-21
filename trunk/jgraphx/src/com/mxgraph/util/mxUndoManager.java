@@ -48,6 +48,8 @@ public class mxUndoManager extends mxEventSource
 	 */
 	protected int indexOfNextAdd;
 
+	private boolean enabled=true;
+
 	/**
 	 * Constructs a new undo manager with a default history size.
 	 */
@@ -154,26 +156,32 @@ public class mxUndoManager extends mxEventSource
 		return modifiedObjects;
 	}
 
+	public void setEnabled(boolean e) {
+		enabled=e;
+	}
+	
 	/**
 	 * Method to be called to add new undoable edits to the history.
 	 */
 	public void undoableEditHappened(mxUndoableEdit undoableEdit)
 	{
-		if (undoableEdit.getTransparent()) {}
-		else if (!undoableEdit.getUndoable()) {
-			notUndoableEditHappened();
-		} else {
-			trim();
-	
-			if (size > 0 && size == history.size())
-			{
-				history.remove(0);
-				unmodifiedPosition--;
+		if (enabled) {
+			if (undoableEdit.getTransparent()) {}
+			else if (!undoableEdit.getUndoable()) {
+				notUndoableEditHappened();
+			} else {
+				trim();
+		
+				if (size > 0 && size == history.size())
+				{
+					history.remove(0);
+					unmodifiedPosition--;
+				}
+		
+				history.add(undoableEdit);
+				indexOfNextAdd = history.size();
+				fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 			}
-	
-			history.add(undoableEdit);
-			indexOfNextAdd = history.size();
-			fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 		}
 	}
 	private boolean notUndoableEdits=false;
