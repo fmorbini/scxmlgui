@@ -4,6 +4,8 @@
  */
 package com.mxgraph.model;
 
+import java.util.Map;
+
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
@@ -87,7 +89,7 @@ public interface mxIGraphModel
 	 * with all descendants.
 	 * @return Returns a cloned array of cells.
 	 */
-	Object[] cloneCells(Object[] cells, boolean includeChildren);
+	Object[] cloneCells(Object[] cells, boolean includeChildren,Map<Object, Object> mapping);
 
 	/**
 	 * Returns true if the given parent is an ancestor of the given child.

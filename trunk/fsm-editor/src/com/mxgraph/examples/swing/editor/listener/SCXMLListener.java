@@ -43,7 +43,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.mxgraph.examples.swing.SCXMLEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.DefaultFileFilter;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.model.mxCell;
@@ -74,16 +74,16 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	private SCXMLSocketListener listener;
 	private SCXMLGraphComponent graphComponent;
 	private mxIGraphModel model;
-	private SCXMLEditor editor;
+	private SCXMLGraphEditor editor;
 
-	public SCXMLListener(SCXMLEditor editor) {
+	public SCXMLListener(SCXMLGraphEditor editor2) {
 		super("SCXML listener");
 		
 		highlightedCellsEachInstant=new ArrayList<HashSet<mxCell>>();
 		
-		graphComponent=editor.getGraphComponent();
+		graphComponent=editor2.getGraphComponent();
 		model=graphComponent.getGraph().getModel();
-		this.editor=editor;
+		this.editor=editor2;
 		
 		addWindowListener(this);
 		JPanel contentPane = new JPanel(new BorderLayout());

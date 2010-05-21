@@ -32,7 +32,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.mxgraph.examples.swing.SCXMLEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
@@ -50,13 +50,13 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 
 	private JButton okButton,cancelButton;
 	private JButton upButton,downButton;
-	private SCXMLEditor editor;
+	private SCXMLGraphEditor editor;
 	private SCXMLGraphComponent gc;
 	private SCXMLGraph graph;
 	
 	private static final String title="Edge order editor";
 	
-	public SCXMLOutEdgeOrderEditor(mxCell source, SCXMLEditor e, Point pos) {
+	public SCXMLOutEdgeOrderEditor(mxCell source, SCXMLGraphEditor e, Point pos) {
 		editor=e;
 		gc=editor.getGraphComponent();
 		graph=gc.getGraph();

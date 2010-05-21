@@ -37,7 +37,7 @@
 	<target name="jar" depends="build">
         <jar destfile="${FSM.binaries}/${FSM.archive}" filesetmanifest="mergewithoutmain">
              <manifest>
-                <attribute name="Main-Class" value="com.mxgraph.examples.swing.SCXMLEditor"/>
+                <attribute name="Main-Class" value="com.mxgraph.examples.swing.SCXMLGraphEditor"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <zipfileset excludes="META-INF/*.SF" src="${JGRAPHX}"/>

@@ -19,8 +19,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
 
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.util.mxResources;

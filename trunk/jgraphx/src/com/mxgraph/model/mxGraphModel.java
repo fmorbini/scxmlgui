@@ -298,9 +298,9 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 	/* (non-Javadoc)
 	 * @see com.mxgraph.model.mxIGraphModel#cloneCells(Object[], boolean)
 	 */
-	public Object[] cloneCells(Object[] cells, boolean includeChildren)
+	public Object[] cloneCells(Object[] cells, boolean includeChildren,Map<Object, Object> mapping)
 	{
-		Map<Object, Object> mapping = new Hashtable<Object, Object>();
+		if (mapping==null) mapping = new Hashtable<Object, Object>();
 		Object[] clones = new Object[cells.length];
 
 		for (int i = 0; i < cells.length; i++)

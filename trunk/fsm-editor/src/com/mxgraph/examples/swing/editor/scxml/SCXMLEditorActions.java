@@ -43,7 +43,8 @@ import org.w3c.dom.Document;
 
 import com.mxgraph.analysis.mxDistanceCostFunction;
 import com.mxgraph.analysis.mxGraphAnalysis;
-import com.mxgraph.examples.swing.SCXMLEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor.AskToSaveIfRequired;
 import com.mxgraph.examples.swing.editor.EditorRuler;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
@@ -51,12 +52,12 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphEditor.AskToSaveIfRequired;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLDatamodelEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNamespaceEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.layout.mxIGraphLayout;
@@ -89,19 +90,19 @@ public class SCXMLEditorActions
 	 * @param e
 	 * @return Returns the graph for the given action event.
 	 */
-	public static final SCXMLEditor getEditor(ActionEvent e)
+	public static final SCXMLGraphEditor getEditor(ActionEvent e)
 	{
 		if (e.getSource() instanceof Component)
 		{
 			Component component = (Component) e.getSource();
 
 			while (component != null
-					&& !(component instanceof SCXMLEditor))
+					&& !(component instanceof SCXMLGraphEditor))
 			{
 				component = component.getParent();
 			}
 
-			return (SCXMLEditor) component;
+			return (SCXMLGraphEditor) component;
 		}
 
 		return null;
@@ -183,7 +184,7 @@ public class SCXMLEditorActions
 		}
 		public void actionPerformed(ActionEvent e)
 		{
-			SCXMLEditor editor = getEditor(e);
+			SCXMLGraphEditor editor = getEditor(e);
 			new SCXMLOutEdgeOrderEditor(source,editor,pos);
 		}
 	}
@@ -349,6 +350,33 @@ public class SCXMLEditorActions
 		}
 	}
 
+	public static class SetNodeAsOutsourced extends AbstractAction
+	{
+		private Point pos;
+		private mxCell cell;
+		
+		public SetNodeAsOutsourced(mxCell c, Point pt) {
+			cell=c;
+			pos=pt;
+		}
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraph graph = editor.getGraphComponent().getGraph();
+			assert(cell.isVertex());
+			SCXMLNode n=(SCXMLNode) cell.getValue();
+			
+			//edit outsourcing
+			SCXMLOutsourcingEditor.createAndShowSCXMLOutsourcingEditor(editor,(SCXMLNode)cell.getValue(),pos);				
+
+			if (n.isOutsourcedNode()) {
+				graph.addToOutsourced(cell);
+			}
+			else graph.removeFromOutsourced(cell);
+			graph.setCellStyle(n.getStyle(),cell);
+		}
+	}
+	
 	public static class SetNodeAsParallel extends AbstractAction
 	{
 		private mxCell cell;
@@ -858,7 +886,7 @@ public class SCXMLEditorActions
 				try
 				{
 					fileIO.write(fc,editor);
-					editor.undoManager.resetUnmodifiedState();
+					editor.getUndoManager().resetUnmodifiedState();
 					editor.setLastModifiedDate();
 				}
 				catch (Throwable ex)
@@ -1545,8 +1573,8 @@ public class SCXMLEditorActions
 
 					graph.setCellAsDeletable(p, false);
 					editor.setModified(false);
-					editor.undoManager.clear();
-					editor.undoManager.resetUnmodifiedState();
+					editor.getUndoManager().clear();
+					editor.getUndoManager().resetUnmodifiedState();
 					editor.updateUndoRedoActionState();
 				}
 			}
@@ -1612,7 +1640,7 @@ public class SCXMLEditorActions
 			if (editor != null)
 			{
 				if (AskToSaveIfRequired.check(editor)) {
-					mxGraph graph = mxGraphActions.getGraph(e);
+					SCXMLGraph graph = editor.getGraphComponent().getGraph();
 
 					if (graph != null)
 					{
@@ -1630,10 +1658,17 @@ public class SCXMLEditorActions
 							try
 							{
 								IImportExport fie=fileIO.read(fc,editor);
+								
+								if (editor.isDisplayOfOutsourcedContentSelected()) editor.displayOutsourcedContent(graph, true,true);
+								
+								// apply layout to each cluster from the leaves up:
+								mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+								clusterLayout.execute(graph.getDefaultParent());
+								
 								editor.setModified(false);
 								editor.setCurrentFile(fc.getSelectedFile(),fie);
-								editor.undoManager.clear();
-								editor.undoManager.resetUnmodifiedState();
+								editor.getUndoManager().clear();
+								editor.getUndoManager().resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
 							} catch (Exception ex) {
 								ex.printStackTrace();
@@ -2142,6 +2177,39 @@ public class SCXMLEditorActions
 		}
 	}
 
+	public static class ToggleDisplayOutsourcedContent extends AbstractAction {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraph graph = editor.getGraphComponent().getGraph();
+			if (editor.isDisplayOfOutsourcedContentSelected()) {
+				//disable
+				try {
+					editor.displayOutsourcedContent(graph, false,true);
+					// apply layout to each cluster from the leaves up:
+					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+					clusterLayout.execute(graph.getDefaultParent());
+					editor.setDisplayOfOutsourcedContentSelected(false);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					editor.setDisplayOfOutsourcedContentSelected(true);
+				}
+			} else {
+				//enable
+				try {
+					editor.displayOutsourcedContent(graph, true,true);
+					// apply layout to each cluster from the leaves up:
+					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+					clusterLayout.execute(graph.getDefaultParent());
+					editor.setDisplayOfOutsourcedContentSelected(true);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					editor.setDisplayOfOutsourcedContentSelected(false);
+				}
+			}
+		}
+	}
+	
 	public static class ZoomIN extends AbstractAction
 	{
 		/**

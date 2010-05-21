@@ -1,6 +1,7 @@
-package com.mxgraph.examples.swing.editor.scxml;
+package com.mxgraph.examples.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +13,12 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -20,6 +26,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -30,13 +37,23 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
-import com.mxgraph.examples.swing.SCXMLEditor;
 import com.mxgraph.examples.swing.editor.EditorAboutFrame;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorMenuBar;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
+import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
@@ -46,9 +63,11 @@ import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.layout.mxPartitionLayout;
 import com.mxgraph.layout.mxStackLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
+import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxRectangle;
@@ -58,6 +77,7 @@ import com.mxgraph.util.mxUndoableEdit;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.view.mxMultiplicity;
 
 public class SCXMLGraphEditor extends JPanel
 {
@@ -159,6 +179,166 @@ public class SCXMLGraphEditor extends JPanel
 		return scxmlListener;
 	}
 	
+	private HashMap<String,SCXMLGraph> file2graph=new HashMap<String, SCXMLGraph>();
+	private HashMap<String,SCXMLImportExport> file2importer=new HashMap<String, SCXMLImportExport>();
+	public void clearDisplayOutsourcedContentStatus() {
+		file2graph.clear();
+		file2importer.clear();
+	}
+	public SCXMLGraph attachOutsourcedContentToThisNode(mxCell ond,SCXMLGraph g,boolean display) throws Exception {
+		SCXMLGraph rootg=getGraphComponent().getGraph();
+		SCXMLNode v=(SCXMLNode) ond.getValue();
+		// get the outsourcing url (SRC field)
+		String src=v.getSRC();
+		// get the file name, the optional namespace and the optional node name
+		// syntax handled: filename#namespace:nodename
+		// or filename#nodename
+		// or filename
+		String file,namespace,node;
+		int pos=src.indexOf('#',0);
+		if (pos>=0) {
+			file=src.substring(0, pos);
+			int nmpos=src.indexOf(':',pos);
+			if (nmpos>=0) {
+				namespace=src.substring(pos+1, nmpos);
+				node=src.substring(nmpos+1);
+			} else {
+				namespace=null;
+				node=src.substring(pos+1);
+			}
+		} else {
+			file=src;
+			namespace=null;
+			node=null;
+		}
+		if ((namespace!=null) && (node==null)) throw new Exception("node name not given but namespace given in: '"+src+"'");
+		String SCXMLnodename=((namespace!=null)?namespace+":":"")+node;
+		// normalize the file name to the system absolute path of that file
+		File f=new File(file);
+		String fileName=f.getName();
+		// add the base directory information
+		String wd=(getCurrentFile()!=null)?getCurrentFile().getParent():System.getProperty("user.dir");
+		f=new File(wd+f.separator+fileName);
+		while (!f.exists()) {
+			JFileChooser fc = new JFileChooser(wd);
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int rc = fc.showDialog(null, mxResources.get("pickDirectory"+" '"+fileName+"'"));
+			if (rc == JFileChooser.APPROVE_OPTION) {
+				System.out.println("trying this file: '"+fc.getSelectedFile()+f.separator+fileName+"'");
+				f=new File(fc.getSelectedFile()+f.separator+fileName);
+			} else {
+				throw new Exception("Aborted by the user.");
+			}
+		}
+		fileName=f.getAbsolutePath();
+		// check to see if the required file has already been read
+		SCXMLImportExport ie = file2importer.get(fileName);
+		SCXMLGraph ig = file2graph.get(fileName);
+		if (ig==null) {
+			// load the required graph
+			assert(!file2importer.containsKey(fileName));
+			file2importer.put(file, ie=new SCXMLImportExport());								
+			// read the graph, this will throw an exception if something goes wrong
+			ie.readInGraph(ig=new SCXMLGraph(), f.getAbsolutePath());
+			ig.setEditor(this);
+			file2graph.put(file, ig);
+		}
+		assert((ig!=null) && (ie!=null));
+		System.out.println("attaching node: '"+SCXMLnodename+"' from file '"+fileName+"'");
+		// check that the requested node is there
+		SCXMLNode SCXMLn = ie.getNodeFromSCXMLID(SCXMLnodename);
+		assert(SCXMLn!=null);
+		String internalID=SCXMLn.getInternalID();
+		assert(!StringUtils.isEmptyString(internalID));
+		// get the cell corresponding to that node
+		mxCell oc=ie.getCellFromInternalID(internalID);
+		assert(oc!=null);
+		// check whether ond has children, issue a warning if it has
+		int cc=ond.getChildCount();
+		if (cc>0) {
+			//  remove all children of ond
+			if (display) System.out.println("WARNING: the node: "+v+" has "+cc+" child(ren). Removing all of them.");
+
+			// insure first that the cells are deletable
+			Set<Object> descendants=new HashSet<Object>();
+			rootg.getAllDescendants(ond, descendants);
+			// don't change ond (ond is the original node in the graph (the one to which we are adding the outsourced content))
+			descendants.remove(ond);
+			for(Object d:descendants) rootg.setCellAsDeletable(d, true);
+
+			Object[] children=new Object[cc];
+			for (int i=0;i<cc;i++) children[i]=ond.getChildAt(i);
+			rootg.removeCells(children);
+		}
+		if (display) {
+			//  attach copy of oc as only children of ond
+			v.setCluster(true); rootg.setCellStyle(v.getStyle(),ond);
+			HashMap<Object,Object> original2clone=new HashMap<Object, Object>();
+			Object[] noc = g.cloneCells(new Object[]{oc}, false,original2clone);
+			
+			// loop through the mapping now created while cloning, if there are
+			// any cells that are outsourced add this clone to the list of clones
+			// for them in the graph ig.
+			for (mxCell c:ig.getOutsourcedNodes()) {
+				mxCell clone=(mxCell) original2clone.get(c);
+				if (clone!=null) {
+					HashSet<mxCell> clones4ThisOriginal = ig.getOriginal2Clones().get(c);
+					if (clones4ThisOriginal==null) ig.getOriginal2Clones().put(c,clones4ThisOriginal=new HashSet<mxCell>());
+					assert(!clones4ThisOriginal.contains(clone));
+					clones4ThisOriginal.add(clone);
+				}
+			}
+		
+			assert(noc.length==1);
+			mxCell ocCopy=(mxCell) noc[0];
+			rootg.addCell(ocCopy, ond);
+			//  block all editing for ocCopy and all its children
+			Set<Object> descendants=new HashSet<Object>();
+			rootg.getAllDescendants(ocCopy, descendants);
+			for(Object d:descendants) {
+				rootg.setCellAsDeletable(d, false);
+				rootg.setCellAsEditable(d, false);
+				rootg.setCellAsMovable(d, false);
+			}
+		} else {
+			v.setCluster(false); rootg.setCellStyle(v.getStyle(),ond);
+		}
+		return ig;
+	}
+	public void displayOutsourcedContent(SCXMLGraph g,boolean display,boolean isRoot) throws Exception {
+		// get the nodes that are outsourced
+		HashSet<mxCell> onds = g.getOutsourcedNodes();
+		for(mxCell ond:onds) {
+			// ig contains the graph from which the content of ond (or all its clones) is imported
+			SCXMLGraph ig=null;
+			// if isRoot is true, use the original node.
+			// else: check if there are clones for this original node and use those clones
+			if (isRoot) {
+				ig=attachOutsourcedContentToThisNode(ond, g, display);
+			} else {
+				HashSet<mxCell> clones4Ond=g.getOriginal2Clones().get(ond);
+				if (clones4Ond!=null)
+					for (mxCell clonedOnd:clones4Ond)
+						ig=attachOutsourcedContentToThisNode(clonedOnd, g, display);
+			}
+			// recursively call this function on the graph just created
+			if (ig!=null) displayOutsourcedContent(ig,display,false);
+		}
+	}
+	private boolean doDisplayOfOutsourcedContent=false;
+	private JCheckBoxMenuItem displayOutsourcedContentMenuItem;
+	public void setDisplayOutsourcedContentMenuItem(JCheckBoxMenuItem mi) {
+		displayOutsourcedContentMenuItem=mi;
+	}
+	public boolean isDisplayOfOutsourcedContentSelected() {
+		return doDisplayOfOutsourcedContent;
+	}
+	public void setDisplayOfOutsourcedContentSelected(boolean b) {
+		doDisplayOfOutsourcedContent=b;
+		if (displayOutsourcedContentMenuItem!=null)
+			displayOutsourcedContentMenuItem.setSelected(isDisplayOfOutsourcedContentSelected());
+	}
+	
 	/**
 	 * 
 	 */
@@ -182,7 +362,7 @@ public class SCXMLGraphEditor extends JPanel
 
 		// Stores a reference to the graph and creates the command history
 		graphComponent = component;
-		final mxGraph graph = graphComponent.getGraph();
+		final SCXMLGraph graph = graphComponent.getGraph();
 		undoManager = new mxUndoManager(100);
 
 		// Updates the modified flag if the graph model changes
@@ -217,6 +397,16 @@ public class SCXMLGraphEditor extends JPanel
 		add(statusBar, BorderLayout.SOUTH);
 
 		updateTitle();
+		
+		graph.setAutoSizeCells(true);
+		graph.setEditor(this);
+		graph.setMultigraph(true);
+		graph.setAllowDanglingEdges(false);
+		graph.setConnectableEdges(false);
+		// the following 2 lines are required by the graph validation routines,
+		// otherwise a null pointer exception is generated.
+		mxMultiplicity[] m={};
+		graph.setMultiplicities(m);
 	}
 
 	/**
@@ -744,7 +934,7 @@ public class SCXMLGraphEditor extends JPanel
 		}
 	}
 
-	public JFrame createFrame(SCXMLEditor editor)
+	public JFrame createFrame(SCXMLGraphEditor editor)
 	{
 		WindowEventDemo frame = new WindowEventDemo(this);
 		// the contentPane of the JRootPane is a JPanel (that is the FSMGraphEditor)
@@ -965,5 +1155,29 @@ public class SCXMLGraphEditor extends JPanel
 		}
 
 		return layout;
+	}
+	
+	/**
+	 * main of the editor application.
+	 * creates the FSMEditor that is a CustomGraphComponent (JScrollPane)
+	 *  contains an instance of CustomGraph (mxGraph that is mxEventSourcE))
+	 * create the interface containing the CustomGraphComponent: FSMEditor (FSMGraphEditor (JPanel))
+	 * @param args
+	 */
+	public static void main(String[] args)
+	{
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e1)
+		{
+			e1.printStackTrace();
+		}
+
+		mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
+		SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
+		editor.createFrame(editor).setVisible(true);
+		editor.getGraphComponent().requestFocusInWindow();
 	}
 }
