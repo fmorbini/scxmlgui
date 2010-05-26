@@ -32,6 +32,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -147,9 +148,14 @@ public class SCXMLEditorActions
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
 			Object nodeValue = node.getValue();
 			if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
-				SCXMLDatamodelEditor.createAndShowSCXMLDatamodelEditor(editor,(SCXMLNode) nodeValue,pos);
+				try {
+					new SCXMLDatamodelEditor(frame,editor,(SCXMLNode) nodeValue,pos);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
@@ -163,12 +169,13 @@ public class SCXMLEditorActions
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
 			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
 			mxCell root = SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
 			if (root!=null) {
 				Object nodeValue = root.getValue();
 				if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
-					SCXMLNamespaceEditor.createAndShowSCXMLNamespaceEditor(editor,(SCXMLNode) nodeValue,pos);
+					new SCXMLNamespaceEditor(frame,editor,(SCXMLNode) nodeValue,pos);
 				}
 			}
 		}
@@ -185,7 +192,8 @@ public class SCXMLEditorActions
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
-			new SCXMLOutEdgeOrderEditor(source,editor,pos);
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);			
+			new SCXMLOutEdgeOrderEditor(frame,source,editor,pos);
 		}
 	}
 
@@ -202,7 +210,8 @@ public class SCXMLEditorActions
 		{
 			assert(cell.isEdge());
 			SCXMLGraphEditor editor = getEditor(e);
-			SCXMLEdgeEditor.createAndShowSCXMLEdgeEditor(editor,(SCXMLEdge)cell.getValue(),pos);
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
+			new SCXMLEdgeEditor(frame,(SCXMLEdge)cell.getValue(),editor,pos);
 		}
 	}
 
@@ -292,7 +301,8 @@ public class SCXMLEditorActions
 		{
 			assert(cell.isVertex());
 			SCXMLGraphEditor editor = getEditor(e);
-			SCXMLNodeEditor.createAndShowSCXMLNodeEditor(editor,(SCXMLNode)cell.getValue(),pos);
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
+			new SCXMLNodeEditor(frame,(SCXMLNode)cell.getValue(),editor,pos);
 		}
 	}
 	
@@ -362,12 +372,17 @@ public class SCXMLEditorActions
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
 			SCXMLGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
 			
 			//edit outsourcing
-			SCXMLOutsourcingEditor.createAndShowSCXMLOutsourcingEditor(editor,(SCXMLNode)cell.getValue(),pos);				
+			try {
+				new SCXMLOutsourcingEditor(frame,editor,(SCXMLNode)cell.getValue(),pos);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 
 			if (n.isOutsourcedNode()) {
 				graph.addToOutsourced(cell);
@@ -1660,9 +1675,7 @@ public class SCXMLEditorActions
 							{
 								editor.clearDisplayOutsourcedContentStatus();
 								IImportExport fie=fileIO.read(fc,editor);
-								
-								if (editor.isDisplayOfOutsourcedContentSelected()) editor.displayOutsourcedContent(graph, true,true);
-								
+
 								// apply layout to each cluster from the leaves up:
 								mxClusterLayout clusterLayout=new mxClusterLayout(graph);
 								clusterLayout.execute(graph.getDefaultParent());
@@ -2179,39 +2192,61 @@ public class SCXMLEditorActions
 		}
 	}
 
+	public static class ToggleDisplayOutsourcedContentInNode extends AbstractAction {
+
+		private mxCell node=null;
+		
+		public ToggleDisplayOutsourcedContentInNode(mxCell n) {
+			this.node=n;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraph graph = editor.getGraphComponent().getGraph();
+			try {
+				editor.getUndoManager().setEnabled(false);
+				if (node.getChildCount()>0) {
+					// disable
+					editor.displayOutsourcedContentInNode(node,graph,false);
+				} else {
+					// disable
+					editor.displayOutsourcedContentInNode(node,graph,true);
+				}
+				// apply layout to each cluster from the leaves up:
+				mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+				clusterLayout.execute(graph.getDefaultParent());
+				editor.setDisplayOfOutsourcedContentSelected(false);
+				editor.getUndoManager().setEnabled(true);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
 	public static class ToggleDisplayOutsourcedContent extends AbstractAction {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SCXMLGraphEditor editor = getEditor(e);
 			SCXMLGraph graph = editor.getGraphComponent().getGraph();
-			if (editor.isDisplayOfOutsourcedContentSelected()) {
-				//disable
-				try {
-					editor.getUndoManager().setEnabled(false);
+			mxIGraphModel model = graph.getModel();
+			try {
+				editor.getUndoManager().setEnabled(false);
+				if (editor.isDisplayOfOutsourcedContentSelected()) {
+					//disable
 					editor.displayOutsourcedContent(graph, false,true);
-					// apply layout to each cluster from the leaves up:
-					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-					clusterLayout.execute(graph.getDefaultParent());
-					editor.setDisplayOfOutsourcedContentSelected(false);
-					editor.getUndoManager().setEnabled(true);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					editor.setDisplayOfOutsourcedContentSelected(true);
-				}
-			} else {
-				//enable
-				try {
-					editor.getUndoManager().setEnabled(false);
+				} else {
+					// enable
 					editor.displayOutsourcedContent(graph, true,true);
-					// apply layout to each cluster from the leaves up:
-					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-					clusterLayout.execute(graph.getDefaultParent());
-					editor.setDisplayOfOutsourcedContentSelected(true);
-					editor.getUndoManager().setEnabled(true);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					editor.setDisplayOfOutsourcedContentSelected(false);
 				}
+				// apply layout to each cluster from the leaves up:
+				mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+				clusterLayout.execute(graph.getDefaultParent());
+				editor.setDisplayOfOutsourcedContentSelected(false);
+				editor.getUndoManager().setEnabled(true);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				editor.setDisplayOfOutsourcedContentSelected(!editor.isDisplayOfOutsourcedContentSelected());
 			}
 		}
 	}

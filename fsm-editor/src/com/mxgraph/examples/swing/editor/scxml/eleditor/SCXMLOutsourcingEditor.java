@@ -12,6 +12,7 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
@@ -22,10 +23,7 @@ import javax.swing.undo.UndoManager;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
-import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.DocumentChangeListener;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
-import com.mxgraph.util.mxResources;
 
 public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
@@ -35,11 +33,11 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
     private SCXMLNode node;
 	private JTabbedPane tabbedPane;
     
-    public SCXMLOutsourcingEditor(SCXMLGraphEditor editor, SCXMLNode n) throws Exception {
-    	super(editor);
+    public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode n, Point pos) throws Exception {
+    	super(parent,editor);
     	setModal(true);
-    	//closeAction=new aaa;
         setTitle("Set source file to fill the content of this node");
+        setLocation(pos);
 
         DocumentChangeListener changeListener = new DocumentChangeListener(editor);
 
@@ -77,28 +75,15 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
         JMenuBar mb = new JMenuBar();
         mb.add(editMenu);
         setJMenuBar(mb);
+        
+		//Display the window.
+		pack();
+		setVisible(true);
     }
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
 			dispose();
 		}
 	}
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event dispatch thread.
-     * @param editor 
-     * @param pos 
-     */
-    public static void createAndShowSCXMLOutsourcingEditor(SCXMLGraphEditor editor, SCXMLNode root, Point pos) {
-        //Create and set up the window.
-        SCXMLOutsourcingEditor frame;
-		try {
-			frame = new SCXMLOutsourcingEditor(editor,root);
-	        frame.showSCXMLElementEditor(pos);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    }
 }
 

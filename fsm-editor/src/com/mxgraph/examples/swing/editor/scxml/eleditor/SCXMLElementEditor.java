@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
@@ -46,8 +47,8 @@ public class SCXMLElementEditor extends JDialog {
     
 	private AbstractActionWrapper externalUndoAction,externalRedoAction;
 
-    public SCXMLElementEditor(SCXMLGraphEditor e) {
-    	setAlwaysOnTop(true);
+    public SCXMLElementEditor(JFrame parent, SCXMLGraphEditor e) {    	
+    	super(parent);
     	closeAction=new CloseAction();
     	editor=e;
     	externalUndoAction = editor.bind(mxResources.get("undo"), null,"/com/mxgraph/examples/swing/images/undo.gif");

@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
@@ -20,9 +21,7 @@ import javax.swing.undo.UndoManager;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.DocumentChangeListener;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
-import com.mxgraph.util.mxResources;
 
 public class SCXMLDatamodelEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
@@ -32,9 +31,11 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
     private SCXMLNode root;
 	private JTabbedPane tabbedPane;
     
-    public SCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode r) throws Exception {
-    	super(editor);
+    public SCXMLDatamodelEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode r, Point pos) throws Exception {
+    	super(parent,editor);
         setTitle("SCXML datamodel editor");
+        setLocation(pos);
+        setAlwaysOnTop(true);
 
         DocumentChangeListener changeListener = new DocumentChangeListener(editor);
 
@@ -45,7 +46,14 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
         doc=root.getDatamodelDoc();
         // undo and doc must be both either null or not null.
         assert(!((undo==null) ^ (doc==null)));
-        undoTextPane=new UndoJTextPane(XMLUtils.prettyPrintXMLString(root.getDataModel()," "), doc, undo);
+        String datamodelText="",datamodelXML="";
+        try {
+        	datamodelText=root.getDataModel();
+        	datamodelXML=XMLUtils.prettyPrintXMLString(datamodelText," ");
+        } catch (Exception e) {
+        	datamodelXML=datamodelText;
+        }
+        undoTextPane=new UndoJTextPane(datamodelXML, doc, undo);
         if (doc==null) {
         	root.setDatamodelDoc(doc=undoTextPane.getDocument());
         	root.setDatamodelUndoManager(undo=undoTextPane.getUndoManager());
@@ -72,23 +80,10 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
         JMenuBar mb = new JMenuBar();
         mb.add(editMenu);
         setJMenuBar(mb);
-    }
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event dispatch thread.
-     * @param editor 
-     * @param pos 
-     */
-    public static void createAndShowSCXMLDatamodelEditor(SCXMLGraphEditor editor, SCXMLNode root, Point pos) {
-        //Create and set up the window.
-        SCXMLDatamodelEditor frame;
-		try {
-			frame = new SCXMLDatamodelEditor(editor,root);
-	        frame.showSCXMLElementEditor(pos);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
+        //Display the window.
+		pack();
+		setVisible(true);
     }
 }
 
