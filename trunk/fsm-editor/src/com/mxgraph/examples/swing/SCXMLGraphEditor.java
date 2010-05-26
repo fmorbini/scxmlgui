@@ -305,6 +305,9 @@ public class SCXMLGraphEditor extends JPanel
 		}
 		return ig;
 	}
+	public void displayOutsourcedContentInNode(mxCell node, SCXMLGraph g, boolean display) throws Exception {
+		attachOutsourcedContentToThisNode(node, g, display);
+	}
 	public void displayOutsourcedContent(SCXMLGraph g,boolean display,boolean isRoot) throws Exception {
 		// get the nodes that are outsourced
 		HashSet<mxCell> onds = g.getOutsourcedNodes();

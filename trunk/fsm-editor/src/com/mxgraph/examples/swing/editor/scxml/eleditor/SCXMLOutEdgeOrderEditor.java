@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -56,7 +57,8 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 	
 	private static final String title="Edge order editor";
 	
-	public SCXMLOutEdgeOrderEditor(mxCell source, SCXMLGraphEditor e, Point pos) {
+	public SCXMLOutEdgeOrderEditor(JFrame parent,mxCell source, SCXMLGraphEditor e, Point pos) {
+		super(parent,true);
 		editor=e;
 		gc=editor.getGraphComponent();
 		graph=gc.getGraph();
@@ -87,7 +89,6 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 		
 		//Display the window.
 		pack();
-		setModal(true);
 		setVisible(true);
 	}
 	

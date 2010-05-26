@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
@@ -23,7 +24,6 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
-import com.mxgraph.util.mxResources;
 
 public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
@@ -41,9 +41,11 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
     private SCXMLEdge edge;
     private JMenu editMenu;
 
-    public SCXMLEdgeEditor(SCXMLEdge e, SCXMLGraphEditor editor) {
-    	super(editor);
+    public SCXMLEdgeEditor(JFrame parent,SCXMLEdge e, SCXMLGraphEditor editor, Point pos) {
+    	super(parent,editor);
     	setTitle("SCXML edge editor");
+    	setLocation(pos);
+        setAlwaysOnTop(true);
 
         edge=e;
         //we need 3 editors:
@@ -115,18 +117,9 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         JMenuBar mb = new JMenuBar();
         mb.add(editMenu);
         setJMenuBar(mb);
-    }
-
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event dispatch thread.
-     * @param editor 
-     * @param pos 
-     */
-    public static void createAndShowSCXMLEdgeEditor(SCXMLGraphEditor editor, SCXMLEdge edge, Point pos) {
-        //Create and set up the window.
-        final SCXMLEdgeEditor frame = new SCXMLEdgeEditor(edge,editor);        
-        frame.showSCXMLElementEditor(pos);
+        
+		//Display the window.
+		pack();
+		setVisible(true);
     }
 }

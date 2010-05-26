@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
@@ -42,9 +43,11 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
     private SCXMLNode node;
     private JMenu editMenu;
 
-    public SCXMLNodeEditor(SCXMLNode n, SCXMLGraphEditor editor) {
-    	super(editor);
-        setTitle("SCXML edge editor");
+    public SCXMLNodeEditor(JFrame parent,SCXMLNode n, SCXMLGraphEditor editor, Point pos) {
+    	super(parent,editor);
+        setTitle("SCXML node editor");
+        setLocation(pos);
+        setAlwaysOnTop(true);
 
         node=n;
         //we need 3 editors:
@@ -144,18 +147,9 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         JMenuBar mb = new JMenuBar();
         mb.add(editMenu);
         setJMenuBar(mb);
-    }
-
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event dispatch thread.
-     * @param editor 
-     * @param pos 
-     */
-    public static void createAndShowSCXMLNodeEditor(SCXMLGraphEditor editor, SCXMLNode node, Point pos) {
-        //Create and set up the window.
-        final SCXMLNodeEditor frame = new SCXMLNodeEditor(node,editor);
-        frame.showSCXMLElementEditor(pos);
+        
+		//Display the window.
+		pack();
+		setVisible(true);
     }
 }
