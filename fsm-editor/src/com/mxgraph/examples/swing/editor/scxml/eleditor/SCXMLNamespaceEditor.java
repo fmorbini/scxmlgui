@@ -28,7 +28,6 @@ public class SCXMLNamespaceEditor extends SCXMLElementEditor {
 	private UndoManager undo;
 	private Document doc;
     private SCXMLNode node;
-	private JTabbedPane tabbedPane;
     
     public SCXMLNamespaceEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode n, Point pos) {
     	super(parent,editor);

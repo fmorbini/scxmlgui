@@ -35,7 +35,6 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 	private UndoJTextField eventTextPane;
 	private UndoJTextField conditionTextPane;
 	private UndoJTextPane exeTextPane;
-	private JTabbedPane tabbedPane;
     private UndoManager undo;
     private Document doc;
     private SCXMLEdge edge;

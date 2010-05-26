@@ -29,7 +29,6 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
 	private UndoManager undo;
 	private Document doc;
     private SCXMLNode root;
-	private JTabbedPane tabbedPane;
     
     public SCXMLDatamodelEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode r, Point pos) throws Exception {
     	super(parent,editor);
