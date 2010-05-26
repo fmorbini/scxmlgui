@@ -1,5 +1,8 @@
 package com.mxgraph.examples.swing.editor.scxml.eleditor;
 
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -43,6 +46,6 @@ public class EditorKeyboardHandler {
 		map.put("cut", editor.getActionByName(DefaultEditorKit.cutAction));
 		map.put("copy", editor.getActionByName(DefaultEditorKit.copyAction));
 		map.put("paste", editor.getActionByName(DefaultEditorKit.pasteAction));
-		map.put("close", editor.getActionByName(SCXMLElementEditor.closeActionName));
+		map.put("close", editor.closeAction);
 	}
 }

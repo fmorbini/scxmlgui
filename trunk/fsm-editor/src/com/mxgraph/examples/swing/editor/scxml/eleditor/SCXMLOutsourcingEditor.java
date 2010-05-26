@@ -31,7 +31,6 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
 	private UndoManager undo;
 	private Document doc;
     private SCXMLNode node;
-	private JTabbedPane tabbedPane;
     
     public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode n, Point pos) throws Exception {
     	super(parent,editor);

@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -51,7 +50,6 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
@@ -81,9 +79,12 @@ import com.mxgraph.view.mxMultiplicity;
 
 public class SCXMLGraphEditor extends JPanel
 {
+	public Preferences preferences=Preferences.userRoot();
 	private JTextArea scxmlErrorsDialog;
 	private ImportExportPicker iep;
 	public ImportExportPicker getIOPicker() {return iep;}
+	public SCXMLEditorMenuBar menuBar;
+
 	/**
 	 * 
 	 */
@@ -353,7 +354,7 @@ public class SCXMLGraphEditor extends JPanel
 			else setModified(true);
 		}
 	};
-
+	
 	/**
 	 * 
 	 */
@@ -410,6 +411,8 @@ public class SCXMLGraphEditor extends JPanel
 		// otherwise a null pointer exception is generated.
 		mxMultiplicity[] m={};
 		graph.setMultiplicities(m);
+		
+		preferences = Preferences.userRoot();
 	}
 
 	/**
@@ -554,9 +557,10 @@ public class SCXMLGraphEditor extends JPanel
 	 */
 	protected void showGraphPopupMenu(MouseEvent e)
 	{
+		Point screenCoord=e.getLocationOnScreen();
 		Point mousePoint = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(),graphComponent);
 		Point graphPoint=((SCXMLGraphComponent)graphComponent).mouseCoordToGraphMouseCoord(mousePoint);
-		SCXMLEditorPopupMenu menu = new SCXMLEditorPopupMenu(this,mousePoint,graphPoint);
+		SCXMLEditorPopupMenu menu = new SCXMLEditorPopupMenu(this,mousePoint,graphPoint,screenCoord);
 		menu.show(graphComponent, mousePoint.x, mousePoint.y);
 
 		e.consume();
@@ -973,7 +977,7 @@ public class SCXMLGraphEditor extends JPanel
 		scxmlListener=new SCXMLListener(editor);
 		
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setJMenuBar(new SCXMLEditorMenuBar(editor));
+		frame.setJMenuBar(menuBar=new SCXMLEditorMenuBar(editor));
 		frame.setSize(870, 640);
 
 		

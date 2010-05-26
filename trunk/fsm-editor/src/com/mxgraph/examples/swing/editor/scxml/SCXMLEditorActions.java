@@ -1638,30 +1638,46 @@ public class SCXMLEditorActions
 		 * 
 		 */
 		protected String lastDir;
+		protected File file;
 
+		public OpenAction(File file) {
+			this.file=file;
+		}
+		
+		public OpenAction() {
+			this.file=null;
+		}
+
+		private JFileChooser getFileToOpen(SCXMLGraphEditor editor) {
+			String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():System.getProperty("user.dir"));
+			JFileChooser fc = new JFileChooser(wd);
+			
+			ImportExportPicker fileIO=editor.getIOPicker();
+			fileIO.addImportFiltersToFileChooser(fc);
+
+			if (file!=null) fc.setSelectedFile(file);
+			else {
+				int rc = fc.showDialog(null, mxResources.get("openFile"));
+				if (rc != JFileChooser.APPROVE_OPTION) fc.setSelectedFile(null);
+			}
+			return fc;
+		}
+		
 		/**
 		 * 
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
-
-			if (editor != null)
-			{
+			if (editor != null) {
 				if (AskToSaveIfRequired.check(editor)) {
 					SCXMLGraph graph = editor.getGraphComponent().getGraph();
-
-					if (graph != null)
-					{
-						String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():System.getProperty("user.dir"));
-						JFileChooser fc = new JFileChooser(wd);
+					if (graph != null) {
+						JFileChooser fc = getFileToOpen(editor);
 
 						ImportExportPicker fileIO=editor.getIOPicker();
-						fileIO.addImportFiltersToFileChooser(fc);
 
-						int rc = fc.showDialog(null, mxResources.get("openFile"));
-
-						if (rc == JFileChooser.APPROVE_OPTION)
+						if (fc.getSelectedFile()!=null)
 						{
 							lastDir = fc.getSelectedFile().getParent();
 							try
@@ -1678,6 +1694,7 @@ public class SCXMLEditorActions
 								editor.getUndoManager().clear();
 								editor.getUndoManager().resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
+								editor.menuBar.updateRecentlyOpenedListWithFile(fc.getSelectedFile(), editor);
 							} catch (Exception ex) {
 								ex.printStackTrace();
 								JOptionPane.showMessageDialog(editor.getGraphComponent(),

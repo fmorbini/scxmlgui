@@ -39,7 +39,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 	 */
 	private static final long serialVersionUID = -3132749140550242191L;
 
-	public SCXMLEditorPopupMenu(SCXMLGraphEditor editor,Point mousePt, Point graphPt)
+	public SCXMLEditorPopupMenu(SCXMLGraphEditor editor,Point mousePt, Point graphPt, Point screenCoord)
 	{
 		SCXMLGraphComponent gc = editor.getGraphComponent();
 		mxCell c=(mxCell) gc.getCellAt(graphPt.x, graphPt.y);
@@ -82,12 +82,12 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					add(editor.bind(mxResources.get("addNode"), new AddAction(mousePt,c))).setEnabled(addNodeEnabled);
 					addSeparator();
 					mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
-					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,mousePt))).setEnabled(c!=root);
-					add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(mousePt))).setEnabled(c==root);
-					add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,mousePt)));
+					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,screenCoord))).setEnabled(c!=root);
+					add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(screenCoord))).setEnabled(c==root);
+					add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,screenCoord)));
 					if (c!=root) {
-						add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,mousePt))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
-						JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,mousePt)));
+						add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
+						JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,screenCoord)));
 						menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
 						add(menuItem2);
 						addSeparator();

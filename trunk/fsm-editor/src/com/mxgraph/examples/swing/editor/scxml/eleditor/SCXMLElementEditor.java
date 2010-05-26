@@ -36,8 +36,8 @@ public class SCXMLElementEditor extends JDialog {
 	
 	public static final String undoAction="Undo"; 
 	public static final String redoAction="Redo"; 
-	public static final String closeActionName="close"; 
 	public final CloseAction closeAction; 
+	protected JTabbedPane tabbedPane;
 	
     protected HashMap<Object, Action> actions=new HashMap<Object, Action>();;
 
@@ -68,7 +68,6 @@ public class SCXMLElementEditor extends JDialog {
     	    	UndoJTextPane u;
     			u=(UndoJTextPane) o;
     			ActionMap actionMap = u.getActionMap();
-    			actions.put(closeActionName, closeAction);
     			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
     			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
     			actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
@@ -93,7 +92,6 @@ public class SCXMLElementEditor extends JDialog {
     	    	UndoJTextField u;
     			u=(UndoJTextField) o;
     			ActionMap actionMap = u.getActionMap();
-    			actions.put(closeActionName, closeAction);
     			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
     			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
     			actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
@@ -123,9 +121,9 @@ public class SCXMLElementEditor extends JDialog {
 		public void actionPerformed(ActionEvent e) {
 			dispose();
 		}
-	}
-    
-    // any time a change is made to the document, the scxml editor "modified" flag is set 
+	}    
+	
+	// any time a change is made to the document, the scxml editor "modified" flag is set 
     protected class DocumentChangeListener implements DocumentListener {
     	private SCXMLGraphEditor editor;
         public DocumentChangeListener(SCXMLGraphEditor e) {

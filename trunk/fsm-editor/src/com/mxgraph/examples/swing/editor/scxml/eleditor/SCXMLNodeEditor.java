@@ -37,7 +37,6 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	private UndoJTextPane onexitTextPane;
 	private UndoJTextPane initialTextPane;
 	private UndoJTextPane finalTextPane;
-	private JTabbedPane tabbedPane;
     private UndoManager undo;
     private Document doc;
     private SCXMLNode node;
