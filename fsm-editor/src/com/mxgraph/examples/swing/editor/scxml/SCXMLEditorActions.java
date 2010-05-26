@@ -1621,17 +1621,10 @@ public class SCXMLEditorActions
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
-			mxIGraphModel model = graph.getModel();
-			//model.beginUpdate();
+			SCXMLGraphEditor editor = getEditor(e);
+			editor.getUndoManager().setCollectionMode(true);
 			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
-			/*try
-			{
-				layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
-			}
-			finally
-			{
-				model.endUpdate();
-			}*/
+			editor.getUndoManager().setCollectionMode(false);
 		}
 	}
 
@@ -2205,7 +2198,7 @@ public class SCXMLEditorActions
 			SCXMLGraphEditor editor = getEditor(e);
 			SCXMLGraph graph = editor.getGraphComponent().getGraph();
 			try {
-				editor.getUndoManager().setEnabled(false);
+				editor.getUndoManager().setCollectionMode(true);
 				if (node.getChildCount()>0) {
 					// disable
 					editor.displayOutsourcedContentInNode(node,graph,false);
@@ -2217,10 +2210,10 @@ public class SCXMLEditorActions
 				mxClusterLayout clusterLayout=new mxClusterLayout(graph);
 				clusterLayout.execute(graph.getDefaultParent());
 				editor.setDisplayOfOutsourcedContentSelected(false);
-				editor.getUndoManager().setEnabled(true);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
+			editor.getUndoManager().setCollectionMode(false);
 		}
 	}
 	
@@ -2231,7 +2224,7 @@ public class SCXMLEditorActions
 			SCXMLGraph graph = editor.getGraphComponent().getGraph();
 			mxIGraphModel model = graph.getModel();
 			try {
-				editor.getUndoManager().setEnabled(false);
+				editor.getUndoManager().setCollectionMode(true);
 				if (editor.isDisplayOfOutsourcedContentSelected()) {
 					//disable
 					editor.displayOutsourcedContent(graph, false,true);
@@ -2242,12 +2235,11 @@ public class SCXMLEditorActions
 				// apply layout to each cluster from the leaves up:
 				mxClusterLayout clusterLayout=new mxClusterLayout(graph);
 				clusterLayout.execute(graph.getDefaultParent());
-				editor.setDisplayOfOutsourcedContentSelected(false);
-				editor.getUndoManager().setEnabled(true);
+				editor.setDisplayOfOutsourcedContentSelected(!editor.isDisplayOfOutsourcedContentSelected());
 			} catch (Exception e1) {
 				e1.printStackTrace();
-				editor.setDisplayOfOutsourcedContentSelected(!editor.isDisplayOfOutsourcedContentSelected());
 			}
+			editor.getUndoManager().setCollectionMode(false);
 		}
 	}
 	

@@ -41,7 +41,7 @@ public class mxUndoManager extends mxEventSource
 	/**
 	 * List that contains the steps of the command history.
 	 */
-	protected List<mxUndoableEdit> history;
+	protected List<List<mxUndoableEdit>> history;
 
 	/**
 	 * Index of the element to be added next.
@@ -49,6 +49,8 @@ public class mxUndoManager extends mxEventSource
 	protected int indexOfNextAdd;
 
 	private boolean enabled=true;
+	private boolean collection=false;
+	private List<mxUndoableEdit> collected=new ArrayList<mxUndoableEdit>();
 
 	/**
 	 * Constructs a new undo manager with a default history size.
@@ -81,7 +83,7 @@ public class mxUndoManager extends mxEventSource
 	 */
 	public void clear()
 	{
-		history = new ArrayList<mxUndoableEdit>(size);
+		history = new ArrayList<List<mxUndoableEdit>>(size);
 		indexOfNextAdd = 0;
 		fireEvent(new mxEventObject(mxEvent.CLEAR));
 	}
@@ -100,21 +102,25 @@ public class mxUndoManager extends mxEventSource
 	public Collection<Object> undo()
 	{
 		HashSet<Object> modifiedObjects=new HashSet<Object>();
-		while (indexOfNextAdd > 0)
+		boolean done=false;
+		while ((indexOfNextAdd > 0) && !done)
 		{
-			mxUndoableEdit edit = history.get(--indexOfNextAdd);
-			edit.undo();
-			for (mxUndoableChange c:edit.getChanges()) {
-				if (c instanceof mxChildChange) {
-					Object o = ((mxChildChange) c).getChild();
-					if (o!=null) modifiedObjects.add(o);
+			List<mxUndoableEdit> edits = history.get(--indexOfNextAdd);
+			for (int i=edits.size()-1;i>=0;i--) {
+				mxUndoableEdit edit = edits.get(i);
+				edit.undo();
+				for (mxUndoableChange c:edit.getChanges()) {
+					if (c instanceof mxChildChange) {
+						Object o = ((mxChildChange) c).getChild();
+						if (o!=null) modifiedObjects.add(o);
+					}
 				}
-			}
-
-			if (edit.isSignificant())
-			{
-				fireEvent(new mxEventObject(mxEvent.UNDO, "edit", edit));
-				break;
+	
+				if (edit.isSignificant())
+				{
+					fireEvent(new mxEventObject(mxEvent.UNDO, "edit", edit));
+					done=true;
+				}
 			}
 		}
 		return modifiedObjects;
@@ -135,22 +141,25 @@ public class mxUndoManager extends mxEventSource
 	{
 		HashSet<Object> modifiedObjects=new HashSet<Object>();
 		int n = history.size();
+		boolean done=false;
 
-		while (indexOfNextAdd < n)
+		while ((indexOfNextAdd < n) && !done)
 		{
-			mxUndoableEdit edit = history.get(indexOfNextAdd++);
-			edit.redo();
-			for (mxUndoableChange c:edit.getChanges()) {
-				if (c instanceof mxChildChange) {
-					Object o = ((mxChildChange) c).getChild();
-					if (o!=null) modifiedObjects.add(o);
+			List<mxUndoableEdit> edits = history.get(indexOfNextAdd++);
+			for (mxUndoableEdit edit:edits) {
+				edit.redo();
+				for (mxUndoableChange c:edit.getChanges()) {
+					if (c instanceof mxChildChange) {
+						Object o = ((mxChildChange) c).getChild();
+						if (o!=null) modifiedObjects.add(o);
+					}
 				}
-			}
-			
-			if (edit.isSignificant())
-			{
-				fireEvent(new mxEventObject(mxEvent.REDO, "edit", edit));
-				break;
+				
+				if (edit.isSignificant())
+				{
+					fireEvent(new mxEventObject(mxEvent.REDO, "edit", edit));
+					done=true;
+				}
 			}
 		}
 		return modifiedObjects;
@@ -159,7 +168,13 @@ public class mxUndoManager extends mxEventSource
 	public void setEnabled(boolean e) {
 		enabled=e;
 	}
-	
+	public void setCollectionMode(boolean e) {
+		collection=e;
+		if (!collection && (collected.size()>0)) {
+			addEventList();
+		}
+	}
+
 	/**
 	 * Method to be called to add new undoable edits to the history.
 	 */
@@ -169,19 +184,29 @@ public class mxUndoManager extends mxEventSource
 			if (undoableEdit.getTransparent()) {}
 			else if (!undoableEdit.getUndoable()) {
 				notUndoableEditHappened();
+			} else if (collection) {
+				collected.add(undoableEdit);
+				fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 			} else {
-				trim();
-		
-				if (size > 0 && size == history.size())
-				{
-					history.remove(0);
-					unmodifiedPosition--;
-				}
-		
-				history.add(undoableEdit);
-				indexOfNextAdd = history.size();
+				collected.add(undoableEdit);
+				addEventList();
 				fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
 			}
+		}
+	}
+	private void addEventList() {
+		if (collected.size()>0) {
+			trim();
+			
+			if (size > 0 && size == history.size())
+			{
+				history.remove(0);
+				unmodifiedPosition--;
+			}
+	
+			history.add(collected);
+			indexOfNextAdd = history.size();
+			collected=new ArrayList<mxUndoableEdit>();
 		}
 	}
 	private boolean notUndoableEdits=false;
@@ -197,9 +222,8 @@ public class mxUndoManager extends mxEventSource
 	{
 		while (history.size() > indexOfNextAdd)
 		{
-			mxUndoableEdit edit = (mxUndoableEdit) history
-					.remove(indexOfNextAdd);
-			edit.die();
+			List<mxUndoableEdit> edits = (List<mxUndoableEdit>) history.remove(indexOfNextAdd);
+			for (mxUndoableEdit edit:edits)edit.die();
 		}
 	}
 
