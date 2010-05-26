@@ -571,7 +571,7 @@ public class SCXMLGraphEditor extends JPanel
 	}
 
 	public int getScroollingAmount(JScrollBar hs, MouseWheelEvent e) {
-		return (int) (e.getWheelRotation()*hs.getModel().getExtent()*0.7);
+		return (int) (e.getWheelRotation()*hs.getModel().getExtent()*0.3);
 	}
 	
 	/**
