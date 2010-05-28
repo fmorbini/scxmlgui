@@ -46,7 +46,6 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
     	super(parent,editor);
         setTitle("SCXML node editor");
         setLocation(pos);
-        setAlwaysOnTop(true);
 
         node=n;
         //we need 3 editors:

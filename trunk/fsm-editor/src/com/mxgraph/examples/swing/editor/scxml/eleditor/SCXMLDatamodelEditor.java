@@ -34,7 +34,6 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
     	super(parent,editor);
         setTitle("SCXML datamodel editor");
         setLocation(pos);
-        setAlwaysOnTop(true);
 
         DocumentChangeListener changeListener = new DocumentChangeListener(editor);
 

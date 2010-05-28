@@ -37,6 +37,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
 
 import com.mxgraph.examples.swing.editor.EditorAboutFrame;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
@@ -222,11 +223,25 @@ public class SCXMLGraphEditor extends JPanel
 		f=new File(wd+f.separator+fileName);
 		while (!f.exists()) {
 			JFileChooser fc = new JFileChooser(wd);
-			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			int rc = fc.showDialog(null, mxResources.get("pickDirectory"+" '"+fileName+"'"));
+			final String inputFileName=fileName;
+			fc.setFileFilter(new FileFilter() {
+				
+				@Override
+				public String getDescription() {
+					return "Find '"+inputFileName+"' file.";
+				}
+				
+				@Override
+				public boolean accept(File f) {
+					if (f.getName().equals(inputFileName) || f.isDirectory()) return true;
+					else return false;
+				}
+			});
+			fc.setAcceptAllFileFilterUsed(false);
+			int rc = fc.showDialog(this, mxResources.get("findFile")+" '"+fileName+"'");
 			if (rc == JFileChooser.APPROVE_OPTION) {
-				System.out.println("trying this file: '"+fc.getSelectedFile()+f.separator+fileName+"'");
-				f=new File(fc.getSelectedFile()+f.separator+fileName);
+				System.out.println("trying this file: '"+fc.getSelectedFile()+"'");
+				f=fc.getSelectedFile();
 			} else {
 				throw new Exception("Aborted by the user.");
 			}
@@ -248,63 +263,67 @@ public class SCXMLGraphEditor extends JPanel
 		System.out.println("attaching node: '"+SCXMLnodename+"' from file '"+fileName+"'");
 		// check that the requested node is there
 		SCXMLNode SCXMLn = ie.getNodeFromSCXMLID(SCXMLnodename);
-		assert(SCXMLn!=null);
-		String internalID=SCXMLn.getInternalID();
-		assert(!StringUtils.isEmptyString(internalID));
-		// get the cell corresponding to that node
-		mxCell oc=ie.getCellFromInternalID(internalID);
-		assert(oc!=null);
-		// check whether ond has children, issue a warning if it has
-		int cc=ond.getChildCount();
-		if (cc>0) {
-			//  remove all children of ond
-			if (display) System.out.println("WARNING: the node: "+v+" has "+cc+" child(ren). Removing all of them.");
-
-			// insure first that the cells are deletable
-			Set<Object> descendants=new HashSet<Object>();
-			rootg.getAllDescendants(ond, descendants);
-			// don't change ond (ond is the original node in the graph (the one to which we are adding the outsourced content))
-			descendants.remove(ond);
-			for(Object d:descendants) rootg.setCellAsDeletable(d, true);
-
-			Object[] children=new Object[cc];
-			for (int i=0;i<cc;i++) children[i]=ond.getChildAt(i);
-			rootg.removeCells(children);
-		}
-		if (display) {
-			//  attach copy of oc as only children of ond
-			v.setCluster(true); rootg.setCellStyle(v.getStyle(),ond);
-			HashMap<Object,Object> original2clone=new HashMap<Object, Object>();
-			Object[] noc = g.cloneCells(new Object[]{oc}, false,original2clone);
-			
-			// loop through the mapping now created while cloning, if there are
-			// any cells that are outsourced add this clone to the list of clones
-			// for them in the graph ig.
-			for (mxCell c:ig.getOutsourcedNodes()) {
-				mxCell clone=(mxCell) original2clone.get(c);
-				if (clone!=null) {
-					HashSet<mxCell> clones4ThisOriginal = ig.getOriginal2Clones().get(c);
-					if (clones4ThisOriginal==null) ig.getOriginal2Clones().put(c,clones4ThisOriginal=new HashSet<mxCell>());
-					assert(!clones4ThisOriginal.contains(clone));
-					clones4ThisOriginal.add(clone);
-				}
-			}
-		
-			assert(noc.length==1);
-			mxCell ocCopy=(mxCell) noc[0];
-			rootg.addCell(ocCopy, ond);
-			//  block all editing for ocCopy and all its children
-			Set<Object> descendants=new HashSet<Object>();
-			rootg.getAllDescendants(ocCopy, descendants);
-			for(Object d:descendants) {
-				rootg.setCellAsDeletable(d, false);
-				rootg.setCellAsEditable(d, false);
-				rootg.setCellAsMovable(d, false);
-			}
+		if(SCXMLn==null) {
+			JOptionPane.showMessageDialog(this,mxResources.get("nodeNotFound")+": '"+SCXMLnodename+"'",mxResources.get("error"),JOptionPane.ERROR_MESSAGE);
+			return null;
 		} else {
-			v.setCluster(false); rootg.setCellStyle(v.getStyle(),ond);
+			String internalID=SCXMLn.getInternalID();
+			assert(!StringUtils.isEmptyString(internalID));
+			// get the cell corresponding to that node
+			mxCell oc=ie.getCellFromInternalID(internalID);
+			assert(oc!=null);
+			// check whether ond has children, issue a warning if it has
+			int cc=ond.getChildCount();
+			if (cc>0) {
+				//  remove all children of ond
+				if (display) System.out.println("WARNING: the node: "+v+" has "+cc+" child(ren). Removing all of them.");
+
+				// insure first that the cells are deletable
+				Set<Object> descendants=new HashSet<Object>();
+				rootg.getAllDescendants(ond, descendants);
+				// don't change ond (ond is the original node in the graph (the one to which we are adding the outsourced content))
+				descendants.remove(ond);
+				for(Object d:descendants) rootg.setCellAsDeletable(d, true);
+
+				Object[] children=new Object[cc];
+				for (int i=0;i<cc;i++) children[i]=ond.getChildAt(i);
+				rootg.removeCells(children);
+			}
+			if (display) {
+				//  attach copy of oc as only children of ond
+				v.setCluster(true); rootg.setCellStyle(v.getStyle(),ond);
+				HashMap<Object,Object> original2clone=new HashMap<Object, Object>();
+				Object[] noc = g.cloneCells(new Object[]{oc}, false,original2clone);
+
+				// loop through the mapping now created while cloning, if there are
+				// any cells that are outsourced add this clone to the list of clones
+				// for them in the graph ig.
+				for (mxCell c:ig.getOutsourcedNodes()) {
+					mxCell clone=(mxCell) original2clone.get(c);
+					if (clone!=null) {
+						HashSet<mxCell> clones4ThisOriginal = ig.getOriginal2Clones().get(c);
+						if (clones4ThisOriginal==null) ig.getOriginal2Clones().put(c,clones4ThisOriginal=new HashSet<mxCell>());
+						assert(!clones4ThisOriginal.contains(clone));
+						clones4ThisOriginal.add(clone);
+					}
+				}
+
+				assert(noc.length==1);
+				mxCell ocCopy=(mxCell) noc[0];
+				rootg.addCell(ocCopy, ond);
+				//  block all editing for ocCopy and all its children
+				Set<Object> descendants=new HashSet<Object>();
+				rootg.getAllDescendants(ocCopy, descendants);
+				for(Object d:descendants) {
+					rootg.setCellAsDeletable(d, false);
+					rootg.setCellAsEditable(d, false);
+					rootg.setCellAsMovable(d, false);
+				}
+			} else {
+				v.setCluster(false); rootg.setCellStyle(v.getStyle(),ond);
+			}
+			return ig;
 		}
-		return ig;
 	}
 	public void displayOutsourcedContentInNode(mxCell node, SCXMLGraph g, boolean display) throws Exception {
 		attachOutsourcedContentToThisNode(node, g, display);

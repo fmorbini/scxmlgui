@@ -44,7 +44,6 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
     	super(parent,editor);
     	setTitle("SCXML edge editor");
     	setLocation(pos);
-        setAlwaysOnTop(true);
 
         edge=e;
         //we need 3 editors:

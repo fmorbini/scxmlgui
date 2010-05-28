@@ -69,10 +69,12 @@ public class mxClusterLayout extends mxGraphLayout {
 			// apply layout
 			// exit cluster
 			// resize the cluster container
-			for (mxIGraphLayout layout:layouts) layout.execute(cluster);
-			Object[] a=new Object[1];
-			a[0]=cluster;
-			graph.updateGroupBounds(a,2 * graph.getGridSize(),false);
+			if (!cluster.isCollapsed()) {
+				for (mxIGraphLayout layout:layouts) layout.execute(cluster);
+				Object[] a=new Object[1];
+				a[0]=cluster;
+				graph.updateGroupBounds(a,2 * graph.getGridSize(),false);
+			}
 		}
 	}
 }

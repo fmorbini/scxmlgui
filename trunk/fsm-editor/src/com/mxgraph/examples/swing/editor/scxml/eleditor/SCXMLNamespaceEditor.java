@@ -33,7 +33,6 @@ public class SCXMLNamespaceEditor extends SCXMLElementEditor {
     	super(parent,editor);
         setTitle("SCXML namespace editor");
         setLocation(pos);
-        setAlwaysOnTop(true);
 
         DocumentChangeListener changeListener = new DocumentChangeListener(editor);
 
