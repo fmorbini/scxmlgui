@@ -35,7 +35,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 	 * 
 	 */
 	private static final long serialVersionUID = 4060203894740766714L;
-	private static final int MAX_RECENT_FILE_HISTORY=10;
+	private static final int MAX_RECENT_FILE_HISTORY=9;
 	private ArrayList<String> recentlyOpenedFiles=new ArrayList<String>();
 	private JMenu fileMenu;
 

@@ -13,6 +13,7 @@ import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxPoint;
+import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
@@ -140,13 +141,13 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 		mxIGraphModel model = graph.getModel();
 		mxGeometry src = model.getGeometry(model.getTerminal(edge, true));
 		mxGeometry trg = model.getGeometry(model.getTerminal(edge, false));
-
+		
 		// Routes multiple loops
 		if (src == trg)
 		{
-			//now loops are the children of the cell of which they are attached (i.e. src)
-			// so there is no need to sum src.getX and src.getY because the coordinates of the edge
-			// are already relative to that point.
+			//in the current code loops (i.e. edges with src==trg) are the children of the cell of
+			// which they are attached (i.e. src) so there is no need to sum src.getX and src.getY
+			// because the coordinates of the edge are already relative to that point.
 			//double x0 = src.getX() + src.getWidth() + this.spacing;
 			//double y0 = src.getY() + src.getHeight() / 2;
 			double x0 = src.getWidth() + this.spacing;
@@ -183,7 +184,13 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 
 			for (int i = 0; i < parallels.size(); i++)
 			{
-				route(parallels.get(i), x0, y0);
+				mxCell parallelEdge = (mxCell) parallels.get(i);
+				/*mxCellState edgeState=graph.getView().getState(parallelEdge);
+				int numPoints=edgeState.getAbsolutePointCount();
+				mxPoint first=edgeState.getAbsolutePoint(0);
+				mxPoint last=edgeState.getAbsolutePoint(numPoints-1);
+				System.out.println(first+" "+last);*/
+				route(parallelEdge, x0, y0);
 				x0 -= nx;
 				y0 += ny;
 			}
@@ -197,8 +204,7 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 	{
 		if (graph.isCellMovable(edge))
 		{
-			setEdgePoints(edge, Arrays
-					.asList(new mxPoint[] { new mxPoint(x, y) }));
+			setEdgePoints(edge, Arrays.asList(new mxPoint[] { new mxPoint(x, y) }));
 		}
 	}
 

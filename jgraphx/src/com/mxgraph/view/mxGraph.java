@@ -4232,15 +4232,16 @@ public class mxGraph extends mxEventSource
 				} else if (cell.isEdge()) {
 					mxGraphView view=getView();
 					mxCellState state = view.getState(cell);
-					geo = state.getLabelBounds();
-					//System.out.println("EDGE SB: "+convertValueToString(cell)+" "+geo);
-					geo=parentState.relativizeRectangleToThisState(geo, view.getScale(), view.getTranslate());
-					//System.out.println("RELATIVE EDGE: "+convertValueToString(cell)+" "+geo);
-					
-					//geo=getCellGeometry(cell);
+					if (state!=null) {
+						geo = state.getLabelBounds();
+						//System.out.println("EDGE SB: "+convertValueToString(cell)+" "+geo);
+						geo=parentState.relativizeRectangleToThisState(geo, view.getScale(), view.getTranslate());
+						//System.out.println("RELATIVE EDGE: "+convertValueToString(cell)+" "+geo);
+						//geo=getCellGeometry(cell);
+					}
 				}
 				if (result == null) result = new mxRectangle(geo);
-				else result.add(geo);
+				else if (geo!=null) result.add(geo);
 			}
 		}
 		//System.out.println("result: "+result);

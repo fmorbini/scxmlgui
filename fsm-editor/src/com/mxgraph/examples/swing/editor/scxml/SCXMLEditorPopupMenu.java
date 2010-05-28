@@ -60,7 +60,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					// if on a control point find out if it's the beginning or end of the endge.
 					// -add control point if not on a control point
 					// -remove control point if on one that is neither the beginning nor the end.
-					add(editor.bind(mxResources.get("editEdge"), new EditEdgeAction(c,mousePt)));
+					add(editor.bind(mxResources.get("editEdge"), new EditEdgeAction(c,screenCoord)));
 					addSeparator();
 					// if the edge is not a loop you can add/remove corners
 					if (c.getSource()!=c.getTarget()) {
