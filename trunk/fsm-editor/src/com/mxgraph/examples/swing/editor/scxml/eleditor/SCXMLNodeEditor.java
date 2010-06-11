@@ -135,8 +135,9 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         tabbedPane.addChangeListener(new ChangeListener() {
         	public void stateChanged(ChangeEvent changeEvent) {
         		//System.out.println("stateChanged in scxmlnodeeditor");
-        		updateActionTable(tabbedPane,actions);
+        		updateActionTable(tabbedPane,actions);        		
         	}
+
         });
 
         //Add the components.
@@ -149,5 +150,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 		//Display the window.
 		pack();
 		setVisible(true);
+		
+		SCXMLElementEditor.focusOnTextPanel(tabbedPane.getSelectedComponent());
     }
 }

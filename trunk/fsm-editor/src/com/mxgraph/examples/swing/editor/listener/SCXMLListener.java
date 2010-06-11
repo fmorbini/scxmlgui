@@ -24,6 +24,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,6 +45,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor.WindowEventDemo;
 import com.mxgraph.examples.swing.editor.DefaultFileFilter;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.model.mxCell;
@@ -52,7 +54,7 @@ import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUtils;
 
-public class SCXMLListener extends JFrame implements ListSelectionListener, WindowListener, ActionListener, DocumentListener {
+public class SCXMLListener extends JDialog implements ListSelectionListener, WindowListener, ActionListener, DocumentListener {
 	private int status;
 	private static final int STARTED = 0;
 	private static final int STOPPED = 1;
@@ -65,7 +67,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	private JScrollPane listScrollPane;
 	private ArrayList<HashSet<mxCell>> highlightedCellsEachInstant;
 
-	private JButton saveButton,loadButton;
+	private JButton saveButton,loadButton,reloadButton;
 	private JButton startStopButton;
 	private JTextField port;
 
@@ -76,14 +78,13 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	private mxIGraphModel model;
 	private SCXMLGraphEditor editor;
 
-	public SCXMLListener(SCXMLGraphEditor editor2) {
-		super("SCXML listener");
-		
+	public SCXMLListener(JFrame parent, SCXMLGraphEditor editor) {
+		super(parent,"SCXML Listener");
 		highlightedCellsEachInstant=new ArrayList<HashSet<mxCell>>();
 		
-		graphComponent=editor2.getGraphComponent();
+		graphComponent=editor.getGraphComponent();
 		model=graphComponent.getGraph().getModel();
-		this.editor=editor2;
+		this.editor=editor;
 		
 		addWindowListener(this);
 		JPanel contentPane = new JPanel(new BorderLayout());
@@ -111,6 +112,14 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		startStopButton.setActionCommand("start");
 		startStopButton.addActionListener(this);
 				
+		reloadButton = new JButton(mxResources.get("reloadSCXMLListener"));
+		reloadButton.setActionCommand("refresh");
+		reloadButton.setEnabled(false);
+		reloadButton.addActionListener(this);
+		JPanel reloadButtonPane = new JPanel();
+		reloadButtonPane.setLayout(new BoxLayout(reloadButtonPane,BoxLayout.LINE_AXIS));
+		reloadButtonPane.add(reloadButton);
+		
 		JPanel startStopButtonPane = new JPanel();
 		startStopButtonPane.setLayout(new BoxLayout(startStopButtonPane,BoxLayout.LINE_AXIS));
 		startStopButtonPane.add(portLabel);
@@ -144,9 +153,11 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		loadSaveButtonPane.add(loadButton);
 		loadSaveButtonPane.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
-		contentPane.add(startStopButtonPane, BorderLayout.PAGE_START);
-		contentPane.add(listScrollPane, BorderLayout.CENTER);
-		contentPane.add(loadSaveButtonPane, BorderLayout.PAGE_END);
+		contentPane.setLayout(new BoxLayout(contentPane,BoxLayout.Y_AXIS));
+		contentPane.add(startStopButtonPane);
+		contentPane.add(reloadButtonPane);
+		contentPane.add(listScrollPane);
+		contentPane.add(loadSaveButtonPane);
 
 		setStatus(PRESTARTING);
 	}
@@ -181,6 +192,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		if (e.getValueIsAdjusting() == false) {
 			int lastIndex = listModel.size()-1;
 			int selectedIndex = list.getSelectedIndex();
+			if (lastIndex>0) reloadButton.setEnabled(true);
 			if ((lastIndex<0) || (selectedIndex>=lastIndex)) {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
@@ -337,6 +349,11 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				}			
 				setStatus(STOPPED);
 			}
+		} else if (cmd.equals("refresh")) {
+			int size=listModel.size();
+			for (int i=0;i<size;i++) {
+				refreshEvent((SCXMLEvent)listModel.get(i),i);
+			}
 		}
 	}
 
@@ -384,7 +401,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 				socket = new ServerSocket(port);
 				return true;
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "impossible to listen to port '"+port+"'", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, "impossible to listen to port '"+port+"': "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			} catch (IllegalArgumentException e) {
 				JOptionPane.showMessageDialog(this, "illegal port: '"+port+"'", "Error", JOptionPane.ERROR_MESSAGE);
 			}
@@ -533,6 +550,15 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 		}
 	}
 
+	public void refreshEvent(SCXMLEvent ev,int pos) {
+		ev.refreshEvent();
+		HashSet<mxCell> prevHighlightedCells = getHighlightAtIndex(pos-1);
+		HashSet<mxCell> newHighlightedCells = (prevHighlightedCells==null)? new HashSet<mxCell>():new HashSet<mxCell>(prevHighlightedCells);
+		// updates the highlight
+		ev.execute(model,false,newHighlightedCells);
+		// store the new highlight state (without changing the display
+		setHighlightAtIndex(pos,newHighlightedCells);
+	}
 	public void addEvent(String command) {
 		try {
 			SCXMLEvent event = new SCXMLEvent(command);
@@ -570,7 +596,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 	}
 
 	private void doNodeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
-		if (show) model.highlightCell(n, "#ffe088");
+		if (show) model.highlightCell(n, "#ff9b88");
 		if (highlightedCells!=null) highlightedCells.add(n);
 	}
 	private void doEdgeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
@@ -603,7 +629,7 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 			if (m.matches() && (m.groupCount()==2)) {
 				this.command=Integer.parseInt(m.group(1));
 				arg1n=m.group(2);
-				arg1 = graphComponent.getSCXMLNodeForID(arg1n);				
+				arg1 = graphComponent.getSCXMLNodeForID(arg1n);
 			} else {
 				m = edgep.matcher(command);
 				if (m.matches() && (m.groupCount()==3)) {
@@ -617,6 +643,11 @@ public class SCXMLListener extends JFrame implements ListSelectionListener, Wind
 					throw new Exception("error in received command");
 				}
 			}
+		}
+
+		public void refreshEvent() {
+			if ((arg1==null) && (arg1n!=null)) arg1=graphComponent.getSCXMLNodeForID(arg1n);
+			if ((arg2==null) && (arg2n!=null)) arg2=graphComponent.getSCXMLNodeForID(arg2n);
 		}
 		
 		public void execute(mxIGraphModel model,boolean show,HashSet<mxCell> highlightedCells) {

@@ -78,6 +78,8 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
 		//Display the window.
 		pack();
 		setVisible(true);
+		
+		SCXMLElementEditor.focusOnTextPanel(tabbedPane.getSelectedComponent());
     }
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {

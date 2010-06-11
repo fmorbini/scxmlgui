@@ -2220,7 +2220,7 @@ public class SCXMLEditorActions
 					// disable
 					editor.displayOutsourcedContentInNode(node,graph,false);
 				} else {
-					// disable
+					// enable
 					editor.displayOutsourcedContentInNode(node,graph,true);
 				}
 				// apply layout to each cluster from the leaves up:

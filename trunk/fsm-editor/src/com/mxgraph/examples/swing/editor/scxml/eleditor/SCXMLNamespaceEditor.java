@@ -69,6 +69,8 @@ public class SCXMLNamespaceEditor extends SCXMLElementEditor {
 		//Display the window.
 		pack();
 		setVisible(true);
+		
+		SCXMLElementEditor.focusOnTextPanel(tabbedPane.getSelectedComponent());
     }
 }
 

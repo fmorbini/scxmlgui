@@ -315,20 +315,27 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 			list.setSelectedIndices(sis);
 
 			setModified(true);
-		} else if (cmd.equals("ok")) {
+		} else if (cmd.equals("ok")) {			
 			graph.getModel().notUndoableEditHappened();
 			exitTool();
 		} else if (cmd.equals("cancel")) {
 			if (!getModified())
 				exitTool();
 			else {
-				if (JOptionPane.showConfirmDialog(editor, mxResources.get("saveChanges")) == JOptionPane.NO_OPTION) {
+				int answer = JOptionPane.showConfirmDialog(editor, mxResources.get("saveChanges"));
+				switch (answer) {
+				case JOptionPane.NO_OPTION:
 					int i=0;
 					for (mxCell edge:originalOrder) {
 						SCXMLEdge se=(SCXMLEdge)edge.getValue();
 						se.setOrder(i++);
 					}
 					exitTool();
+					break;
+				case JOptionPane.YES_OPTION:
+					graph.getModel().notUndoableEditHappened();
+					exitTool();
+					break;
 				}
 			}
 		}
