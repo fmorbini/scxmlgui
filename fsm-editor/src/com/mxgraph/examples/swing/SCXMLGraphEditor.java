@@ -317,7 +317,7 @@ public class SCXMLGraphEditor extends JPanel
 				for(Object d:descendants) {
 					rootg.setCellAsDeletable(d, false);
 					rootg.setCellAsEditable(d, false);
-					rootg.setCellAsMovable(d, false);
+					//rootg.setCellAsMovable(d, false);
 				}
 			} else {
 				v.setCluster(false); rootg.setCellStyle(v.getStyle(),ond);
@@ -993,7 +993,7 @@ public class SCXMLGraphEditor extends JPanel
 		setLayout(new BorderLayout());
 		add(outer, BorderLayout.CENTER);
 		
-		scxmlListener=new SCXMLListener(editor);
+		scxmlListener=new SCXMLListener(frame,editor);
 		
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setJMenuBar(menuBar=new SCXMLEditorMenuBar(editor));

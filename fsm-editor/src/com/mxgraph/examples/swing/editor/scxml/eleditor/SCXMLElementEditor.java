@@ -5,9 +5,9 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
  *   DocumentSizeFilter.java
  */
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowListener;
 import java.util.HashMap;
 
 import javax.swing.AbstractAction;
@@ -18,11 +18,10 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
-import javax.swing.undo.CannotUndoException;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
@@ -56,11 +55,12 @@ public class SCXMLElementEditor extends JDialog {
     	keyboardHandler=new EditorKeyboardHandler(this);
 	}
 
-	//The following two methods allow us to find an
-    //action provided by the editor kit by its name.
     protected HashMap<Object, Action> updateActionTable(JTabbedPane tabbedPane,HashMap<Object, Action> actions) {
-    	Object o=tabbedPane.getSelectedComponent();
+    	Component o=tabbedPane.getSelectedComponent();
     	if (o instanceof JScrollPane) {
+    		// put focus on text field
+            focusOnTextPanel(o);
+
     		JScrollPane scrollPane=(JScrollPane) o;
     		o=scrollPane.getViewport().getComponent(0);
     		//o=scrollPane.getComponent(0);
@@ -180,4 +180,12 @@ public class SCXMLElementEditor extends JDialog {
         pack();
         setVisible(true);
     }
+
+	public static void focusOnTextPanel(Component component) {
+		if (component instanceof JScrollPane) {
+			JScrollPane scrollPane=(JScrollPane) component;
+			component=scrollPane.getViewport().getComponent(0);
+			component.requestFocus();
+		}
+	}
 }

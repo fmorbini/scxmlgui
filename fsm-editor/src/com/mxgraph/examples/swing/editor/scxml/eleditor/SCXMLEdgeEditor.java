@@ -119,5 +119,7 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 		//Display the window.
 		pack();
 		setVisible(true);
+		
+		SCXMLElementEditor.focusOnTextPanel(tabbedPane.getSelectedComponent());
     }
 }
