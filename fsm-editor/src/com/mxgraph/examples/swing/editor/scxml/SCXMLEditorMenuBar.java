@@ -22,6 +22,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.NewSCXMLAction
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLListener;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLFindTool;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContent;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphActions;
@@ -93,6 +94,10 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		menu.add(externalAction);
 		editor.setRedoMenuAction(externalAction);
 
+		menu.addSeparator();
+		
+		menu.add(editor.bind(mxResources.get("find"),  new ShowSCXMLFindTool(), "/com/mxgraph/examples/swing/images/zoom.gif"));
+		
 		menu.addSeparator();
 
 		menu.add(editor.bind(mxResources.get("cut"), TransferHandler.getCutAction(), "/com/mxgraph/examples/swing/images/cut.gif"));

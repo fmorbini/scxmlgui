@@ -21,6 +21,7 @@ import javax.swing.undo.UndoManager;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
+import com.mxgraph.model.mxCell;
 
 public class SCXMLNamespaceEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
@@ -29,8 +30,8 @@ public class SCXMLNamespaceEditor extends SCXMLElementEditor {
 	private Document doc;
     private SCXMLNode node;
     
-    public SCXMLNamespaceEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode n, Point pos) {
-    	super(parent,editor);
+    public SCXMLNamespaceEditor(JFrame parent,SCXMLGraphEditor editor, mxCell nn,SCXMLNode n, Point pos) {
+    	super(parent,editor,nn);
         setTitle("SCXML namespace editor");
         setLocation(pos);
 

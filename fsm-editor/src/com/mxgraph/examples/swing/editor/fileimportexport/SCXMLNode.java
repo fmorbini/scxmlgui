@@ -27,7 +27,6 @@ public class SCXMLNode implements Serializable {
 	public static final String FINAL="final";
 	public static final String ONENTRYEXE="onentryexe";
 	public static final String INITEXE="initexe";
-	public static final String FINALDATA="finalData";
 	public static final String ONEXITEXE="onexitexe";
 
 	public static final String PARALLEL="parallel";
@@ -94,16 +93,18 @@ public class SCXMLNode implements Serializable {
 		node.put(INTERNALID, internalID);
 	}
 	public String getSRC() {
+		String ret=null;
 		Document dmd = getSRCDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(SRC);
+				ret=(String)node.get(SRC);
 			}
 		}
 		else
-			return (String)node.get(SRC);
+			ret=(String)node.get(SRC);
+		return (ret==null)?"":ret;
 	}
 	public void setSRC(String src) {
 		node.put(SRC, src);
@@ -127,16 +128,18 @@ public class SCXMLNode implements Serializable {
 		return doc;
 	}
 	public String getNAMESPACE() {
+		String ret=null;
 		Document dmd = getNAMESPACEDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(NAMESPACE);
+				ret=(String)node.get(NAMESPACE);
 			}
 		}
 		else
-			return (String)node.get(NAMESPACE);
+			ret=(String)node.get(NAMESPACE);
+		return (ret==null)?"":ret;
 	}
 	public void setNAMESPACE(String namespace) {
 		node.put(NAMESPACE, namespace);
@@ -157,70 +160,63 @@ public class SCXMLNode implements Serializable {
 		return doc;
 	}
 	public String getID() {
+		String ret=null;
 		Document dmd = getSCXMLIDDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(ID);
+				ret=(String)node.get(ID);
 			}
 		}
 		else
-			return (String)node.get(ID);
+			ret=(String)node.get(ID);
+		return (ret==null)?"":ret;
 	}
 	public void setID(String scxmlID) {
 		node.put(ID, scxmlID);
 	}
 	public String getOnEntry() {
+		String ret=null;
 		Document dmd = getOnEntryDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(ONENTRYEXE);
+				ret=(String)node.get(ONENTRYEXE);
 			}
 		}
 		else
-			return (String)node.get(ONENTRYEXE);
+			ret=(String)node.get(ONENTRYEXE);
+		return (ret==null)?"":ret;
 	}
 	public String getOnExit() {
+		String ret=null;
 		Document dmd = getOnExitDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(ONEXITEXE);
+				ret=(String)node.get(ONEXITEXE);
 			}
 		}
 		else
-			return (String)node.get(ONEXITEXE);
+			ret=(String)node.get(ONEXITEXE);
+		return (ret==null)?"":ret;
 	}
 	public String getOnInitialEntry() {
+		String ret=null;
 		Document dmd = getInitialEntryDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(INITEXE);
+				ret=(String)node.get(INITEXE);
 			}
 		}
 		else
-			return (String)node.get(INITEXE);
-	}
-	public void setFinalData(String scxmlID) {
-		node.put(FINALDATA, scxmlID);
-	}
-	public String getFinalData() {
-		Document dmd = getFinalDataDoc();
-		if (dmd!=null) {
-			try {
-				return dmd.getText(0, dmd.getLength());
-			} catch (BadLocationException e) {
-				return (String)node.get(FINALDATA);
-			}
-		}
-		else
-			return (String)node.get(FINALDATA);
+			ret=(String)node.get(INITEXE);
+		return (ret==null)?"":ret;
 	}
 	public void setOnEntry(String exe) {
 		node.put(ONENTRYEXE,exe);
@@ -236,17 +232,19 @@ public class SCXMLNode implements Serializable {
 		node.put(DONEDATA,dd);
 	}
 	public String getDoneData() {
+		String ret=null;
 		assert(isFinal());
 		Document dmd = getFinalDataDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(DONEDATA);
+				ret=(String)node.get(DONEDATA);
 			}
 		}
 		else
-			return (String)node.get(DONEDATA);
+			ret=(String)node.get(DONEDATA);
+		return (ret==null)?"":ret;
 	}
 	public void setDataModel(String dm) {
 		node.put(DATAMODEL,dm);
@@ -256,16 +254,18 @@ public class SCXMLNode implements Serializable {
 		node.put(DATAMODEL,(pdm==null)?dm:pdm+dm);
 	}
 	public String getDataModel() {
+		String ret=null;
 		Document dmd = getDatamodelDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)node.get(DATAMODEL);
+				ret=(String)node.get(DATAMODEL);
 			}
 		}
 		else
-			return (String)node.get(DATAMODEL);
+			ret=(String)node.get(DATAMODEL);
+		return (ret==null)?"":ret;
 	}
 	public void setParallel(boolean b) {
 		this.setFillColor((isInitial())?INITIALFILLCOLOR:((b)?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
@@ -474,7 +474,7 @@ public class SCXMLNode implements Serializable {
 		n.setDataModel(getDataModel());
 		n.setFinalDataDoc(null);
 		n.setFinalUndoManager(null);
-		n.setFinalData(getFinalData());
+		n.setDoneData(getDoneData());
 		n.setInitialEntryDoc(null);
 		n.setInitialEntryUndoManager(null);
 		n.setOnInitialEntry(getOnInitialEntry());

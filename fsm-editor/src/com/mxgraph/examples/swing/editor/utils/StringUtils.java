@@ -1,7 +1,5 @@
 package com.mxgraph.examples.swing.editor.utils;
 
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 
 public class StringUtils {
 	

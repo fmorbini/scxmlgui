@@ -24,6 +24,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
+import com.mxgraph.model.mxCell;
 
 public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
@@ -32,8 +33,8 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
 	private Document doc;
     private SCXMLNode node;
     
-    public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode n, Point pos) throws Exception {
-    	super(parent,editor);
+    public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, mxCell nn,SCXMLNode n, Point pos) throws Exception {
+    	super(parent,editor,nn);
     	setModal(true);
         setTitle("Set source file to fill the content of this node");
         setLocation(pos);
