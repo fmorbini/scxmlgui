@@ -977,47 +977,6 @@ public class SCXMLGraphEditor extends JPanel
 		}
 	}
 	
-    private TransferHandler handler = new TransferHandler() {
-        public boolean canImport(TransferHandler.TransferSupport support) {
-            if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                return false;
-            } else {
-            	return true;
-            }
-        }
-
-        public boolean importData(TransferHandler.TransferSupport support) {
-            if (!canImport(support)) {
-                return false;
-            }
-            
-            Transferable t = support.getTransferable();
-
-            try {
-                List<File> l = (List<File>)t.getTransferData(DataFlavor.javaFileListFlavor);
-
-                int num=l.size();
-                if (num>0) {
-                    File f=l.get(0);
-                	if (num>1) {
-                		JOptionPane.showMessageDialog(SCXMLGraphEditor.this,
-                				"Importing only first file: "+f,
-                				mxResources.get("warning"),
-                				JOptionPane.WARNING_MESSAGE);
-                	}
-                	OpenAction action = new OpenAction(f);
-                	action.actionPerformed(new ActionEvent(SCXMLGraphEditor.this, 0, "", 0));
-                }
-            } catch (UnsupportedFlavorException e) {
-                return false;
-            } catch (IOException e) {
-                return false;
-            }
-
-            return true;
-        }
-    };	
-
 	public JFrame createFrame(SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException
 	{
 		WindowEventDemo frame = new WindowEventDemo(this);
@@ -1057,8 +1016,6 @@ public class SCXMLGraphEditor extends JPanel
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setJMenuBar(menuBar=new SCXMLEditorMenuBar(editor));
 		frame.setSize(870, 640);
-
-		graphComponent.setTransferHandler(handler);
 		
 		// Updates the frame title
 		// Installs rubberband selection and handling for some special
