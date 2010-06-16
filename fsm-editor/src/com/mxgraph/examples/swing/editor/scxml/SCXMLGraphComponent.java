@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import javax.swing.TransferHandler;
+
 import org.w3c.dom.Document;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
@@ -15,6 +17,7 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.handler.mxGraphTransferHandler;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 
@@ -120,6 +123,11 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		return (validateGraph(graph.getModel().getRoot(),new Hashtable<Object, Object>(),warnings)==null);
 	}
 
+	@Override
+	protected TransferHandler createTransferHandler()
+	{
+		return new SCXMLTransferHandler();
+	}
 	/*
 	@Override
 	public void componentHidden(ComponentEvent e) {
