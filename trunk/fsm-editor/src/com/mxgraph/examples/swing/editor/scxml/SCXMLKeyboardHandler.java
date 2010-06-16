@@ -48,6 +48,7 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 			map.put(KeyStroke.getKeyStroke("ESCAPE"), "selectNone");
 			map.put(KeyStroke.getKeyStroke("control PAGE_UP"), "zoomIN");
 			map.put(KeyStroke.getKeyStroke("control PAGE_DOWN"), "zoomOUT");
+			map.put(KeyStroke.getKeyStroke("control F"), "find");
 		}
 
 		return map;
@@ -74,6 +75,7 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 		map.put("selectNone", mxGraphActions.getSelectNoneAction());
 		map.put("zoomIN", new SCXMLEditorActions.ZoomIN());
 		map.put("zoomOUT", new SCXMLEditorActions.ZoomOUT());
+		map.put("find", new SCXMLEditorActions.ShowSCXMLFindTool());
 
 		return map;
 	}

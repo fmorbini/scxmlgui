@@ -8,6 +8,7 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.util.HashMap;
 
 import javax.swing.AbstractAction;
@@ -18,15 +19,18 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
+
+import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.queryParser.ParseException;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxResources;
 
 public class SCXMLElementEditor extends JDialog {
@@ -46,8 +50,11 @@ public class SCXMLElementEditor extends JDialog {
     
 	private AbstractActionWrapper externalUndoAction,externalRedoAction;
 
-    public SCXMLElementEditor(JFrame parent, SCXMLGraphEditor e) {    	
+	private mxCell cell=null;
+	
+    public SCXMLElementEditor(JFrame parent, SCXMLGraphEditor e,mxCell cell) {    	
     	super(parent);
+    	this.cell=cell;
     	closeAction=new CloseAction();
     	editor=e;
     	externalUndoAction = editor.bind(mxResources.get("undo"), null,"/com/mxgraph/examples/swing/images/undo.gif");
@@ -131,12 +138,27 @@ public class SCXMLElementEditor extends JDialog {
 		}
 		public void insertUpdate(DocumentEvent e) {
 			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
+			try {
+				editor.getSCXMLSearchTool().updateCellInIndex(cell);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
         }
         public void removeUpdate(DocumentEvent e) {
 			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
+			try {
+				editor.getSCXMLSearchTool().updateCellInIndex(cell);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
         }
         public void changedUpdate(DocumentEvent e) {
 			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
+			try {
+				editor.getSCXMLSearchTool().updateCellInIndex(cell);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
         }
     }
 

@@ -24,6 +24,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
+import com.mxgraph.model.mxCell;
 
 public class SCXMLNodeEditor extends SCXMLElementEditor {
 
@@ -42,8 +43,8 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
     private SCXMLNode node;
     private JMenu editMenu;
 
-    public SCXMLNodeEditor(JFrame parent,SCXMLNode n, SCXMLGraphEditor editor, Point pos) {
-    	super(parent,editor);
+    public SCXMLNodeEditor(JFrame parent,mxCell nn,SCXMLNode n, SCXMLGraphEditor editor, Point pos) {
+    	super(parent,editor,nn);
         setTitle("SCXML node editor");
         setLocation(pos);
 

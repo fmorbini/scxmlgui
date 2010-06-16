@@ -1,9 +1,10 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.IOException;
+
 import org.w3c.dom.Document;
+
 import com.mxgraph.io.mxCodec;
-import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;

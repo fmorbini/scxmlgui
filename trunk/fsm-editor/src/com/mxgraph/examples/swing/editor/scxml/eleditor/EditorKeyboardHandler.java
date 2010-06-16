@@ -1,8 +1,5 @@
 package com.mxgraph.examples.swing.editor.scxml.eleditor;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;

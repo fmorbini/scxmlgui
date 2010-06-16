@@ -24,6 +24,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
+import com.mxgraph.model.mxCell;
 
 public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
@@ -40,8 +41,8 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
     private SCXMLEdge edge;
     private JMenu editMenu;
 
-    public SCXMLEdgeEditor(JFrame parent,SCXMLEdge e, SCXMLGraphEditor editor, Point pos) {
-    	super(parent,editor);
+    public SCXMLEdgeEditor(JFrame parent,mxCell en,SCXMLEdge e, SCXMLGraphEditor editor, Point pos) {
+    	super(parent,editor,en);
     	setTitle("SCXML edge editor");
     	setLocation(pos);
 

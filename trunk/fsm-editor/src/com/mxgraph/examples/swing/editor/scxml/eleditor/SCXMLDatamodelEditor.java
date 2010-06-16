@@ -22,6 +22,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
+import com.mxgraph.model.mxCell;
 
 public class SCXMLDatamodelEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
@@ -30,8 +31,8 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
 	private Document doc;
     private SCXMLNode root;
     
-    public SCXMLDatamodelEditor(JFrame parent,SCXMLGraphEditor editor, SCXMLNode r, Point pos) throws Exception {
-    	super(parent,editor);
+    public SCXMLDatamodelEditor(JFrame parent,SCXMLGraphEditor editor, mxCell rn,SCXMLNode r, Point pos) throws Exception {
+    	super(parent,editor,rn);
         setTitle("SCXML datamodel editor");
         setLocation(pos);
 

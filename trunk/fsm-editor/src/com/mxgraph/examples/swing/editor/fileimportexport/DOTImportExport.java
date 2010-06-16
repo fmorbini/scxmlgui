@@ -3,8 +3,6 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 import java.io.IOException;
 
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
-import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;

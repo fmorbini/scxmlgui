@@ -52,13 +52,13 @@ import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
-import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLDatamodelEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNamespaceEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
+import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.layout.mxIGraphLayout;
@@ -152,7 +152,7 @@ public class SCXMLEditorActions
 			Object nodeValue = node.getValue();
 			if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
 				try {
-					new SCXMLDatamodelEditor(frame,editor,(SCXMLNode) nodeValue,pos);
+					new SCXMLDatamodelEditor(frame,editor,node,(SCXMLNode) nodeValue,pos);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -175,7 +175,7 @@ public class SCXMLEditorActions
 			if (root!=null) {
 				Object nodeValue = root.getValue();
 				if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
-					new SCXMLNamespaceEditor(frame,editor,(SCXMLNode) nodeValue,pos);
+					new SCXMLNamespaceEditor(frame,editor,root,(SCXMLNode) nodeValue,pos);
 				}
 			}
 		}
@@ -211,7 +211,7 @@ public class SCXMLEditorActions
 			assert(cell.isEdge());
 			SCXMLGraphEditor editor = getEditor(e);
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
-			new SCXMLEdgeEditor(frame,(SCXMLEdge)cell.getValue(),editor,pos);
+			new SCXMLEdgeEditor(frame,cell,(SCXMLEdge)cell.getValue(),editor,pos);
 		}
 	}
 
@@ -302,7 +302,7 @@ public class SCXMLEditorActions
 			assert(cell.isVertex());
 			SCXMLGraphEditor editor = getEditor(e);
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
-			new SCXMLNodeEditor(frame,(SCXMLNode)cell.getValue(),editor,pos);
+			new SCXMLNodeEditor(frame,cell,(SCXMLNode)cell.getValue(),editor,pos);
 		}
 	}
 	
@@ -379,7 +379,7 @@ public class SCXMLEditorActions
 			
 			//edit outsourcing
 			try {
-				new SCXMLOutsourcingEditor(frame,editor,(SCXMLNode)cell.getValue(),pos);
+				new SCXMLOutsourcingEditor(frame,editor,cell,n,pos);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -1695,6 +1695,7 @@ public class SCXMLEditorActions
 								editor.getUndoManager().resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
 								editor.menuBar.updateRecentlyOpenedListWithFile(fc.getSelectedFile(), editor);
+								editor.getSCXMLSearchTool().buildIndex();
 							} catch (Exception ex) {
 								ex.printStackTrace();
 								JOptionPane.showMessageDialog(editor.getGraphComponent(),
@@ -2187,7 +2188,20 @@ public class SCXMLEditorActions
 			}
 		}
 	}
-
+	
+	public static class ShowSCXMLFindTool extends AbstractAction
+	{
+		/**
+		 * 
+		 */
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLSearchTool st=editor.getSCXMLSearchTool();
+			st.showTool();
+		}
+	}
+	
 	@SuppressWarnings("serial")
 	public static class ShowSCXMLListener extends AbstractAction
 	{

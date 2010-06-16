@@ -14,7 +14,6 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
-import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;

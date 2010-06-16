@@ -1,10 +1,6 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
-import java.io.IOException;
-
-import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
 
 public interface IImportExport {
 	public abstract Boolean canImport();

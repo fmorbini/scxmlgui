@@ -6,8 +6,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 
-import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
-
 public class AbstractActionWrapper extends AbstractAction {
 
 	private Action action;

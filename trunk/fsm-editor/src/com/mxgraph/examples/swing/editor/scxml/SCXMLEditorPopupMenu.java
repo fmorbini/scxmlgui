@@ -13,23 +13,21 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditDatamodelAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNamespaceAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeOrderAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNamespaceAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNodeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.RemoveCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsCluster;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsFinal;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsInitial;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsOutsourced;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContentInNode;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
-import com.mxgraph.view.mxGraph;
 
 public class SCXMLEditorPopupMenu extends JPopupMenu
 {

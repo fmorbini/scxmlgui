@@ -5,8 +5,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.swing.text.Document;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
 
 public class SCXMLEdge implements Serializable {
@@ -47,46 +47,52 @@ public class SCXMLEdge implements Serializable {
 		edge.put(INTERNALID, internalID);
 	}
 	public String getEvent() {
+		String ret=null;
 		Document dmd = getEventDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)edge.get(EVENT);
+				ret=(String)edge.get(EVENT);
 			}
 		}
 		else
-			return (String)edge.get(EVENT);
+			ret=(String)edge.get(EVENT);
+		return (ret==null)?"":ret;
 	}
 	public void setEvent(String e) {
 		edge.put(EVENT, e);
 	}
 	public String getCondition() {
+		String ret=null;
 		Document dmd = getConditionDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)edge.get(CONDITION);
+				ret=(String)edge.get(CONDITION);
 			}
 		}
 		else
-			return (String)edge.get(CONDITION);
+			ret=(String)edge.get(CONDITION);
+		return (ret==null)?"":ret;
 	}
 	public void setCondition(String c) {
 		edge.put(CONDITION, c);
 	}
 	public String getExe() {
+		String ret=null;
 		Document dmd = getExeDoc();
 		if (dmd!=null) {
 			try {
-				return dmd.getText(0, dmd.getLength());
+				ret=dmd.getText(0, dmd.getLength());
 			} catch (BadLocationException e) {
-				return (String)edge.get(EDGEEXE);
+				ret=(String)edge.get(EDGEEXE);
 			}
 		}
 		else
-			return (String)edge.get(EDGEEXE);
+			ret=(String)edge.get(EDGEEXE);
+		return (ret==null)?"":ret;
 	}
 	public void setExe(String e) {
 		edge.put(EDGEEXE, e);
