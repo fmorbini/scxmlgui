@@ -3,6 +3,9 @@ package com.mxgraph.examples.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Point;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -13,6 +16,8 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,21 +41,27 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
+
+import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.store.LockObtainFailedException;
 
 import com.mxgraph.examples.swing.editor.EditorAboutFrame;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
-import com.mxgraph.examples.swing.editor.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorMenuBar;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLSearchTool;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
+import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
@@ -77,6 +88,7 @@ import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxMultiplicity;
+
 
 public class SCXMLGraphEditor extends JPanel
 {
@@ -110,6 +122,7 @@ public class SCXMLGraphEditor extends JPanel
 	protected mxGraphOutline graphOutline;
 
 	private SCXMLListener scxmlListener;
+	private SCXMLSearchTool scxmlSearchtool;
 
 	/**
 	 * 
@@ -179,6 +192,9 @@ public class SCXMLGraphEditor extends JPanel
 
 	public SCXMLListener getSCXMLListener() {
 		return scxmlListener;
+	}
+	public SCXMLSearchTool getSCXMLSearchTool() {
+		return scxmlSearchtool;
 	}
 	
 	private HashMap<String,SCXMLGraph> file2graph=new HashMap<String, SCXMLGraph>();
@@ -884,6 +900,7 @@ public class SCXMLGraphEditor extends JPanel
 		{
 			frame.dispose();
 			scxmlListener.dispose();
+			scxmlSearchtool.dispose();
 		}
 	}
 
@@ -959,8 +976,49 @@ public class SCXMLGraphEditor extends JPanel
 			
 		}
 	}
+	
+    private TransferHandler handler = new TransferHandler() {
+        public boolean canImport(TransferHandler.TransferSupport support) {
+            if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                return false;
+            } else {
+            	return true;
+            }
+        }
 
-	public JFrame createFrame(SCXMLGraphEditor editor)
+        public boolean importData(TransferHandler.TransferSupport support) {
+            if (!canImport(support)) {
+                return false;
+            }
+            
+            Transferable t = support.getTransferable();
+
+            try {
+                List<File> l = (List<File>)t.getTransferData(DataFlavor.javaFileListFlavor);
+
+                int num=l.size();
+                if (num>0) {
+                    File f=l.get(0);
+                	if (num>1) {
+                		JOptionPane.showMessageDialog(SCXMLGraphEditor.this,
+                				"Importing only first file: "+f,
+                				mxResources.get("warning"),
+                				JOptionPane.WARNING_MESSAGE);
+                	}
+                	OpenAction action = new OpenAction(f);
+                	action.actionPerformed(new ActionEvent(SCXMLGraphEditor.this, 0, "", 0));
+                }
+            } catch (UnsupportedFlavorException e) {
+                return false;
+            } catch (IOException e) {
+                return false;
+            }
+
+            return true;
+        }
+    };	
+
+	public JFrame createFrame(SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException
 	{
 		WindowEventDemo frame = new WindowEventDemo(this);
 		// the contentPane of the JRootPane is a JPanel (that is the FSMGraphEditor)
@@ -994,11 +1052,13 @@ public class SCXMLGraphEditor extends JPanel
 		add(outer, BorderLayout.CENTER);
 		
 		scxmlListener=new SCXMLListener(frame,editor);
+		scxmlSearchtool=new SCXMLSearchTool(frame,editor);
 		
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setJMenuBar(menuBar=new SCXMLEditorMenuBar(editor));
 		frame.setSize(870, 640);
 
+		graphComponent.setTransferHandler(handler);
 		
 		// Updates the frame title
 		// Installs rubberband selection and handling for some special
@@ -1195,15 +1255,14 @@ public class SCXMLGraphEditor extends JPanel
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
+			SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
+			editor.createFrame(editor).setVisible(true);
+			editor.getGraphComponent().requestFocusInWindow();
 		}
-		catch (Exception e1)
+		catch (Exception e)
 		{
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
-
-		mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
-		SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
-		editor.createFrame(editor).setVisible(true);
-		editor.getGraphComponent().requestFocusInWindow();
 	}
 }
