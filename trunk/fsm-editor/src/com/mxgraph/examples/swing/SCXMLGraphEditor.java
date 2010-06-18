@@ -3,9 +3,6 @@ package com.mxgraph.examples.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Point;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -41,7 +38,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
@@ -60,7 +56,6 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLSearchTool;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
@@ -1012,7 +1007,7 @@ public class SCXMLGraphEditor extends JPanel
 		
 		scxmlListener=new SCXMLListener(frame,editor);
 		scxmlSearchtool=new SCXMLSearchTool(frame,editor);
-		
+
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setJMenuBar(menuBar=new SCXMLEditorMenuBar(editor));
 		frame.setSize(870, 640);

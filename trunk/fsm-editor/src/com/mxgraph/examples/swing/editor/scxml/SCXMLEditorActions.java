@@ -1417,9 +1417,11 @@ public class SCXMLEditorActions
 				{
 					modifiedObjects=editor.getUndoManager().redo();
 				}
-				for (Object o:modifiedObjects) {
-					if ((o instanceof mxCell) && ((mxCell)o).isEdge()) {
-						editor.getGraphComponent().getGraph().reOrderOutgoingEdges((mxCell) ((mxCell)o).getSource());
+				if (modifiedObjects!=null) {
+					for (Object o:modifiedObjects) {
+						if ((o instanceof mxCell) && ((mxCell)o).isEdge()) {
+							editor.getGraphComponent().getGraph().reOrderOutgoingEdges((mxCell) ((mxCell)o).getSource());
+						}
 					}
 				}
 				editor.updateUndoRedoActionState();

@@ -5,7 +5,10 @@
 package com.mxgraph.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import com.mxgraph.model.mxGraphModel.mxChildChange;
 
 /**
  * Implements a 2-dimensional rectangle with double precision coordinates.
@@ -200,6 +203,17 @@ public class mxUndoableEdit
 	}
 	public boolean getUndoable() {
 		return undoable;
+	}
+
+	public HashSet<Object> getAffectedObjects() {
+		HashSet<Object> modifiedObjects=new HashSet<Object>();
+		for (mxUndoableChange c:getChanges()) {
+			if (c instanceof mxChildChange) {
+				Object o = ((mxChildChange) c).getChild();
+				if (o!=null) modifiedObjects.add(o);
+			}
+		}
+		return modifiedObjects;
 	}
 	
 }
