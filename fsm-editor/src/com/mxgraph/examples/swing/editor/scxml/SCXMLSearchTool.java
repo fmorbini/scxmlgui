@@ -2,6 +2,8 @@ package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -9,26 +11,22 @@ import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.apache.lucene.index.CorruptIndexException;
@@ -36,6 +34,8 @@ import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.store.LockObtainFailedException;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 
@@ -48,15 +48,17 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	private JList list;
 	private DefaultListModel listModel;
 	private mxIGraphModel model;
+	private SCXMLGraphComponent gc;
 
 	public SCXMLSearchTool(JFrame parent, SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		super(parent,"SCXML Listener");
-		search = new SCXMLSearch();
+		search = new SCXMLSearch(editor,defaultNumResults);
 
-		search.buildIndex(editor.getGraphComponent().getGraph(),defaultNumResults);
+		buildIndex();
 		
 		this.editor=editor;
-		this.model=editor.getGraphComponent().getGraph().getModel();
+		this.gc=editor.getGraphComponent();
+		this.model=gc.getGraph().getModel();
 		
 		addWindowListener(this);
 		JPanel contentPane = new JPanel(new BorderLayout());
@@ -73,12 +75,15 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	}
 	
 	public void buildIndex() throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		search.buildIndex(editor.getGraphComponent().getGraph(),defaultNumResults);
+		search.buildIndex();
 	}
-	public void updateCellInIndex(mxCell c) throws CorruptIndexException, IOException, ParseException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public void updateCellInIndex(mxCell c,boolean add) throws CorruptIndexException, IOException, ParseException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		ArrayList<mxCell> l = new ArrayList<mxCell>();
 		l.add(c);
-		search.updateIndex(l);
+		search.updateIndex(l,add);
+	}
+	public void updateCellsInIndex(Collection<mxCell> cs,boolean add) throws CorruptIndexException, IOException, ParseException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		search.updateIndex(cs,add);
 	}
 	
 	private void populateGUI(JPanel contentPane) {
@@ -98,9 +103,18 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		list.setCellRenderer((ListCellRenderer) new SCXMLSearchrenderer());
 		JScrollPane listScrollPane = new JScrollPane(list);
 
-		contentPane.setLayout(new BoxLayout(contentPane,BoxLayout.Y_AXIS));
-		contentPane.add(searchBox);
-		contentPane.add(listScrollPane);
+		contentPane.setLayout(new GridBagLayout());
+
+		//Add Components to this panel.
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        contentPane.add(searchBox, c);
+
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+        contentPane.add(listScrollPane, c);
 	}
 
 	class SCXMLSearchrenderer extends JLabel implements ListCellRenderer {
@@ -111,7 +125,15 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 				boolean isSelected,      // is the cell selected
 				boolean cellHasFocus)    // the list and the cell have the focus
 		{	    	 
-			String s = value.toString();
+			mxCell c=(mxCell)value;
+			String s="";
+			if (c.isVertex()) {
+				SCXMLNode n=(SCXMLNode) c.getValue();
+				s=n.getID();
+			} else {
+				SCXMLEdge e=(SCXMLEdge) c.getValue();
+				s=e.getSCXMLSource()+"-["+e.getCondition()+","+e.getEvent()+"]->"+e.getSCXMLTarget();
+			}
 			setText(index+": "+s);
 			if (isSelected) {
 				setBackground(list.getSelectionBackground());
@@ -154,8 +176,10 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 			currentSelectedCellPrevStyle=model.getStyle(c);
 			if (c.isEdge()) {
 				model.highlightCell(c, "#ff9b88","3");
+				gc.scrollCellToVisible(c, true);
 			} else {
 				model.highlightCell(c, "#ff9b88");
+				gc.scrollCellToVisible(c, true);
 			}
 		}
 	}

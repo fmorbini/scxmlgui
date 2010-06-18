@@ -10,24 +10,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
 
 public class SCXMLSearch {
 
@@ -37,11 +42,60 @@ public class SCXMLSearch {
 	private IndexSearcher searcher;
 	private int defaultNumResults;
 	private Class analyzer=null;
+	private SCXMLGraphEditor editor;
 
-	public void buildIndex(SCXMLGraph graph,int numResults) throws CorruptIndexException, LockObtainFailedException, IOException, ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		analyzer=Class.forName("org.apache.lucene.analysis.SimpleAnalyzer");
+	public SCXMLSearch(SCXMLGraphEditor editor,int numResults) {
+		this.editor=editor;
+        this.defaultNumResults=numResults;
+
+        SCXMLGraph graph = editor.getGraphComponent().getGraph();
+		graph.addListener(mxEvent.CELLS_REMOVED, new mxIEventListener() {
+			@Override
+			public void invoke(Object sender, mxEventObject evt) {
+				Object[] arg=(Object[]) evt.getProperty("cells");
+				if (arg!=null) {
+					ArrayList<mxCell> cells=new ArrayList<mxCell>();
+					for (Object o:arg) {
+						if (o instanceof mxCell) {
+							cells.add((mxCell) o);
+						}
+					}
+					try {
+						updateIndex(cells, false);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		graph.addListener(mxEvent.CELLS_ADDED, new mxIEventListener() {
+			@Override
+			public void invoke(Object sender, mxEventObject evt) {
+				Object[] arg=(Object[]) evt.getProperty("cells");
+				if (arg!=null) {
+					ArrayList<mxCell> cells=new ArrayList<mxCell>();
+					for (Object o:arg) {
+						if (o instanceof mxCell) {
+							cells.add((mxCell) o);
+						}
+					}
+					try {
+						updateIndex(cells, true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+	}
+	
+	public void buildIndex() throws CorruptIndexException, LockObtainFailedException, IOException, ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		SCXMLGraph graph = editor.getGraphComponent().getGraph();
+		analyzer=Class.forName("com.mxgraph.examples.swing.editor.scxml.SCXMLAnalyzer");
 		Constructor constructor = analyzer.getConstructor();
 		IndexWriter writer = new IndexWriter(idx, (Analyzer) constructor.newInstance(), IndexWriter.MaxFieldLength.UNLIMITED);
+        writer.deleteAll();
+        writer.commit();
         
 		mxIGraphModel model = graph.getModel();
 		mxCell root=(mxCell) model.getRoot();
@@ -52,8 +106,6 @@ public class SCXMLSearch {
         writer.close();
 
         searcher = new IndexSearcher(idx);
-        
-        this.defaultNumResults=numResults;
 	}
 	
 	HashSet<String> cellsAlreadySeen=new HashSet<String>();
@@ -109,25 +161,44 @@ public class SCXMLSearch {
 		Document doc=(c.isVertex())?createDocumentForSCXMLNode((SCXMLNode)v,cellID):createDocumentForSCXMLEdge((SCXMLEdge)v,cellID);
 		return doc;
 	}
-	public void updateIndex(Collection<mxCell> cs) throws CorruptIndexException, IOException, ParseException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		IndexWriter writer = new IndexWriter(idx, new SimpleAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED);
-		for(mxCell c:cs) {
-			Query q=getQueryForGettingDocumentOfCell(c);
-			writer.deleteDocuments(q);
-			Document doc=createDocumentForCell(c);
-			writer.addDocument(doc);
+	public void updateIndex(Collection<mxCell> cs,boolean add) throws CorruptIndexException, IOException, ParseException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		Constructor constructor = analyzer.getConstructor();
+		IndexWriter writer = new IndexWriter(idx, (Analyzer) constructor.newInstance(), IndexWriter.MaxFieldLength.UNLIMITED);
+		try {
+			for(mxCell c:cs) {
+				Query q=getQueryForGettingDocumentOfCell(c);
+				//System.out.println("query: "+q.getClass()+" "+q);
+				writer.deleteDocuments(q);
+
+				TopDocs result = searcher.search(q, this.defaultNumResults);
+				//printResult(result);
+	        	int numHits=result.totalHits;
+
+	        	for(int i=0;i<numHits;i++) {
+	        		int docPos=result.scoreDocs[i].doc;
+	        		Document doc = searcher.doc(docPos);
+	        		doc2mxCell.remove(doc.get(INDEXID));
+	        	}
+
+	        	writer.commit();
+				if (add) {
+					Document doc=createDocumentForCell(c);
+					doc2mxCell.put(doc.get(INDEXID), c);
+					writer.addDocument(doc);
+				}
+			}
+			writer.optimize();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-        writer.optimize();
-        writer.close();
+        writer.close();        
         searcher.close();
         searcher = new IndexSearcher(idx);
     }
 	
 	public Query getQueryForGettingDocumentOfCell(mxCell c) throws ParseException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
 		String cellID=c.getId();
-		Constructor constructor = analyzer.getConstructor();
-        QueryParser queryParser = new QueryParser(Version.LUCENE_30,null,(Analyzer) constructor.newInstance());
-        Query q = queryParser.parse(INDEXID+":"+cellID);
+        Query q=new TermQuery(new Term(INDEXID, cellID));
         return q;
 	}
 	
@@ -136,6 +207,7 @@ public class SCXMLSearch {
         QueryParser queryParser = new QueryParser(Version.LUCENE_30,INDEXID,(Analyzer) constructor.newInstance());
         try {
         	Query q = queryParser.parse(query);
+			//System.out.println("query: "+q.getClass()+" "+q);
         	TopDocs result = searcher.search(q, this.defaultNumResults);
         	int numHits=result.totalHits;
 
@@ -152,5 +224,18 @@ public class SCXMLSearch {
         } catch (ParseException e) {
         }
 		return null;
+	}
+
+	public void printResult(TopDocs result) throws CorruptIndexException, IOException {
+		int numHits=result.totalHits;
+
+		for(int i=0;i<numHits;i++) {
+			int docPos=result.scoreDocs[i].doc;
+			Document doc = searcher.doc(docPos);
+			mxCell matchingCell=doc2mxCell.get(doc.get(INDEXID));
+			if (matchingCell!=null) {
+				System.out.println(" search result: "+matchingCell.getValue());
+			}
+		}
 	}
 }

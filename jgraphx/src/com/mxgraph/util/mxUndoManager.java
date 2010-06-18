@@ -101,7 +101,7 @@ public class mxUndoManager extends mxEventSource
 	 */
 	public Collection<Object> undo()
 	{
-		HashSet<Object> modifiedObjects=new HashSet<Object>();
+		HashSet<Object> modifiedObjects=null;
 		boolean done=false;
 		while ((indexOfNextAdd > 0) && !done)
 		{
@@ -109,12 +109,7 @@ public class mxUndoManager extends mxEventSource
 			for (int i=edits.size()-1;i>=0;i--) {
 				mxUndoableEdit edit = edits.get(i);
 				edit.undo();
-				for (mxUndoableChange c:edit.getChanges()) {
-					if (c instanceof mxChildChange) {
-						Object o = ((mxChildChange) c).getChild();
-						if (o!=null) modifiedObjects.add(o);
-					}
-				}
+				modifiedObjects=edit.getAffectedObjects();
 	
 				if (edit.isSignificant())
 				{
@@ -191,7 +186,7 @@ public class mxUndoManager extends mxEventSource
 				collected.add(undoableEdit);
 				addEventList();
 				fireEvent(new mxEventObject(mxEvent.ADD, "edit", undoableEdit));
-			}
+			}			
 		}
 	}
 	private void addEventList() {

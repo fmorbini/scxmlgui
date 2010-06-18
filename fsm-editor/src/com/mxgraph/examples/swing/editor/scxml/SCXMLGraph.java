@@ -176,12 +176,13 @@ public class SCXMLGraph extends mxGraph
 	public Object insertEdge(Object parent, String id, Object value,Object source, Object target)
 	{		
 		int size=getAllOutgoingEdges(source).length;
-		if (value==null)
+		if (value==null) {
 			value=getEditor().getCurrentFileIO().buildEdgeValue();
-		else if (!(value instanceof SCXMLEdge)) {
+		} else if (!(value instanceof SCXMLEdge)) {
 			System.out.println("WARNING: non NULL and non SCXMLEdge value passed for new edge (insertEdge in SCXMLGraph)");
 			value=getEditor().getCurrentFileIO().buildEdgeValue();
 		}
+		updateConnectionOfSCXMLEdge((SCXMLEdge) value,source,target);
 		if (((SCXMLEdge)value).getOrder()==null) ((SCXMLEdge)value).setOrder(size);
 		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight;strokeColor=#888888");
 	}
@@ -407,6 +408,7 @@ public class SCXMLGraph extends mxGraph
 					previous));
 			reOrderOutgoingEdges((mxCell) previous);
 			reOrderOutgoingEdges((mxCell) terminal);
+			updateConnectionOfSCXMLEdge((SCXMLEdge) ((mxCell)edge).getValue(),(source)?terminal:null,(source)?null:terminal);
 		}
 		finally
 		{
@@ -414,6 +416,17 @@ public class SCXMLGraph extends mxGraph
 		}
 
 		return edge;
+	}
+	private void updateConnectionOfSCXMLEdge(SCXMLEdge value, Object source, Object target) {
+		String sourceID=null,targetID=null;
+		if (source!=null) {
+			sourceID=((SCXMLNode)((mxCell)source).getValue()).getID();
+			value.setSCXMLSource(sourceID);
+		}
+		if (target!=null) {
+			targetID=((SCXMLNode)((mxCell)target).getValue()).getID();
+			value.setSCXMLTarget(targetID);
+		}
 	}
 	public void setEditor(SCXMLGraphEditor scxmlGraphEditor) {
 		this.editor=scxmlGraphEditor;

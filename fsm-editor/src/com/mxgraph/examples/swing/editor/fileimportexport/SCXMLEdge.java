@@ -37,8 +37,14 @@ public class SCXMLEdge implements Serializable {
 	public String getSCXMLSource() {
 		return (String)edge.get(FROM);
 	}
+	public void setSCXMLSource(String sourceID) {
+		edge.put(FROM, sourceID);
+	}
 	public String getSCXMLTarget() {
 		return (String)edge.get(TO);
+	}
+	public void setSCXMLTarget(String targetID) {
+		edge.put(TO, targetID);
 	}
 	public String getInternalID() {
 		return (String)edge.get(INTERNALID);
@@ -180,6 +186,9 @@ public class SCXMLEdge implements Serializable {
 		edge=newe.edge;
 		out.defaultWriteObject();
 		edge=hash;
+	}
+	public String toString() {
+		return getSCXMLSource()+"-["+getCondition()+","+getEvent()+"]->"+getSCXMLTarget();
 	}
 }
 

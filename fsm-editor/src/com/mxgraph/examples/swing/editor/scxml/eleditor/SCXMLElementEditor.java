@@ -127,6 +127,11 @@ public class SCXMLElementEditor extends JDialog {
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
 			dispose();
+			try {
+				editor.getSCXMLSearchTool().updateCellInIndex(cell,true);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
 	}    
 	
@@ -138,27 +143,12 @@ public class SCXMLElementEditor extends JDialog {
 		}
 		public void insertUpdate(DocumentEvent e) {
 			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
-			try {
-				editor.getSCXMLSearchTool().updateCellInIndex(cell);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
         }
         public void removeUpdate(DocumentEvent e) {
 			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
-			try {
-				editor.getSCXMLSearchTool().updateCellInIndex(cell);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
         }
         public void changedUpdate(DocumentEvent e) {
 			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
-			try {
-				editor.getSCXMLSearchTool().updateCellInIndex(cell);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
         }
     }
 
