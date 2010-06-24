@@ -267,7 +267,7 @@ public class SCXMLImportExport implements IImportExport {
 		NodeList list = n.getChildNodes();
 		int listLength = list.getLength();
 		for (int i=0;i<listLength;i++) {
-			content+=XMLUtils.domNode2String(list.item(i));
+			content+=XMLUtils.domNode2String(list.item(i),false);
 		}
 		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
@@ -279,13 +279,15 @@ public class SCXMLImportExport implements IImportExport {
 		fromToEdges.clear();
 		scxmlID2nodes.clear();
 		internalIDcounter=11;
-				
-		Document doc = mxUtils.parse(mxUtils.readFile(filename));
+
+		System.out.println("Parsing file: "+filename);
+		Document doc = mxUtils.parseFile(filename);
 		doc.getDocumentElement().normalize();
 		root=handleSCXMLNode(doc.getDocumentElement(),null,false);
 		root.setID(SCXMLNode.ROOTID);
 		getNodeHier(doc.getDocumentElement(),root);
-
+		System.out.println("Done reading file");
+		
 		// empty the graph
 		mxCell gr = new mxCell();
 		gr.insert(new mxCell());
@@ -293,7 +295,9 @@ public class SCXMLImportExport implements IImportExport {
 		graph.setDefaultParent(null);
 		graph.clearOutsourcedIndex();
 
+		System.out.println("Populating graph."); 
 		populateGraph(graph);
+		System.out.println("Done populating graph."); 
 		// set the SCXML (this.root) mxCell as not deletable.
 		gr=internalID2cell.get(root.getInternalID());
 		graph.setCellAsDeletable(gr, false);
@@ -441,7 +445,7 @@ public class SCXMLImportExport implements IImportExport {
 		if (root!=null) {
 			String scxml=mxVertex2SCXMLString(view,root,true);
 			System.out.println(scxml);
-			scxml=XMLUtils.prettyPrintXMLString(scxml, " ");			
+			scxml=XMLUtils.prettyPrintXMLString(scxml, " ",true);			
 			System.out.println(scxml);
 			mxUtils.writeFile(scxml, into);
 		}
@@ -470,7 +474,7 @@ public class SCXMLImportExport implements IImportExport {
 		if (initialChild!=null) oninitialentry=initialChild.getOnInitialEntry();
 		String close;
 		if (isRoot) {
-			ret="<scxml "+StringUtils.removeLeadingAndTrailingSpaces(value.getNAMESPACE().replace("\n", " "));
+			ret="<scxml";
 			close="</scxml>";
 		} else if (value.isParallel()) {
 			ret="<parallel";
@@ -482,6 +486,9 @@ public class SCXMLImportExport implements IImportExport {
 			ret="<state";
 			close="</state>";
 		}
+		String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNAMESPACE().replace("\n", " "));
+		if (!StringUtils.isEmptyString(namespace))
+			ret+=" "+namespace;
 		if (!StringUtils.isEmptyString(src))
 			ret+=" src=\""+src+"\"";
 		if (!StringUtils.isEmptyString(ID))
@@ -550,9 +557,9 @@ public class SCXMLImportExport implements IImportExport {
 				SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
 				assert((edgeValue!=null) && (targetValue!=null));
 				assert(!targetValue.getID().equals(""));
-				String cond=edgeValue.getCondition();
-				String event=edgeValue.getEvent();
-				String exe=edgeValue.getExe();
+				String cond=XMLUtils.escapeStringForXML(edgeValue.getCondition());
+				String event=XMLUtils.escapeStringForXML(edgeValue.getEvent());
+				String exe=XMLUtils.escapeStringForXML(edgeValue.getExe());
 				ret="<transition";
 				if (!StringUtils.isEmptyString(event))
 					ret+=" event=\""+event+"\"";

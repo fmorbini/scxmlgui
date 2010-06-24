@@ -22,11 +22,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -2026,13 +2029,23 @@ public class mxUtils
 	 */
 	public static Document parse(String xml) throws ParserConfigurationException, SAXException, IOException
 	{
-		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
-		.newInstance();
+		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 
 		return docBuilder.parse(new InputSource(new StringReader(xml)));
 	}
+	public static Document parseFile(String filename) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+		docBuilderFactory.setXIncludeAware(true);
+		docBuilderFactory.setNamespaceAware(true);
+		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 
+		File file=new File(filename);
+		InputSource i = new InputSource(new FileInputStream(file));
+		i.setSystemId(file.toURI().toURL().toExternalForm());
+		
+		return docBuilder.parse(i);
+	}
 	/**
 	 * Evaluates a Java expression as a class member using mxCodecRegistry.
 	 * The range of supported expressions is limited to static class

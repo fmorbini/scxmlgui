@@ -129,7 +129,7 @@ public class SCXMLGraph extends mxGraph
 				if (!namespaceGood) return "Namespace '"+namespace+"' is used but not defined.\n";
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
 				if (!StringUtils.isEmptyString(nodeValue.getID()))
-					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name.\n";
+					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name: "+nodeValue.getID()+"\n";
 					else gc.addSCXMLNode(nodeValue,node);
 				if (nodeValue.isClusterNode()) {
 					int numInitialChildren=0;
@@ -139,8 +139,8 @@ public class SCXMLGraph extends mxGraph
 						if (c.isVertex()) {
 							SCXMLNode cValue = (SCXMLNode)c.getValue();
 							if (cValue.isInitial()) numInitialChildren++;
-							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes don't support a child marked as intiial.\n";
-							if (numInitialChildren>1) return "More than 1 children is marked as initial.\n";
+							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes ("+nodeValue.getID()+") don't support a child marked as intiial.\n";
+							if (numInitialChildren>1) return "More than 1 children of "+nodeValue.getID()+" is marked as initial.\n";
 						}
 					}
 				}

@@ -48,7 +48,7 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
         doc=node.getSRCDoc();
         // undo and doc must be both either null or not null.
         assert(!((undo==null) ^ (doc==null)));
-        undoTextField=new UndoJTextField(XMLUtils.prettyPrintXMLString(node.getSRC()," "), doc, undo);
+        undoTextField=new UndoJTextField(node.getSRC(), doc, undo);
         if (doc==null) {
         	node.setSRCDoc(doc=undoTextField.getDocument());
         	node.setSRCUndoManager(undo=undoTextField.getUndoManager());

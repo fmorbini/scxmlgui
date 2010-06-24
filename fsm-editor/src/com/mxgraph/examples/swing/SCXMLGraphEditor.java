@@ -55,8 +55,8 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
+import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
@@ -264,11 +264,12 @@ public class SCXMLGraphEditor extends JPanel
 		if (ig==null) {
 			// load the required graph
 			assert(!file2importer.containsKey(fileName));
-			file2importer.put(file, ie=new SCXMLImportExport());								
+			file2importer.put(fileName, ie=new SCXMLImportExport());								
 			// read the graph, this will throw an exception if something goes wrong
-			ie.readInGraph(ig=new SCXMLGraph(), f.getAbsolutePath());
+			System.out.println("reading "+fileName);
+			ie.readInGraph(ig=new SCXMLGraph(), fileName);
 			ig.setEditor(this);
-			file2graph.put(file, ig);
+			file2graph.put(fileName, ig);
 		}
 		assert((ig!=null) && (ie!=null));
 		System.out.println("attaching node: '"+SCXMLnodename+"' from file '"+fileName+"'");
@@ -331,7 +332,8 @@ public class SCXMLGraphEditor extends JPanel
 					//rootg.setCellAsMovable(d, false);
 				}
 			} else {
-				v.setCluster(false); rootg.setCellStyle(v.getStyle(),ond);
+				v.setCluster(false);
+				rootg.setCellStyle(v.getStyle(),ond);
 			}
 			return ig;
 		}
@@ -339,21 +341,30 @@ public class SCXMLGraphEditor extends JPanel
 	public void displayOutsourcedContentInNode(mxCell node, SCXMLGraph g, boolean display) throws Exception {
 		attachOutsourcedContentToThisNode(node, g, display);
 	}
+	HashSet<mxCell> alreadyDone=new HashSet<mxCell>();
 	public void displayOutsourcedContent(SCXMLGraph g,boolean display,boolean isRoot) throws Exception {
+		if (isRoot) alreadyDone.clear();
 		// get the nodes that are outsourced
 		HashSet<mxCell> onds = g.getOutsourcedNodes();
 		for(mxCell ond:onds) {
 			// ig contains the graph from which the content of ond (or all its clones) is imported
 			SCXMLGraph ig=null;
 			// if isRoot is true, use the original node.
-			// else: check if there are clones for this original node and use those clones
+			// else: check if there are clones for this original node and use those clones			
 			if (isRoot) {
-				ig=attachOutsourcedContentToThisNode(ond, g, display);
+				if (!alreadyDone.contains(ond)) {
+					ig=attachOutsourcedContentToThisNode(ond, g, display);
+					alreadyDone.add(ond);
+				}
 			} else {
 				HashSet<mxCell> clones4Ond=g.getOriginal2Clones().get(ond);
 				if (clones4Ond!=null)
-					for (mxCell clonedOnd:clones4Ond)
-						ig=attachOutsourcedContentToThisNode(clonedOnd, g, display);
+					for (mxCell clonedOnd:clones4Ond) {
+						if (!alreadyDone.contains(clonedOnd)) {
+							ig=attachOutsourcedContentToThisNode(clonedOnd, g, display);
+							alreadyDone.add(clonedOnd);
+						}
+					}
 			}
 			// recursively call this function on the graph just created
 			if (ig!=null) displayOutsourcedContent(ig,display,false);

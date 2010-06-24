@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JTextPane;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
@@ -14,7 +13,10 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-public class UndoJTextPane extends JTextPane {
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+
+public class UndoJTextPane extends RSyntaxTextArea {
 
 	private static final long serialVersionUID = -5128499045192330958L;
 	private Document doc;
@@ -47,6 +49,7 @@ public class UndoJTextPane extends JTextPane {
 		} else {
 			setDocument(doc);
 		}
+		setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
 		if (undo==null)
 			undo=new UndoManager();
 
