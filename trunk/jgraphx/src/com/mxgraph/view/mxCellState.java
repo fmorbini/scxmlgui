@@ -492,7 +492,7 @@ public class mxCellState extends mxRectangle
 
 	public Point relativizePointToThisState(Point p, double s, mxPoint tr) {
 		//p is already normalized to the scale
-		return new Point((int)(p.x-getX()/s),(int)(p.y-getY()/s));
+		return new Point((int) Math.round((p.x-getX())/s),(int)Math.round((p.y-getY())/s));
 	}
 	public mxRectangle relativizeRectangleToThisState(mxRectangle r, double s, mxPoint tr) {
 		// r is not normalized to the scale

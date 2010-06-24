@@ -68,7 +68,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 						if ((index=cellState.getIndexOfEdgePointAt(graphPt.x, graphPt.y,gc.getTolerance()))==-1) {
 							int indexOfNewPoint=cellState.getIndexOfNewPoint(graphPt.x, graphPt.y,gc.getTolerance())-1;
 							if (indexOfNewPoint>=0)
-								add(editor.bind(mxResources.get("addCorner"), new AddCornerToEdgeAction(c,unscaledGraphPoint,indexOfNewPoint)));
+								add(editor.bind(mxResources.get("addCorner"), new AddCornerToEdgeAction(c,unscaledGraphPoint,graphPt,indexOfNewPoint)));
 						} else if (index>0 && index<lastIndex)
 							add(editor.bind(mxResources.get("removeCorner"), new RemoveCornerToEdgeAction(c,index-1)));
 					}
@@ -81,7 +81,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					addSeparator();
 					mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
 					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,screenCoord))).setEnabled(c!=root);
-					add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(screenCoord))).setEnabled(c==root);
+					add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(c,screenCoord)));
 					add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,screenCoord)));
 					if (c!=root) {
 						add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);

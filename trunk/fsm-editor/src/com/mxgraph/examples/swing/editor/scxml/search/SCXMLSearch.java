@@ -1,4 +1,4 @@
-package com.mxgraph.examples.swing.editor.scxml;
+package com.mxgraph.examples.swing.editor.scxml.search;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -28,6 +28,7 @@ import org.apache.lucene.util.Version;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxEvent;
@@ -102,7 +103,7 @@ public class SCXMLSearch {
 		root.getChildCount();
 
 		addCellsToIndex(root,writer,true);
-        writer.optimize();
+        //writer.optimize();
         writer.close();
 
         searcher = new IndexSearcher(idx);
@@ -135,26 +136,29 @@ public class SCXMLSearch {
 	private Document createDocumentForSCXMLEdge(SCXMLEdge v,String cellID) {
         Document doc = new Document();
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
-        doc.add(new Field(SCXMLEdge.SOURCE, new StringReader(v.getSCXMLSource())));
-        doc.add(new Field(SCXMLEdge.TARGET, new StringReader(v.getSCXMLTarget())));
-        doc.add(new Field(SCXMLEdge.EVENT, new StringReader(v.getEvent())));
-        doc.add(new Field(SCXMLEdge.CONDITION, new StringReader(v.getCondition())));
-        doc.add(new Field(SCXMLEdge.EDGEEXE, new StringReader(v.getExe())));
+        doc.add(new Field("source", new StringReader(v.getSCXMLSource())));
+        doc.add(new Field("target", new StringReader(v.getSCXMLTarget())));
+        doc.add(new Field("eve", new StringReader(v.getEvent())));
+        doc.add(new Field("cnd", new StringReader(v.getCondition())));
+        doc.add(new Field("eexe", new StringReader(v.getExe())));
+        doc.add(new Field("all", new StringReader(v.getSCXMLSource()+" "+v.getSCXMLTarget()+" "+v.getEvent()+" "+v.getCondition()+" "+v.getExe())));
         return doc;
 	}
 	private Document createDocumentForSCXMLNode(SCXMLNode v,String cellID) {
         Document doc = new Document();
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
-        doc.add(new Field(SCXMLNode.ID, new StringReader(v.getID())));
-        doc.add(new Field(SCXMLNode.SRC, new StringReader(v.getSRC())));
-        doc.add(new Field(SCXMLNode.DATAMODEL, new StringReader(v.getDataModel())));
-        doc.add(new Field(SCXMLNode.NAMESPACE, new StringReader(v.getNAMESPACE())));
-        doc.add(new Field(SCXMLNode.ONENTRYEXE, new StringReader(v.getOnEntry())));
-        doc.add(new Field(SCXMLNode.ONEXITEXE, new StringReader(v.getOnExit())));
-        doc.add(new Field(SCXMLNode.INITEXE, new StringReader(v.getOnInitialEntry())));
-        doc.add(new Field(SCXMLNode.DONEDATA, new StringReader(v.getDoneData())));
+        doc.add(new Field("id", new StringReader(v.getID())));
+        doc.add(new Field("inc", new StringReader(v.getSRC())));
+        doc.add(new Field("dm", new StringReader(v.getDataModel())));
+        doc.add(new Field("ns", new StringReader(v.getNAMESPACE())));
+        doc.add(new Field("entry", new StringReader(v.getOnEntry())));
+        doc.add(new Field("exit", new StringReader(v.getOnExit())));
+        doc.add(new Field("init", new StringReader(v.getOnInitialEntry())));
+        doc.add(new Field("dd", new StringReader(v.getDoneData())));
+        doc.add(new Field("all", new StringReader(v.getID()+" "+v.getSRC()+" "+v.getDataModel()+" "+v.getNAMESPACE()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData())));
 		return doc;
 	}
+	
 	private Document createDocumentForCell(mxCell c) {
 		String cellID=c.getId();
 		Object v=c.getValue();
@@ -187,7 +191,7 @@ public class SCXMLSearch {
 					writer.addDocument(doc);
 				}
 			}
-			writer.optimize();
+			//writer.optimize();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -204,7 +208,7 @@ public class SCXMLSearch {
 	
 	public ArrayList<mxCell> find(String query) throws IOException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
 		Constructor constructor = analyzer.getConstructor();
-        QueryParser queryParser = new QueryParser(Version.LUCENE_30,INDEXID,(Analyzer) constructor.newInstance());
+        QueryParser queryParser = new QueryParser(Version.LUCENE_30,"all",(Analyzer) constructor.newInstance());
         try {
         	Query q = queryParser.parse(query);
 			//System.out.println("query: "+q.getClass()+" "+q);

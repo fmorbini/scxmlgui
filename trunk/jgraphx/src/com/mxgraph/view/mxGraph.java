@@ -4330,26 +4330,16 @@ public class mxGraph extends mxEventSource
 		{
 			Set<Object> allCells = new HashSet<Object>();
 			allCells.add(cell);
-
-			Set<Object> edges = new HashSet<Object>(Arrays
-					.asList(getEdges(cell)));
-
-			while (!edges.isEmpty() && !allCells.containsAll(edges))
-			{
-				allCells.addAll(edges);
-
-				Set<Object> tmp = new HashSet<Object>();
-				Iterator<Object> it = edges.iterator();
-
-				while (it.hasNext())
-				{
-					Object edge = it.next();
-					tmp.addAll(Arrays.asList(getEdges(edge)));
+			
+			Stack<Object> edges=new Stack<Object>();
+			edges.addAll(Arrays.asList(getEdges(cell)));
+			while (!edges.isEmpty()) {
+				Object e=edges.pop();
+				if (!allCells.contains(e)) {
+					for(Object ee:getEdges(e)) edges.push(ee);
+					allCells.add(e);
 				}
-
-				edges = tmp;
 			}
-
 			cells = allCells.toArray();
 		}
 		else

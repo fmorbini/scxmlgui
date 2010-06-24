@@ -1,9 +1,10 @@
-package com.mxgraph.examples.swing.editor.scxml;
+package com.mxgraph.examples.swing.editor.scxml.search;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -13,7 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,8 +40,11 @@ import org.apache.lucene.store.LockObtainFailedException;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
+import com.mxgraph.examples.swing.editor.scxml.TextDialog;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.util.mxResources;
 
 public class SCXMLSearchTool extends JDialog implements ListSelectionListener, WindowListener, ActionListener, DocumentListener {
 
@@ -87,12 +94,20 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	}
 	
 	private void populateGUI(JPanel contentPane) {
-		JLabel portLabel = new JLabel("port:");
-		
 		searchBox = new JTextField();
 		searchBox.addActionListener(this);
 		searchBox.getDocument().addDocumentListener(this);
 
+		JButton helpButton = new JButton(mxResources.get("help"));
+		helpButton.setActionCommand("help");
+		helpButton.addActionListener(this);
+
+		JPanel searchAndHelp = new JPanel();
+		searchAndHelp.setLayout(new BoxLayout(searchAndHelp,BoxLayout.LINE_AXIS));
+		searchAndHelp.add(searchBox);
+		searchAndHelp.add(helpButton);
+		searchAndHelp.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+		
 		//Create the list and put it in a scroll pane.
 		listModel = new DefaultListModel();
 		list = new JList(listModel);
@@ -109,7 +124,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
         GridBagConstraints c = new GridBagConstraints();
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.fill = GridBagConstraints.HORIZONTAL;
-        contentPane.add(searchBox, c);
+        contentPane.add(searchAndHelp, c);
 
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
@@ -232,8 +247,31 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		String cmd=e.getActionCommand();
+		if (cmd.equals("help")) {
+			new TextDialog((Window)this,"Search help","The search box accepts Lucene syntax avaialble at:\n" +
+					"http://lucene.apache.org/java/2_4_0/queryparsersyntax.html\n" +
+					"\n" +
+					"By default, if no fields are specified the entered text is searched in all fields.\n"+
+					"The available fields are:\n" +
+					"-For edges:\n"+
+					" -source: search the source of edges\n"+
+					" -target: search the target of edges\n"+
+					" -eve: search the event string of edges\n"+
+					" -cnd: search the condition string of edges\n"+
+					" -eexe: search the executable content of edges\n"+
+					"-For nodes:\n"+
+					" -id: search the label of nodes\n"+
+					" -inc: search the include string of nodes\n"+
+					" -dm: search the datamodel associted with nodes\n"+
+					" -ns: search the namespace associated with nodes\n"+
+					" -entry: search the content exectuted whena  node is entered\n"+
+					" -exit: search the content exectuted whena  node is exited\n"+
+					" -init: search the content executed when the node is entered because it's an intial node\n"+
+					" -dd: search the data attached when the node is exited\n"+
+					"\n"+
+					"To search all element with a non empty datamodel field use the following query:\"dm:[* TO*]\"\n");
+		}
 	}
 
 	public ArrayList<mxCell> findAndUpdateList(Document doc) {

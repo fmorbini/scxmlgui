@@ -1,5 +1,6 @@
 package com.mxgraph.layout;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -139,6 +140,21 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 	{
 		Object edge = parallels.get(0);
 		mxIGraphModel model = graph.getModel();
+		
+		mxGraphView view = graph.getView();
+		double scale = view.getScale();
+		mxPoint trans = view.getTranslate();
+
+		Object edgeParent = model.getParent(edge);
+		mxCellState edgeParentState=view.getState(edgeParent);
+		
+		mxCellState cellState=view.getState(edge);		
+		int lastIndex=cellState.getAbsolutePointCount()-1;
+		Point start = cellState.getAbsolutePoint(0).getPoint();
+		Point end = cellState.getAbsolutePoint(lastIndex).getPoint();
+		start=edgeParentState.relativizePointToThisState(start, scale, trans);
+		end=edgeParentState.relativizePointToThisState(end, scale, trans);
+		
 		mxGeometry src = model.getGeometry(model.getTerminal(edge, true));
 		mxGeometry trg = model.getGeometry(model.getTerminal(edge, false));
 		
@@ -162,11 +178,15 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 		else if (src != null && trg != null)
 		{
 			// Routes parallel edges
-			double scx = src.getX() + src.getWidth() / 2;
+			/*double scx = src.getX() + src.getWidth() / 2;
 			double scy = src.getY() + src.getHeight() / 2;
-
 			double tcx = trg.getX() + trg.getWidth() / 2;
-			double tcy = trg.getY() + trg.getHeight() / 2;
+			double tcy = trg.getY() + trg.getHeight() / 2;*/
+			// changed to position of starting and end points instead of center of source and target states.
+			double scx = start.getX();
+			double scy = start.getY();
+			double tcx = end.getX();
+			double tcy = end.getY();
 
 			double dx = tcx - scx;
 			double dy = tcy - scy;

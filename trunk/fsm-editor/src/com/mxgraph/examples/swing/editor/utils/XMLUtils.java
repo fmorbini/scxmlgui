@@ -43,7 +43,7 @@ public class XMLUtils {
 		return result.toString();
 	}
 	
-	public static String domNode2String(Node node)  {
+	public static String domNode2String(Node node,boolean escapeStrings)  {
 		String ret="";
 		switch (node.getNodeType()) {
 
@@ -53,7 +53,7 @@ public class XMLUtils {
 			NodeList nodes = node.getChildNodes();
 			if (nodes != null) {
 				for (int i=0; i<nodes.getLength(); i++) {
-					ret+=domNode2String(nodes.item(i));
+					ret+=domNode2String(nodes.item(i),escapeStrings);
 				}
 			}
 			break;
@@ -64,7 +64,7 @@ public class XMLUtils {
 			NamedNodeMap attributes = node.getAttributes();
 			for (int i=0; i<attributes.getLength(); i++) {
 				Node current = attributes.item(i);
-				ret+=" " + current.getNodeName() +"=\"" + escapeStringForXML(current.getNodeValue())+"\"";
+				ret+=" " + current.getNodeName() +"=\"" + ((escapeStrings)?escapeStringForXML(current.getNodeValue()):current.getNodeValue())+"\"";
 			}
 			ret+=">";
 
@@ -72,7 +72,7 @@ public class XMLUtils {
 			NodeList children = node.getChildNodes();
 			if (children != null) {
 				for (int i=0; i<children.getLength(); i++) {
-					ret+=domNode2String(children.item(i));
+					ret+=domNode2String(children.item(i),escapeStrings);
 				}
 			}
 
@@ -80,7 +80,7 @@ public class XMLUtils {
 			break;
 
 		case Node.TEXT_NODE:
-			ret+=escapeStringForXML(node.getNodeValue());
+			ret+=(escapeStrings)?escapeStringForXML(node.getNodeValue()):node.getNodeValue();
 			break;
 		}
 		return ret;
@@ -88,7 +88,7 @@ public class XMLUtils {
 
 	
 	private static String BI=" "; 
-	private static String prettyPrintDom(Node node,String indent,boolean isRoot)  {
+	private static String prettyPrintDom(Node node,String indent,boolean isRoot, boolean escapeStrings)  {
 		String ret="";
 		switch (node.getNodeType()) {
 
@@ -97,7 +97,7 @@ public class XMLUtils {
 			NodeList nodes = node.getChildNodes();
 			if (nodes != null) {
 				for (int i=0; i<nodes.getLength(); i++) {
-					ret+=prettyPrintDom(nodes.item(i),indent,isRoot);
+					ret+=prettyPrintDom(nodes.item(i),indent,isRoot,escapeStrings);
 				}
 			}
 			break;
@@ -108,7 +108,7 @@ public class XMLUtils {
 			NamedNodeMap attributes = node.getAttributes();
 			for (int i=0; i<attributes.getLength(); i++) {
 				Node current = attributes.item(i);
-				ret+=" " + current.getNodeName() +"=\"" + escapeStringForXML(current.getNodeValue())+"\"";
+				ret+=" " + current.getNodeName() +"=\"" + ((escapeStrings)?escapeStringForXML(current.getNodeValue()):current.getNodeValue())+"\"";
 			}
 			ret+=">";
 
@@ -116,7 +116,7 @@ public class XMLUtils {
 			NodeList children = node.getChildNodes();
 			if (children != null) {
 				for (int i=0; i<children.getLength(); i++) {
-					String tmp=prettyPrintDom(children.item(i),indent+((isRoot)?"":BI),false);
+					String tmp=prettyPrintDom(children.item(i),indent+((isRoot)?"":BI),false,escapeStrings);
 					if (!tmp.replaceAll("[\\s]+", "").equals(""))
 						if (tmp.endsWith("\n"))
 							if (ret.endsWith("\n"))
@@ -134,7 +134,7 @@ public class XMLUtils {
 			break;
 
 		case Node.TEXT_NODE:
-			ret+=escapeStringForXML(node.getNodeValue());
+			ret+=(escapeStrings)?escapeStringForXML(node.getNodeValue()):node.getNodeValue();
 			break;
 			
 		case Node.COMMENT_NODE:
@@ -144,13 +144,13 @@ public class XMLUtils {
 		return ret;
 	}
 
-	public static String prettyPrintXMLString(String xml,String indent) throws Exception {
+	public static String prettyPrintXMLString(String xml,String indent, boolean escapeStrings) throws Exception {
 		if (xml==null) return null;
 		// add surrounding top level node just in case
 		xml="<xml>"+xml+"</xml>";		
 		BI=indent;
     	Document doc=mxUtils.parse(xml);
-		xml=prettyPrintDom(doc,"",true);
+		xml=prettyPrintDom(doc,"",true,escapeStrings);
 		//remove added top level node.
 		xml=xml.replaceAll("^[\\s]*<xml>[\\s]*|[\\s]*</xml>[\\s]*$", "");
 		return xml;
@@ -162,9 +162,9 @@ public class XMLUtils {
     	String d="<assign expr=\"Data(_eventdata,'//speech_act/primitive_speech_act/whq/object[@name=\"strange_man\"]/attribute/@name') eq 'name'\" location=\"Data(analysis_variables, 'av:about_1_strange_man_name')\" type=\"match\"></assign>";
     	d=escapeStringForXML(d);
     	try {
-			System.out.println(prettyPrintXMLString(d," "));
+			System.out.println(prettyPrintXMLString(d," ",true));
 			Document doc=mxUtils.parse(a);
-			String b=prettyPrintDom(doc,"",true);
+			String b=prettyPrintDom(doc,"",true,true);
 			System.out.println(b);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -48,7 +48,7 @@ public class SCXMLElementEditor extends JDialog {
 
 	protected EditorKeyboardHandler keyboardHandler=null;
     
-	private AbstractActionWrapper externalUndoAction,externalRedoAction;
+	private AbstractActionWrapper externalUndoAction=null,externalRedoAction=null;
 
 	private mxCell cell=null;
 	
@@ -88,7 +88,7 @@ public class SCXMLElementEditor extends JDialog {
         			//System.out.println("update actions, pane side, after");
     				if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
     				if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
-    		    	externalUndoAction.setInternalAction(ua);    	
+    		    	externalUndoAction.setInternalAction(ua);
     		    	externalRedoAction.setInternalAction(ra);
     		    	ua.updateUndoState();
     		    	ra.updateRedoState();

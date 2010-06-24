@@ -11,12 +11,12 @@ import com.mxgraph.view.mxGraph;
 public class mxClusterLayout extends mxGraphLayout {
 
 	HashSet<String>internalClusterID2DoneLayout; // clsters already layed-out
-	mxIGraphLayout[] layouts; // layout to apply to each cluster
+	mxIGraphLayout clusterLayout; // layout to apply to each cluster
 	mxGraph graph;
 
-	public mxClusterLayout(mxIGraphLayout[] ls,mxGraph g) {
+	public mxClusterLayout(mxIGraphLayout cl,mxGraph g) {
 		super(g);
-		layouts=ls;
+		clusterLayout=cl;
 		internalClusterID2DoneLayout=new HashSet<String>();
 		graph=g;
 	}
@@ -24,8 +24,7 @@ public class mxClusterLayout extends mxGraphLayout {
 	public mxClusterLayout(mxGraph g) {
 		super(g);
 		graph=g;
-		mxIGraphLayout[] ls={new mxHierarchicalLayout(g),new mxParallelEdgeLayout(g),new mxEdgeLabelLayout(g)};
-		layouts=ls;
+		clusterLayout=new mxHierarchicalLayout(g);
 		internalClusterID2DoneLayout=new HashSet<String>();
 	}
 
@@ -44,11 +43,19 @@ public class mxClusterLayout extends mxGraphLayout {
 	
 	@Override
 	public void execute(Object parent) {
+		System.out.println("Starting cluster layout");
 		mxCell root=(mxCell) parent;
+		// first run the layout on the clusters
 		HashSet<mxCell> clusters = findAllClustersRootedAt(graph, root);
 		for (mxCell cluster:clusters) {
 			handleLayoutInThisCluster(cluster,clusters);
 		}
+		// after run the graph layout (for edges and labels)
+		mxIGraphLayout l = new mxParallelEdgeLayout(graph);
+		l.execute(parent);
+		l=new mxEdgeLabelLayout(graph);
+		l.execute(parent);
+		System.out.println("Done cluster layout");
 	}
 	
 	private void handleLayoutInThisCluster(mxCell cluster, HashSet<mxCell> clusters) {
@@ -70,7 +77,7 @@ public class mxClusterLayout extends mxGraphLayout {
 			// exit cluster
 			// resize the cluster container
 			if (!cluster.isCollapsed()) {
-				for (mxIGraphLayout layout:layouts) layout.execute(cluster);
+				clusterLayout.execute(cluster);
 				Object[] a=new Object[1];
 				a[0]=cluster;
 				graph.updateGroupBounds(a,2 * graph.getGridSize(),false);

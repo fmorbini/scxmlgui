@@ -8,6 +8,8 @@
 	<property name="Lib"		location="${FSM}/../lib"/>
 	<property name="JBPM"		location="${Lib}/dom4j.jar"/>
 	<property name="JGRAPHX"	location="${Lib}/jgraphx.jar"/>
+	<property name="Lucene"	location="${Lib}/lucene-core-3.0.1.jar"/>
+	<property name="RS"	location="${Lib}/rsyntaxtextarea.jar"/>
 
 	<!-- project paths -->
 	<property name="FSM.sources"	location="${FSM}/src"/>
@@ -26,6 +28,8 @@
 			<classpath>
 			  <pathelement location="${JBPM}"/>
 			  <pathelement location="${JGRAPHX}"/>
+			  <pathelement location="${Lucene}"/>
+			  <pathelement location="${RS}"/>
 			</classpath>
 		</javac>
 		<copy todir="${FSM.binaries}">
@@ -42,6 +46,8 @@
             </manifest>
             <zipfileset excludes="META-INF/*.SF" src="${JGRAPHX}"/>
             <zipfileset excludes="META-INF/*.SF" src="${JBPM}"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lucene}"/>
+            <zipfileset excludes="META-INF/*.SF" src="${RS}"/>
             <fileset dir="${FSM.binaries}"/>
 		</jar>
     </target>
