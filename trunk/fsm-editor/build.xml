@@ -6,12 +6,15 @@
 	<property name="FSM.archive" 	value="fsm-editor.jar"/>
 
 	<property name="Lib"		location="${FSM}/../lib"/>
-	<property name="JBPM"		location="${Lib}/dom4j.jar"/>
-	<property name="JGRAPHX"	location="${Lib}/jgraphx.jar"/>
-	<property name="Lucene"	location="${Lib}/lucene-core-3.0.1.jar"/>
-	<property name="RS"	location="${Lib}/rsyntaxtextarea.jar"/>
 
-	<!-- project paths -->
+    <path id="FSM.archives">
+		<pathelement path="${Lib}/jgraphx.jar"/>
+		<pathelement path="${Lib}/lucene-core-3.0.1.jar"/>
+		<pathelement path="${Lib}/rsyntaxtextarea.jar"/>
+		<pathelement path="${Lib}/dom4j.jar"/>
+	</path>
+
+		<!-- project paths -->
 	<property name="FSM.sources"	location="${FSM}/src"/>
 	<property name="FSM.binaries"	location="${FSM}/bin"/>
 
@@ -23,13 +26,13 @@
 		<delete dir="${FSM.binaries}" includeemptydirs="true" failonerror="false"/>
 	</target>
 	<target name="build" depends="clean">
+		<!-- 	uncomment the following 2 lines to print the classpath -->
+		<!-- 	<property name="myclasspath" refid="DMS.archives"/> -->
+		<!-- 	<echo message="Classpath = ${myclasspath}"/> -->
 		<mkdir dir="${FSM.binaries}"/>
 		<javac srcdir="${FSM.sources}" destdir="${FSM.binaries}" debug="true">
 			<classpath>
-			  <pathelement location="${JBPM}"/>
-			  <pathelement location="${JGRAPHX}"/>
-			  <pathelement location="${Lucene}"/>
-			  <pathelement location="${RS}"/>
+				<path refid="FSM.archives"/>
 			</classpath>
 		</javac>
 		<copy todir="${FSM.binaries}">
@@ -44,11 +47,43 @@
                 <attribute name="Main-Class" value="com.mxgraph.examples.swing.SCXMLGraphEditor"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <zipfileset excludes="META-INF/*.SF" src="${JGRAPHX}"/>
-            <zipfileset excludes="META-INF/*.SF" src="${JBPM}"/>
-            <zipfileset excludes="META-INF/*.SF" src="${Lucene}"/>
-            <zipfileset excludes="META-INF/*.SF" src="${RS}"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/jgraphx.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/lucene-core-3.0.1.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/rsyntaxtextarea.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
             <fileset dir="${FSM.binaries}"/>
 		</jar>
     </target>
+	  <target name="classpath">
+
+		<echo message="Started writing the FSM classpath"/>
+
+		<pathconvert property="archives" refid="FSM.archives" dirsep="/" pathsep="&quot;/&gt;&#10;&#09;&lt;classpathentry kind=&quot;lib&quot; path=&quot;"/>  
+
+		<basename property="sources" file="${FSM.sources}"/>
+		<basename property="binaries" file="${FSM.binaries}"/>
+
+		<echo file=".classpath">
+
+<![CDATA[
+
+<!-- This file was generated for Eclipse by Ant.	-->
+<!-- Any changes to this file will be overwritten.	-->
+<!-- Edit build.xml to make your changes permanent.	-->
+
+<classpath>
+
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="${archives}"/>
+	<classpathentry kind="output" path="${binaries}"/>
+	<classpathentry kind="src" path="${sources}"/>
+
+</classpath>
+
+]]>
+
+		</echo>
+		<echo message="Completed writing the DMS classpath"/>
+
+	</target>
 </project>
