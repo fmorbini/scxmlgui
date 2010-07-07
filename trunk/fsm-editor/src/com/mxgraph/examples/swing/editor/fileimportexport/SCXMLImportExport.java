@@ -463,15 +463,17 @@ public class SCXMLImportExport implements IImportExport {
 		String transitions=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
-		src=value.getSRC();
-		ID=value.getID();
-		datamodel=value.getDataModel();
-		if (value.isFinal()) donedata=value.getDoneData();
-		onentry=value.getOnEntry();
-		onexit=value.getOnExit();
+		src=StringUtils.removeLeadingAndTrailingSpaces(value.getSRC());
+		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
+		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDataModel());
+		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
+		onentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnEntry());
+		onexit=StringUtils.removeLeadingAndTrailingSpaces(value.getOnExit());
+
 		transitions=edgesOfmxVertex2SCXMLString(n,value);
+
 		SCXMLNode initialChild=getInitialChildOfmxCell(n);
-		if (initialChild!=null) oninitialentry=initialChild.getOnInitialEntry();
+		if (initialChild!=null) oninitialentry=StringUtils.removeLeadingAndTrailingSpaces(initialChild.getOnInitialEntry());
 		String close;
 		if (isRoot) {
 			ret="<scxml";
@@ -499,10 +501,9 @@ public class SCXMLImportExport implements IImportExport {
 
 		// save the geometric information of this node:
 		ret+="<!-- "+getGeometryString(view,n)+" -->";
-		
 		if (!StringUtils.isEmptyString(datamodel))
 			ret+="<datamodel>"+datamodel+"</datamodel>";
-		if (value.isInitial() && !StringUtils.isEmptyString(oninitialentry=value.getOnInitialEntry()))
+		if (value.isInitial() && !StringUtils.isEmptyString(oninitialentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnInitialEntry())))
 			ret+="<initial><transition>"+oninitialentry+"</transition></initial>";
 		if (!StringUtils.isEmptyString(donedata))
 			ret+="<donedata>"+donedata+"</donedata>";
@@ -557,9 +558,9 @@ public class SCXMLImportExport implements IImportExport {
 				SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
 				assert((edgeValue!=null) && (targetValue!=null));
 				assert(!targetValue.getID().equals(""));
-				String cond=XMLUtils.escapeStringForXML(edgeValue.getCondition());
-				String event=XMLUtils.escapeStringForXML(edgeValue.getEvent());
-				String exe=XMLUtils.escapeStringForXML(edgeValue.getExe());
+				String cond=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition()));
+				String event=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent()));
+				String exe=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe()));
 				ret="<transition";
 				if (!StringUtils.isEmptyString(event))
 					ret+=" event=\""+event+"\"";
