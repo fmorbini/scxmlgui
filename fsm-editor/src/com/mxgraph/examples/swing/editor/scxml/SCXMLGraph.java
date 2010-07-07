@@ -19,6 +19,7 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
+import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
@@ -491,6 +492,7 @@ public class SCXMLGraph extends mxGraph
 				tip+="order: "+v.getOrder()+"<br>";
 				tip+="event: "+v.getEvent()+"<br>";
 				tip+="condition: "+v.getCondition()+"<br>";
+				tip+="exe: <pre>"+XMLUtils.escapeStringForXML(v.getExe())+"</pre><br>";
 				tip += "</html>";
 			} else if (((mxCell)cell).isVertex()) {
 				SCXMLNode v=(SCXMLNode) ((mxCell)cell).getValue();
@@ -499,10 +501,16 @@ public class SCXMLGraph extends mxGraph
 					tip="<html>";
 					tip+="src: "+src+"<br>";
 					tip += "</html>";
+				} else {
+					tip="<html>";
+					if (v.isInitial()) tip+="onInitialEntry: "+v.getOnInitialEntry()+"<br>";
+					tip+="onEntry: <pre>"+XMLUtils.escapeStringForXML(v.getOnEntry())+"</pre><br>";
+					tip+="onExit: <pre>"+XMLUtils.escapeStringForXML(v.getOnExit())+"</pre><br>";
+					if (v.isFinal()) tip+="exitData: "+v.getDoneData()+"<br>";
+					tip += "</html>";
 				}
 			}
 		}
-
 		return tip;
 	}
 //	public String getToolTipForCell(Object cell)
