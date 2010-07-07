@@ -117,17 +117,18 @@ public class ImportExportPicker {
 				if (!filename.toLowerCase().endsWith(ext))
 					filename += ext;
 			}
-			if (new File(filename).exists()
+			File file=new File(filename);
+			if (file.exists()
 					&& JOptionPane.showConfirmDialog(graphComponent,
 							mxResources.get("overwriteExistingFile")) != JOptionPane.YES_OPTION)
 			{
 				return;
-			}			
-			fie=fileIO.get(selectedFilter);			
+			}
+			fie=fileIO.get(selectedFilter);
 			fie.write(graphComponent, filename);
 			if (selectedFilter==defaultSaveFilter) {
 				editor.setModified(false);
-				editor.setCurrentFile(fc.getSelectedFile(),fie);
+				editor.setCurrentFile(file,fie);
 			}
 		} else {
 			filename = editor.getCurrentFile().getAbsolutePath();
