@@ -48,7 +48,7 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
         String datamodelText="",datamodelXML="";
         try {
         	datamodelText=root.getDataModel();
-        	datamodelXML=XMLUtils.prettyPrintXMLString(datamodelText," ",false);
+        	datamodelXML=XMLUtils.prettyPrintXMLString(datamodelText," ",true);
         } catch (Exception e) {
         	datamodelXML=datamodelText;
         }
