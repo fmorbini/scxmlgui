@@ -58,7 +58,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	private SCXMLGraphComponent gc;
 
 	public SCXMLSearchTool(JFrame parent, SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		super(parent,"SCXML Listener");
+		super(parent,"Find");
 		search = new SCXMLSearch(editor,defaultNumResults);
 
 		buildIndex();
