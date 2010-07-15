@@ -136,26 +136,26 @@ public class SCXMLSearch {
 	private Document createDocumentForSCXMLEdge(SCXMLEdge v,String cellID) {
         Document doc = new Document();
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
-        doc.add(new Field("source", new StringReader(v.getSCXMLSource())));
-        doc.add(new Field("target", new StringReader(v.getSCXMLTarget())));
-        doc.add(new Field("eve", new StringReader(v.getEvent())));
-        doc.add(new Field("cnd", new StringReader(v.getCondition())));
-        doc.add(new Field("eexe", new StringReader(v.getExe())));
-        doc.add(new Field("all", new StringReader(v.getSCXMLSource()+" "+v.getSCXMLTarget()+" "+v.getEvent()+" "+v.getCondition()+" "+v.getExe())));
+        doc.add(new Field("source", new StringReader(v.getSCXMLSource().toLowerCase())));
+        doc.add(new Field("target", new StringReader(v.getSCXMLTarget().toLowerCase())));
+        doc.add(new Field("eve", new StringReader(v.getEvent().toLowerCase())));
+        doc.add(new Field("cnd", new StringReader(v.getCondition().toLowerCase())));
+        doc.add(new Field("eexe", new StringReader(v.getExe().toLowerCase())));
+        doc.add(new Field("all", new StringReader((v.getSCXMLSource()+" "+v.getSCXMLTarget()+" "+v.getEvent()+" "+v.getCondition()+" "+v.getExe()).toLowerCase())));
         return doc;
 	}
 	private Document createDocumentForSCXMLNode(SCXMLNode v,String cellID) {
         Document doc = new Document();
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
-        doc.add(new Field("id", new StringReader(v.getID())));
-        doc.add(new Field("inc", new StringReader(v.getSRC())));
-        doc.add(new Field("dm", new StringReader(v.getDataModel())));
-        doc.add(new Field("ns", new StringReader(v.getNAMESPACE())));
-        doc.add(new Field("entry", new StringReader(v.getOnEntry())));
-        doc.add(new Field("exit", new StringReader(v.getOnExit())));
-        doc.add(new Field("init", new StringReader(v.getOnInitialEntry())));
-        doc.add(new Field("dd", new StringReader(v.getDoneData())));
-        doc.add(new Field("all", new StringReader(v.getID()+" "+v.getSRC()+" "+v.getDataModel()+" "+v.getNAMESPACE()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData())));
+        doc.add(new Field("id", new StringReader(v.getID().toLowerCase())));
+        doc.add(new Field("inc", new StringReader(v.getSRC().toLowerCase())));
+        doc.add(new Field("dm", new StringReader(v.getDataModel().toLowerCase())));
+        doc.add(new Field("ns", new StringReader(v.getNAMESPACE().toLowerCase())));
+        doc.add(new Field("entry", new StringReader(v.getOnEntry().toLowerCase())));
+        doc.add(new Field("exit", new StringReader(v.getOnExit().toLowerCase())));
+        doc.add(new Field("init", new StringReader(v.getOnInitialEntry().toLowerCase())));
+        doc.add(new Field("dd", new StringReader(v.getDoneData().toLowerCase())));
+        doc.add(new Field("all", new StringReader((v.getID()+" "+v.getSRC()+" "+v.getDataModel()+" "+v.getNAMESPACE()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData()).toLowerCase())));
 		return doc;
 	}
 	

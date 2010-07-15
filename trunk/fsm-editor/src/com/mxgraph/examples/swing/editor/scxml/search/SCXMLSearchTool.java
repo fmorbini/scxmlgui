@@ -274,9 +274,9 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		}
 	}
 
-	public ArrayList<mxCell> findAndUpdateList(Document doc) {
+	public ArrayList<mxCell> findAndUpdateList(Document searchBox) {
 		try {
-			String query=doc.getText(0, doc.getLength());
+			String query=searchBox.getText(0, searchBox.getLength());
 			ArrayList<mxCell> result = search.find(query);
 			listModel.clear();
 			if (result!=null) {

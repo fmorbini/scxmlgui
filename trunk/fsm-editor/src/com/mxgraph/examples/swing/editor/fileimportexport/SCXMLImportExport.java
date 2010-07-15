@@ -267,7 +267,7 @@ public class SCXMLImportExport implements IImportExport {
 		NodeList list = n.getChildNodes();
 		int listLength = list.getLength();
 		for (int i=0;i<listLength;i++) {
-			content+=XMLUtils.domNode2String(list.item(i),false);
+			content+=XMLUtils.domNode2String(list.item(i),true);
 		}
 		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
@@ -558,9 +558,9 @@ public class SCXMLImportExport implements IImportExport {
 				SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
 				assert((edgeValue!=null) && (targetValue!=null));
 				assert(!targetValue.getID().equals(""));
-				String cond=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition()));
-				String event=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent()));
-				String exe=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe()));
+				String cond=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition());
+				String event=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent());
+				String exe=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe());
 				ret="<transition";
 				if (!StringUtils.isEmptyString(event))
 					ret+=" event=\""+event+"\"";
