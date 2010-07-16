@@ -53,6 +53,7 @@
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
             <fileset dir="${FSM.binaries}"/>
 		</jar>
+		<copy file="${FSM.binaries}/${FSM.archive}" todir="${FSM}/../extra/"/>
     </target>
 	  <target name="classpath">
 
