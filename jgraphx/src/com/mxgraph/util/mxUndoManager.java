@@ -6,6 +6,7 @@ package com.mxgraph.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -30,6 +31,8 @@ import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
  */
 public class mxUndoManager extends mxEventSource
 {
+	
+	long timestampOfLastEdit=new Date().getTime();
 	
 	int unmodifiedPosition;
 
@@ -191,6 +194,7 @@ public class mxUndoManager extends mxEventSource
 	}
 	private void addEventList() {
 		if (collected.size()>0) {
+			timestampOfLastEdit=new Date().getTime();
 			trim();
 			
 			if (size > 0 && size == history.size())
@@ -222,7 +226,9 @@ public class mxUndoManager extends mxEventSource
 		}
 	}
 
-	
+	public long getTimeOfMostRecentUndoEvent() {
+		return timestampOfLastEdit;
+	}
 	
 	public void resetUnmodifiedState() {
 		//System.out.println("reset= "+indexOfNextAdd+" "+unmodifiedPosition);

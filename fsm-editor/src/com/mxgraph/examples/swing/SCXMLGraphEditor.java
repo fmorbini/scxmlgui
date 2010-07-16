@@ -93,6 +93,18 @@ public class SCXMLGraphEditor extends JPanel
 	public ImportExportPicker getIOPicker() {return iep;}
 	public SCXMLEditorMenuBar menuBar;
 
+	public static final int STARTUP=0;
+	public static final int EDITING=1;	
+	public static final int LAYOUT=2;	
+	public static final int POPULATING=3;	
+	protected int status=STARTUP;
+	public void setStatus(int status) {
+		this.status=status;
+	}
+	public int getStatus() {
+		return status;
+	}
+
 	/**
 	 * 
 	 */
@@ -1034,12 +1046,17 @@ public class SCXMLGraphEditor extends JPanel
 		// if you are using an mxEditor instance)
 		graphComponent.getGraph().getModel().addListener(mxEvent.CHANGE, new mxIEventListener()
 		{
+			private long timeLastEditEvent=0l;
 			private StringBuffer warnings=new StringBuffer();
 			public void invoke(Object sender, mxEventObject evt)
 			{
-				warnings.setLength(0);
-				if (graphComponent.validateGraph(warnings)) scxmlErrorsDialog.setText("");
-				else scxmlErrorsDialog.setText(warnings.toString());
+				long mostRecentEditEvent=SCXMLGraphEditor.this.getUndoManager().getTimeOfMostRecentUndoEvent();
+				if ((SCXMLGraphEditor.this.status==EDITING) && (timeLastEditEvent!=mostRecentEditEvent)) {
+					timeLastEditEvent=mostRecentEditEvent;
+					warnings.setLength(0);
+					if (graphComponent.validateGraph(warnings)) scxmlErrorsDialog.setText("");
+					else scxmlErrorsDialog.setText(warnings.toString());
+				}
 			}
 		});
 		
