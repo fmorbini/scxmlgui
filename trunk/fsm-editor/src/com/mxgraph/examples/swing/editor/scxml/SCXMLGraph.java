@@ -99,9 +99,19 @@ public class SCXMLGraph extends mxGraph
 		if (model.isVertex(cell)) {
 			mxCell node=(mxCell)cell;
 			if (node.isVertex()) {
-				assert(node.getValue() instanceof SCXMLNode);
 				SCXMLNode nodeValue = (SCXMLNode)node.getValue();				
 				if (nodeValue.getID().matches(".*[\\s]+.*")) return "node name contains spaces.\n";
+				// check if the executable content is parsable xml
+				String error=XMLUtils.isParsableXMLString(nodeValue.getOnEntry());
+				if (error!=null) return "OnEntry content of node "+nodeValue.getID()+" caused a parser error: "+error;
+				error=XMLUtils.isParsableXMLString(nodeValue.getOnExit());
+				if (error!=null) return "OnExit content of node "+nodeValue.getID()+" caused a parser error: "+error;
+				error=XMLUtils.isParsableXMLString(nodeValue.getOnInitialEntry());
+				if (error!=null) return "On initial content of node "+nodeValue.getID()+" caused a parser error: "+error;
+				error=XMLUtils.isParsableXMLString(nodeValue.getDoneData());
+				if (error!=null) return "Done data of node "+nodeValue.getID()+" caused a parser error: "+error;
+				error=XMLUtils.isParsableXMLString(nodeValue.getDataModel());
+				if (error!=null) return "Data model of node "+nodeValue.getID()+" caused a parser error: "+error;
 				// check if the namespace has been included
 				String SCXMLid=nodeValue.getID();
 				int pos=SCXMLid.indexOf(':');
@@ -149,10 +159,12 @@ public class SCXMLGraph extends mxGraph
 		} else if (model.isEdge(cell)) {
 			// check that source and target have non null SCXML ids.
 			mxCell edge=(mxCell)cell;
-			assert(edge.getValue() instanceof SCXMLEdge);
+			SCXMLEdge edgeValue=(SCXMLEdge) edge.getValue();
 			if ((edge.getSource()==null) || (edge.getTarget()==null)) return "unconnected edge.";
+			String error=XMLUtils.isParsableXMLString(edgeValue.getExe());
 			SCXMLNode source=(SCXMLNode)edge.getSource().getValue();
 			SCXMLNode target=(SCXMLNode)edge.getTarget().getValue();
+			if (error!=null) return "Executable content of one edge from "+source.getID()+" to "+target.getID()+" caused a parser error: "+error;
 			if (StringUtils.isEmptyString(source.getID()) || StringUtils.isEmptyString(target.getID())) {
 				return "target and source of a transition must have not empty name.";
 			}

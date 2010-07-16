@@ -33,5 +33,6 @@
         <jar destfile="${JGRAPHX.binaries}/${JGRAPHX.archive}" filesetmanifest="mergewithoutmain">
             <fileset dir="${JGRAPHX.binaries}"/>
         </jar>
+		<copy file="${JGRAPHX.binaries}/${JGRAPHX.archive}" todir="${JGRAPHX}/../lib/"/>
     </target>
 </project>

@@ -584,6 +584,7 @@ public class SCXMLEditorActions
 					editor.updateUndoRedoActionState();
 					editor.clearDisplayOutsourcedContentStatus();
 				}
+				editor.setStatus(SCXMLGraphEditor.EDITING);
 			}
 		}
 	}
@@ -610,9 +611,12 @@ public class SCXMLEditorActions
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
+			int oldStatus=editor.getStatus();
+			editor.setStatus(SCXMLGraphEditor.LAYOUT);
 			editor.getUndoManager().setCollectionMode(true);
 			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
 			editor.getUndoManager().setCollectionMode(false);
+			editor.setStatus(oldStatus);
 		}
 	}
 
@@ -658,6 +662,7 @@ public class SCXMLEditorActions
 		{
 			SCXMLGraphEditor editor = getEditor(e);
 			if (editor != null) {
+				editor.setStatus(SCXMLGraphEditor.POPULATING);
 				if (AskToSaveIfRequired.check(editor)) {
 					SCXMLGraph graph = editor.getGraphComponent().getGraph();
 					if (graph != null) {
@@ -695,6 +700,7 @@ public class SCXMLEditorActions
 						}
 					}
 				}
+				editor.setStatus(SCXMLGraphEditor.EDITING);
 			}
 		}
 	}
