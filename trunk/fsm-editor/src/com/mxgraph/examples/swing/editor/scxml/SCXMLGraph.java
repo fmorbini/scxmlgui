@@ -515,7 +515,7 @@ public class SCXMLGraph extends mxGraph
 					tip += "</html>";
 				} else {
 					tip="<html>";
-					if (v.isInitial()) tip+="onInitialEntry: "+v.getOnInitialEntry()+"<br>";
+					if (v.isInitial()) tip+="onInitialEntry: <pre>"+XMLUtils.escapeStringForXML(v.getOnInitialEntry())+"</pre><br>";
 					tip+="onEntry: <pre>"+XMLUtils.escapeStringForXML(v.getOnEntry())+"</pre><br>";
 					tip+="onExit: <pre>"+XMLUtils.escapeStringForXML(v.getOnExit())+"</pre><br>";
 					if (v.isFinal()) tip+="exitData: "+v.getDoneData()+"<br>";

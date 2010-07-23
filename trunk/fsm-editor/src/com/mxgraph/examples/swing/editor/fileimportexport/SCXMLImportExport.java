@@ -198,7 +198,7 @@ public class SCXMLImportExport implements IImportExport {
 						if ((c.getNodeType()==Node.ELEMENT_NODE) &&
 								c.getNodeName().toLowerCase().equals("transition")) {
 							HashMap<String, String> edgeContent = processEdge(pn,c);
-							pn.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
+							//pn.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
 							String inName=edgeContent.get(SCXMLEdge.TARGET);
 							if (inName!=null) {
 								SCXMLNode in =getNodeFromSCXMLID(inName);
@@ -206,6 +206,7 @@ public class SCXMLImportExport implements IImportExport {
 								in.setID(inName);
 								in.setInitial(true);
 								addSCXMLNode(in);
+								in.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
 							}
 							break;
 						}
@@ -503,8 +504,8 @@ public class SCXMLImportExport implements IImportExport {
 		ret+="<!-- "+getGeometryString(view,n)+" -->";
 		if (!StringUtils.isEmptyString(datamodel))
 			ret+="<datamodel>"+datamodel+"</datamodel>";
-		if (value.isInitial() && !StringUtils.isEmptyString(oninitialentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnInitialEntry())))
-			ret+="<initial><transition>"+oninitialentry+"</transition></initial>";
+		if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
+			ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
 		if (!StringUtils.isEmptyString(donedata))
 			ret+="<donedata>"+donedata+"</donedata>";
 		if (!StringUtils.isEmptyString(onentry))
