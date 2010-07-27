@@ -4240,8 +4240,10 @@ public class mxGraph extends mxEventSource
 						//geo=getCellGeometry(cell);
 					}
 				}
-				if (result == null) result = new mxRectangle(geo);
-				else if (geo!=null) result.add(geo);
+				if (geo!=null) {
+					if (result == null) result = new mxRectangle(geo);
+					else if (geo!=null) result.add(geo);
+				}
 			}
 		}
 		//System.out.println("result: "+result);
