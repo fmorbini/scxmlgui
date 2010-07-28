@@ -4242,7 +4242,7 @@ public class mxGraph extends mxEventSource
 				}
 				if (geo!=null) {
 					if (result == null) result = new mxRectangle(geo);
-					else if (geo!=null) result.add(geo);
+					else result.add(geo);
 				}
 			}
 		}
