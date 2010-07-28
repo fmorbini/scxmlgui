@@ -125,7 +125,7 @@ public class SCXMLImportExport implements IImportExport {
 		internalID2nodes.put(internalID, node);
 	}
 
-	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel) {
+	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel) throws Exception {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
 		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());		
@@ -135,6 +135,7 @@ public class SCXMLImportExport implements IImportExport {
 			node.setID(nodeIDString);
 			addSCXMLNode(node);
 		}
+		if (node==pn) throw new Exception("Found a node with same name as it's parent: "+pn.getID());
 		node.setParallel(isParallel);
 		setNodeAsChildrenOf(node,pn);
 		Node isInitial=null;
@@ -169,7 +170,7 @@ public class SCXMLImportExport implements IImportExport {
 		return node;
 	}
 
-	public void getNodeHier(Node el, SCXMLNode pn) {
+	public void getNodeHier(Node el, SCXMLNode pn) throws Exception {
 		//addTransitionsToInitialNodes(el,pid);
 		NodeList states = el.getChildNodes();
 		for (int s = 0; s < states.getLength(); s++) {
