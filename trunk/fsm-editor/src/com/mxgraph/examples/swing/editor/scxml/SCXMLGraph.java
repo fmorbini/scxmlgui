@@ -81,7 +81,7 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public mxRectangle getPaintBounds(Object[] cells)
 	{
-		return getBoundsForCells(cells, false, false, true);
+		return getBoundsForCells(cells, false, true, true);
 	}
 	@Override
 	public boolean isCellFoldable(Object cell, boolean collapse)
