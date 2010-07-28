@@ -135,9 +135,9 @@ public class SCXMLImportExport implements IImportExport {
 			node.setID(nodeIDString);
 			addSCXMLNode(node);
 		}
-		if (node==pn) throw new Exception("Found a node with same name as it's parent: "+pn.getID());
 		node.setParallel(isParallel);
-		setNodeAsChildrenOf(node,pn);
+		// see issue 7 in google code website
+		if (node!=pn) setNodeAsChildrenOf(node,pn);
 		Node isInitial=null;
 		Node isFinal=null;
 		if (((isFinal=att.getNamedItem("final"))!=null) &&
