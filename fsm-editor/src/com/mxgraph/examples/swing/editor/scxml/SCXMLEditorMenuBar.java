@@ -39,38 +39,52 @@ public class SCXMLEditorMenuBar extends JMenuBar
 	private static final int MAX_RECENT_FILE_HISTORY=9;
 	private ArrayList<String> recentlyOpenedFiles=new ArrayList<String>();
 	private JMenu fileMenu;
+	private static final String PREFERENCE_FILES_KEY="FILE_";
+	private static final String PREFERENCE_LASTFILE_KEY="LASTFILE_";
+	SCXMLGraphEditor editor;
 
 	public void getRecentlyOpenedFiles(final SCXMLGraphEditor editor) {
 		recentlyOpenedFiles.clear();
-		String baseKey="FILE_";
 		for (int i=0;i<MAX_RECENT_FILE_HISTORY;i++) {
-			String fileName=editor.preferences.get(baseKey+i, null);
+			String fileName=editor.preferences.get(PREFERENCE_FILES_KEY+i, null);
 			if (fileName!=null) recentlyOpenedFiles.add(fileName); 
 		}
 	}
-	public void updateRecentlyOpenedListWithFile(File file,SCXMLGraphEditor editor) {
+	public String getLastOpenedFile() {
+		return editor.preferences.get(PREFERENCE_LASTFILE_KEY,null);
+	}
+	public String getLastOpenedDir() {
+		String fileName=editor.preferences.get(PREFERENCE_LASTFILE_KEY,null);
+		if (fileName!=null) {
+			File file=new File(fileName);
+			return file.getParent();
+		}
+		return null;
+	}
+	public void updateRecentlyOpenedListWithFile(File file) {		
 		String fileName=file.getAbsolutePath();
+		if (file.exists()) editor.preferences.put(PREFERENCE_LASTFILE_KEY, fileName);
 		if (!recentlyOpenedFiles.contains(fileName)) {
 			recentlyOpenedFiles.add(fileName);
 			int size=recentlyOpenedFiles.size();
 			for(int i=0;i<size-MAX_RECENT_FILE_HISTORY;i++) {
 				recentlyOpenedFiles.remove(0);
 			}
-			String baseKey="FILE_";
 			int i=0;
 			for(String fn:recentlyOpenedFiles) {
-				if (new File(fn).exists()) editor.preferences.put(baseKey+(i++), fn);
+				if (new File(fn).exists()) editor.preferences.put(PREFERENCE_FILES_KEY+(i++), fn);
 			}
 			for (;i<MAX_RECENT_FILE_HISTORY;i++) {
-				editor.preferences.remove(baseKey+(i++));
+				editor.preferences.remove(PREFERENCE_FILES_KEY+(i++));
 			}
 			makeFileMenu(fileMenu,editor);
 		}
 	}
 
 	@SuppressWarnings("serial")
-	public SCXMLEditorMenuBar(final SCXMLGraphEditor editor)
+	public SCXMLEditorMenuBar(final SCXMLGraphEditor ed)
 	{
+		this.editor=ed;
 		final mxGraphComponent graphComponent = editor.getGraphComponent();
 		final mxGraph graph = graphComponent.getGraph();
 		JMenu menu = null;
