@@ -641,7 +641,8 @@ public class SCXMLEditorActions
 		}
 
 		private JFileChooser getFileToOpen(SCXMLGraphEditor editor) {
-			String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():System.getProperty("user.dir"));
+			String dirOfLastOpenedFile=editor.menuBar.getLastOpenedDir();
+			String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():((dirOfLastOpenedFile!=null)?dirOfLastOpenedFile:System.getProperty("user.dir")));
 			JFileChooser fc = new JFileChooser(wd);
 			
 			ImportExportPicker fileIO=editor.getIOPicker();
@@ -687,7 +688,7 @@ public class SCXMLEditorActions
 								editor.getUndoManager().clear();
 								editor.getUndoManager().resetUnmodifiedState();
 								editor.updateUndoRedoActionState();
-								editor.menuBar.updateRecentlyOpenedListWithFile(fc.getSelectedFile(), editor);
+								editor.menuBar.updateRecentlyOpenedListWithFile(fc.getSelectedFile());
 								editor.getSCXMLSearchTool().buildIndex();
 							} catch (Exception ex) {
 								ex.printStackTrace();
