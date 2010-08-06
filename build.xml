@@ -1,0 +1,44 @@
+<project name="FSMEDITOR" default="jar">
+
+	<!-- project directory -->
+
+	<dirname property="FSMEDITOR.dir" file="${ant.file}"/>
+
+	<property name="JGRAPHX"		location="${FSMEDITOR.dir}/jgraphx"/>
+	<property name="FSM"		location="${FSMEDITOR.dir}/fsm-editor"/>
+
+	<property name="JGRAPHX.antfile"		location="${JGRAPHX}/build.xml"/>
+	<property name="FSM.antfile"		location="${FSM}/build.xml"/>
+
+	<path id="antfiles">
+		<pathelement path="${JGRAPHX.antfile}"/>
+		<pathelement path="${FSM.antfile}"/>
+	</path>
+
+	<!-- standard targets -->
+	
+	<target name="clean">
+		<echo message="Started cleaning..."/>
+		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="clean"/>
+		<echo message="Completed cleaning."/>
+	</target>
+	<target name="build">
+		<echo message="Started building..."/>
+		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="build"/>
+		<echo message="Completed building."/>
+	</target>
+	<target name="jar">
+		<echo message="Started building jar archives..."/>
+		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="jar"/>
+		<echo message="Completed jars."/>
+	</target>
+
+	<!-- Eclipse targets -->
+	
+	<target name="classpath">
+		<echo message="Started writing classpaths..."/>
+		<subant buildpathref="antfiles" failonerror="false" inheritall="false" inheritrefs="false" target="classpath"/>
+		<echo message="Completed writing classpaths."/>
+	</target>
+
+</project>
