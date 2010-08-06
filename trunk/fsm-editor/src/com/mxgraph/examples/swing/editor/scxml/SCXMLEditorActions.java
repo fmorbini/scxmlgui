@@ -452,7 +452,8 @@ public class SCXMLEditorActions
 
 				if (showDialog || (editor.getCurrentFile() == null))
 				{
-					String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():System.getProperty("user.dir"));
+					String dirOfLastOpenedFile=editor.menuBar.getLastOpenedDir();
+					String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():((dirOfLastOpenedFile!=null)?dirOfLastOpenedFile:System.getProperty("user.dir")));
 					fc = new JFileChooser(wd);
 					fileIO.addExportFiltersToFileChooser(fc);
 					int rc = fc.showDialog(null, mxResources.get("save"));
