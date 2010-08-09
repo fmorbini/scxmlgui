@@ -326,6 +326,24 @@ public class SCXMLEditorActions
 		}
 	}
 
+	public static class ToggleWithTargetAction extends AbstractAction
+	{
+		private mxCell cell;
+		
+		public ToggleWithTargetAction(mxCell c) {
+			cell=c;
+		}
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			mxGraph graph = editor.getGraphComponent().getGraph();
+			assert(cell.isEdge());
+			SCXMLEdge n=(SCXMLEdge) cell.getValue();
+			n.setCycleWithTarget(!n.isCycleWithTarget());
+			graph.setCellStyle(n.getStyle(),cell);
+		}
+	}
+
 	public static class SetNodeAsFinal extends AbstractAction
 	{
 		private mxCell cell;
