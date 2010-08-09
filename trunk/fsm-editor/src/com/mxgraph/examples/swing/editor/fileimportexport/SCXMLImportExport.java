@@ -254,8 +254,8 @@ public class SCXMLImportExport implements IImportExport {
 		String cond=(condNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(condNode.getNodeValue()):"";
 		Node eventNode = att.getNamedItem("event");
 		String event=(eventNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(eventNode.getNodeValue()):"";
-		Node targetNode = att.getNamedItem("target");					
-		String target=(targetNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(targetNode.getNodeValue()):pn.getID();
+		Node targetNode = att.getNamedItem("target");
+		String target=(targetNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(targetNode.getNodeValue()):null;
 		String exe=collectAllChildrenInString(n);
 		ret.put(SCXMLEdge.CONDITION,cond);
 		ret.put(SCXMLEdge.EVENT,event);
@@ -352,7 +352,8 @@ public class SCXMLImportExport implements IImportExport {
 				for (String toSCXMLID:toEdge.keySet()) {
 					ArrayList<SCXMLEdge> es=toEdge.get(toSCXMLID);
 					for (SCXMLEdge e:es) {
-						addOrUpdateEdge(graph,e);
+						mxCell ce = addOrUpdateEdge(graph,e);
+						ce.setStyle(e.getStyle());
 					}
 				}
 			}
@@ -568,7 +569,8 @@ public class SCXMLImportExport implements IImportExport {
 					ret+=" event=\""+event+"\"";
 				if (!StringUtils.isEmptyString(cond))
 					ret+=" cond=\""+cond+"\"";
-				ret+=" target=\""+targetValue.getID()+"\"";
+				if ((!edgeValue.isCycle()) || edgeValue.isCycleWithTarget())
+					ret+=" target=\""+targetValue.getID()+"\"";
 				if (!StringUtils.isEmptyString(exe))
 					ret+=">"+exe+"</transition>";
 				else

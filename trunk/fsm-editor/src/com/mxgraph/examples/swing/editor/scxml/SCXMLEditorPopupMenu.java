@@ -7,6 +7,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
@@ -24,6 +25,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsIniti
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsOutsourced;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContentInNode;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleWithTargetAction;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxResources;
@@ -71,6 +73,10 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 								add(editor.bind(mxResources.get("addCorner"), new AddCornerToEdgeAction(c,unscaledGraphPoint,graphPt,indexOfNewPoint)));
 						} else if (index>0 && index<lastIndex)
 							add(editor.bind(mxResources.get("removeCorner"), new RemoveCornerToEdgeAction(c,index-1)));
+					} else {
+						JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("toggleWithTarget"), new ToggleWithTargetAction(c)));
+						menuItem.setSelected(((SCXMLEdge)(c.getValue())).isCycleWithTarget());
+						add(menuItem);
 					}
 				}
 			} else if (c.isVertex()) {				

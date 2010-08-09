@@ -21,6 +21,7 @@ public class SCXMLEdge implements Serializable {
 	public static final String TARGET="target";
 	public static final String SOURCE="source";
 	public static final String EDGEORDER="edgeOrder";
+	public static final String WITHTARGET="withTarget";
 
 	public static final String EVENTUNDO="EVENTundo";
 	public static final String EVENTDOC="EVENTdoc";
@@ -32,7 +33,18 @@ public class SCXMLEdge implements Serializable {
 	private HashMap<String,Object> edge;
 	public SCXMLEdge() {
 		edge=new HashMap<String, Object>();
+		edge.put(WITHTARGET, false);
 		setEvent("");
+	}
+
+	public boolean isCycle() {
+		return getSCXMLSource().equals(getSCXMLTarget());
+	}
+	public boolean isCycleWithTarget() {
+		return isCycle() && (Boolean)edge.get(WITHTARGET);
+	}
+	public void setCycleWithTarget(boolean withTarget) {
+		edge.put(WITHTARGET, withTarget);
 	}
 	public String getSCXMLSource() {
 		return (String)edge.get(FROM);
@@ -44,7 +56,7 @@ public class SCXMLEdge implements Serializable {
 		return (String)edge.get(TO);
 	}
 	public void setSCXMLTarget(String targetID) {
-		edge.put(TO, targetID);
+		edge.put(TO, targetID);		
 	}
 	public String getInternalID() {
 		return (String)edge.get(INTERNALID);
@@ -109,7 +121,13 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EVENT,event);
 		edge.put(EDGEEXE,content);
 		edge.put(FROM, fromSCXMLID);
-		edge.put(TO, toSCXMLID);
+		if (toSCXMLID==null) {
+			edge.put(TO, fromSCXMLID);
+			edge.put(WITHTARGET, false);
+		} else {
+			edge.put(TO, toSCXMLID);
+			edge.put(WITHTARGET, true);
+		}
 	}
 	// getter and setter for document and undomanager for editing event 
 	public UndoManager getEventUndoManager() {
@@ -189,6 +207,12 @@ public class SCXMLEdge implements Serializable {
 	}
 	public String toString() {
 		return getSCXMLSource()+"-["+getCondition()+","+getEvent()+"]->"+getSCXMLTarget();
+	}
+	
+	public String getStyle() {
+		String ret="straight;strokeColor=#888888;";
+		if (isCycle() && (!isCycleWithTarget())) ret+="strokeWidth=3;dashed=1;";
+		return ret;
 	}
 }
 

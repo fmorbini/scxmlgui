@@ -197,7 +197,7 @@ public class SCXMLGraph extends mxGraph
 		}
 		updateConnectionOfSCXMLEdge((SCXMLEdge) value,source,target);
 		if (((SCXMLEdge)value).getOrder()==null) ((SCXMLEdge)value).setOrder(size);
-		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "straight;strokeColor=#888888");
+		return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, ((SCXMLEdge)value).getStyle());
 	}
 	@Override
 	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges,Map<Object,Object> mapping)
