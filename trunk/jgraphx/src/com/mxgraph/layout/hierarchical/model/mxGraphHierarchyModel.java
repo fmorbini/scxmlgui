@@ -349,6 +349,8 @@ public class mxGraphHierarchyModel
 	 */
 	public void initialRank()
 	{
+		HashMap<mxGraphHierarchyNode,Integer> processCounter=new HashMap<mxGraphHierarchyNode, Integer>();
+		HashMap<mxGraphHierarchyNode,HashSet<mxGraphHierarchyEdge>> problematicEdgesForNode=new HashMap<mxGraphHierarchyNode, HashSet<mxGraphHierarchyEdge>>();
 		Collection<mxGraphHierarchyNode> internalNodes = vertexMapper.values();
 		LinkedList<mxGraphHierarchyNode> startNodes = new LinkedList<mxGraphHierarchyNode>();
 
@@ -408,15 +410,22 @@ public class mxGraphHierarchyModel
 			// Mark the node as not having had a layer assigned
 			internalNode.temp[0] = -1;
 		}
-
+		
 		List<mxGraphHierarchyNode> startNodesCopy = new ArrayList<mxGraphHierarchyNode>(
 				startNodes);
 
+		boolean somethingChanged=false;
 		while (!startNodes.isEmpty())
 		{
 			mxGraphHierarchyNode internalNode = startNodes.getFirst();
 			Collection<mxGraphHierarchyEdge> layerDeterminingEdges;
 			Collection<mxGraphHierarchyEdge> edgesToBeMarked;
+			
+			HashSet<mxGraphHierarchyEdge> problematicEdges = problematicEdgesForNode.get(internalNode);
+			if (problematicEdges==null) problematicEdgesForNode.put(internalNode, problematicEdges=new HashSet<mxGraphHierarchyEdge>());
+			Integer count=processCounter.get(internalNode);
+			if (count==null) processCounter.put(internalNode, count=new Integer(1));
+			else processCounter.put(internalNode, ++count);
 
 			if (scanRanksFromSinks)
 			{
@@ -429,6 +438,20 @@ public class mxGraphHierarchyModel
 				edgesToBeMarked = internalNode.connectsAsSource;
 			}
 
+			if (count>1) {
+				processCounter.clear();
+				processCounter.put(internalNode, count=new Integer(1));
+				if (!somethingChanged) {
+					if (!problematicEdges.isEmpty()) {
+						Collection<mxGraphHierarchyEdge> tmp = layerDeterminingEdges;
+						layerDeterminingEdges=new HashSet<mxGraphHierarchyEdge>();
+						layerDeterminingEdges.addAll(tmp);
+						layerDeterminingEdges.removeAll(problematicEdges);
+					}
+				}
+				somethingChanged=false;
+			}
+			
 			// flag to keep track of whether or not all layer determining
 			// edges have been scanned
 			boolean allEdgesScanned = true;
@@ -454,6 +477,7 @@ public class mxGraphHierarchyModel
 
 				if (internalEdge.temp[0] == 5270620)
 				{
+					problematicEdges.remove(internalEdge);
 					// This edge has been scanned, get the layer of the
 					// node on the other end
 					mxGraphHierarchyNode otherNode;
@@ -480,6 +504,7 @@ public class mxGraphHierarchyModel
 				}
 				else
 				{
+					problematicEdges.add(internalEdge);
 					allEdgesScanned = false;
 				}
 			}
@@ -488,6 +513,7 @@ public class mxGraphHierarchyModel
 			// edges in the other direction and remove from the nodes list
 			if (allEdgesScanned)
 			{
+				somethingChanged=true;
 				internalNode.temp[0] = minimumLayer;
 				if (scanRanksFromSinks)
 				{
@@ -545,15 +571,14 @@ public class mxGraphHierarchyModel
 				// the class and put the dunces cap on
 				Object removedCell = startNodes.removeFirst();
 				startNodes.addLast(internalNode);
-
-				if (removedCell == internalNode && startNodes.size() == 1)
+				/*if (removedCell == internalNode && startNodes.size() == 1)
 				{
 					// This is an error condition, we can't get out of
 					// this loop. It could happen for more than one node
 					// but that's a lot harder to detect. Log the error
 					// TODO make log comment
 					break;
-				}
+				}*/
 			}
 		}
 
@@ -603,6 +628,9 @@ public class mxGraphHierarchyModel
 	 */
 	public void fixRanks()
 	{
+		final Set<mxGraphHierarchyNode> seenNodes = new HashSet<mxGraphHierarchyNode>();
+		final Set<mxGraphHierarchyNode> unseenNodes = new HashSet<mxGraphHierarchyNode>(getVertexMapping().values());
+		
 		final mxGraphHierarchyRank[] rankList = new mxGraphHierarchyRank[maxRank + 1];
 		ranks = new LinkedHashMap<Integer, mxGraphHierarchyRank>(maxRank + 1);
 
@@ -630,51 +658,56 @@ public class mxGraphHierarchyModel
 			}
 		}
 
-		visit(new mxGraphHierarchyModel.CellVisitor()
-		{
-			public void visit(mxGraphHierarchyNode parent, mxGraphHierarchyNode cell,
-					mxGraphHierarchyEdge connectingEdge, int layer, int seen)
+		while (!unseenNodes.isEmpty()) {
+			visit(new mxGraphHierarchyModel.CellVisitor()
 			{
-				mxGraphHierarchyNode node = cell;
-
-				if (seen == 0 && node.maxRank < 0 && node.minRank < 0)
+				public void visit(mxGraphHierarchyNode parent, mxGraphHierarchyNode cell,
+						mxGraphHierarchyEdge connectingEdge, int layer, int seen)
 				{
-					//System.out.println("in fixRanks.visit: "+((mxCell)node.cell).getValue());
-					rankList[node.temp[0]].add((mxGraphAbstractHierarchyCell) cell);
-					node.maxRank = node.temp[0];
-					node.minRank = node.temp[0];
-
-					// Set temp[0] to the nodes position in the rank
-					node.temp[0] = rankList[node.maxRank].size() - 1;
-				}
-
-				if (parent != null && connectingEdge != null)
-				{
-					int parentToCellRankDifference = ((mxGraphHierarchyNode) parent).maxRank
-							- node.maxRank;
-
-					if (parentToCellRankDifference > 1)
+					seenNodes.add(cell);
+					unseenNodes.remove(cell);
+					mxGraphHierarchyNode node = cell;
+					if (seen == 0 && node.maxRank < 0 && node.minRank < 0)
 					{
-						// There are ranks in between the parent and current cell
-						mxGraphHierarchyEdge edge = (mxGraphHierarchyEdge) connectingEdge;
-						edge.maxRank = ((mxGraphHierarchyNode) parent).maxRank;
-						edge.minRank = ((mxGraphHierarchyNode) cell).maxRank;
-						edge.temp = new int[parentToCellRankDifference - 1];
-						edge.x = new double[parentToCellRankDifference - 1];
-						edge.y = new double[parentToCellRankDifference - 1];
+						//System.out.println("in fixRanks.visit: "+((mxCell)node.cell).getValue());
+						rankList[node.temp[0]].add((mxGraphAbstractHierarchyCell) cell);
+						node.maxRank = node.temp[0];
+						node.minRank = node.temp[0];
 
-						for (int i = edge.minRank + 1; i < edge.maxRank; i++)
+						// Set temp[0] to the nodes position in the rank
+						node.temp[0] = rankList[node.maxRank].size() - 1;
+					}
+
+					if (parent != null && connectingEdge != null)
+					{
+						int parentToCellRankDifference = ((mxGraphHierarchyNode) parent).maxRank
+						- node.maxRank;
+
+						if (parentToCellRankDifference > 1)
 						{
-							// The connecting edge must be added to the
-							// appropriate ranks
-							rankList[i].add(edge);
-							edge.setGeneralPurposeVariable(i, rankList[i]
-									.size() - 1);
+							// There are ranks in between the parent and current cell
+							mxGraphHierarchyEdge edge = (mxGraphHierarchyEdge) connectingEdge;
+							edge.maxRank = ((mxGraphHierarchyNode) parent).maxRank;
+							edge.minRank = ((mxGraphHierarchyNode) cell).maxRank;
+							edge.temp = new int[parentToCellRankDifference - 1];
+							edge.x = new double[parentToCellRankDifference - 1];
+							edge.y = new double[parentToCellRankDifference - 1];
+
+							for (int i = edge.minRank + 1; i < edge.maxRank; i++)
+							{
+								// The connecting edge must be added to the
+								// appropriate ranks
+								rankList[i].add(edge);
+								edge.setGeneralPurposeVariable(i, rankList[i]
+								                                           .size() - 1);
+							}
 						}
 					}
 				}
-			}
-		}, rootsArray, false, null);
+			}, rootsArray, false, null);
+			mxGraphHierarchyNode[] unseenNodesArray = new mxGraphHierarchyNode[1];
+			rootsArray=unseenNodes.toArray(unseenNodesArray);
+		}
 	}
 
 	/**

@@ -6481,6 +6481,10 @@ public class mxGraph extends mxEventSource
 		return result.toArray();
 	}
 	public Object[] getEdgesForSwimlane(Object cell, Object parent, boolean incoming,boolean outgoing, boolean includeLoops,Set<Object> descendants) {
+		// this function can get all edges coming and going from a node. If the node is a swimlane (cluster)
+		// it gets all edges coming and/or going to itself or to any of its' included nodes (when the other
+		// side of the edge is not among the included nodes)
+		//------------------------------
 		// get loops on cell if includeLoops is true
 		// get all incoming edges to cell if incoming is true
 		// get all outgoing edges from cell if outgoing is true

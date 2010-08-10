@@ -214,4 +214,8 @@ public class mxGraphHierarchyNode extends mxGraphAbstractHierarchyCell
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return cell.toString();
+	}
 }
