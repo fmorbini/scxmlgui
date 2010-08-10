@@ -302,9 +302,8 @@ public class SCXMLNode implements Serializable {
 	}
 	@Override
 	public String toString() {
-		String ret="<";
-		for (String i:node.keySet())
-			ret+=i+": "+node.get(i)+"; ";
+		String ret="<"+getID();
+		//for (String i:node.keySet()) ret+=i+": "+node.get(i)+"; ";
 		return ret+">";
 	}
 	public void setShape(String shape) {

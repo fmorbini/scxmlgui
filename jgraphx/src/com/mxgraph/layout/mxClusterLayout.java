@@ -67,6 +67,7 @@ public class mxClusterLayout extends mxGraphLayout {
 				mxCell c=(mxCell) cluster.getChildAt(i);
 				//System.out.println("  "+c.getValue());
 				if (clusters.contains(c)) {
+					System.out.println("internal starting layout for cluster: "+c.getValue());
 					handleLayoutInThisCluster(c,clusters);
 				}
 			}

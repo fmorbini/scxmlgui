@@ -624,4 +624,11 @@ public class mxCell implements mxICell, Cloneable, Serializable
 		return value;
 	}
 
+	@Override
+	public String toString() {
+		if (getValue()!=null)
+			return "{"+getValue().toString()+"}";
+		else
+			return "{"+super.toString()+"}";
+	}
 }

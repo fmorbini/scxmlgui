@@ -180,4 +180,8 @@ public class mxGraphHierarchyEdge extends mxGraphAbstractHierarchyCell
 		temp[layer - minRank - 1] = value;
 	}
 
+	@Override
+	public String toString() {
+		return edges.toString();
+	}
 }
