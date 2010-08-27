@@ -125,47 +125,59 @@ public class SCXMLImportExport implements IImportExport {
 		internalID2nodes.put(internalID, node);
 	}
 
-	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel) throws Exception {
+	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel, Boolean isHistory) throws Exception {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
-		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());		
+		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());
+		Node nodeHistoryType = att.getNamedItem("type");
+		String nodeHistoryTypeString=(nodeHistoryType==null)?"shallow":StringUtils.cleanupSpaces(nodeHistoryType.getNodeValue());
+		SCXMLNode.HISTORYTYPE historyType=null;
+		try {
+			historyType=SCXMLNode.HISTORYTYPE.valueOf(nodeHistoryTypeString.toUpperCase());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		SCXMLNode node;
 		if (nodeIDString.equals("") || ((node=scxmlID2nodes.get(nodeIDString))==null)) {
 			node=new SCXMLNode();
 			node.setID(nodeIDString);
 			addSCXMLNode(node);
 		}
-		node.setParallel(isParallel);
 		// see issue 7 in google code website
 		if (node!=pn) setNodeAsChildrenOf(node,pn);
-		Node isInitial=null;
-		Node isFinal=null;
-		if (((isFinal=att.getNamedItem("final"))!=null) &&
-			(isFinal.getNodeValue().equals("true"))) {
-			node.setFinal(true);
-		}
-		if (((isInitial=att.getNamedItem("initial"))!=null)||
-				((isInitial=att.getNamedItem("initialstate"))!=null)) {
-			String[] initialStates=StringUtils.cleanupSpaces(isInitial.getNodeValue()).split("[\\s]");
-			for (String initialStateID:initialStates) {
-				SCXMLNode in =getNodeFromSCXMLID(initialStateID);
-				if (in==null) in=new SCXMLNode();
-				in.setID(initialStateID);
-				in.setInitial(true);
-				addSCXMLNode(in);
+		if ((!isHistory) || (historyType==null)) {
+			node.setParallel(isParallel);
+			Node isInitial=null;
+			Node isFinal=null;
+			if (((isFinal=att.getNamedItem("final"))!=null) &&
+					(isFinal.getNodeValue().equals("true"))) {
+				node.setFinal(true);
 			}
+			if (((isInitial=att.getNamedItem("initial"))!=null)||
+					((isInitial=att.getNamedItem("initialstate"))!=null)) {
+				String[] initialStates=StringUtils.cleanupSpaces(isInitial.getNodeValue()).split("[\\s]");
+				for (String initialStateID:initialStates) {
+					SCXMLNode in =getNodeFromSCXMLID(initialStateID);
+					if (in==null) in=new SCXMLNode();
+					in.setID(initialStateID);
+					in.setInitial(true);
+					addSCXMLNode(in);
+				}
+			}
+			// set namespace attribute
+			int na=att.getLength();
+			String namespace="";
+			for(int i=0;i<na;i++) {
+				Node a=att.item(i);
+				String name=a.getNodeName().toLowerCase();
+				if (name.startsWith("xmlns")) {
+					namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
+				} else if (name.equals("src")) node.setSRC(a.getNodeValue());
+			}
+			if (!StringUtils.isEmptyString(namespace)) node.setNAMESPACE(namespace);
+		} else {
+			node.setAsHistory(historyType);
 		}
-		// set namespace attribute
-		int na=att.getLength();
-		String namespace="";
-		for(int i=0;i<na;i++) {
-			Node a=att.item(i);
-			String name=a.getNodeName().toLowerCase();
-			if (name.startsWith("xmlns")) {
-				namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
-			} else if (name.equals("src")) node.setSRC(a.getNodeValue());
-		}
-		if (!StringUtils.isEmptyString(namespace)) node.setNAMESPACE(namespace);		
 		// set src attribute
 		return node;
 	}
@@ -180,14 +192,15 @@ public class SCXMLImportExport implements IImportExport {
 				String name=n.getNodeName().toLowerCase();
 				// STATE: normal or parallel
 				Boolean isParallel=false;
-				if (name.equals("state")||(isParallel=name.equals("parallel"))) {
-					SCXMLNode node = handleSCXMLNode(n,pn,isParallel);
+				boolean isHistory=false;
+				if (name.equals("state")||(isParallel=name.equals("parallel"))||(isHistory=name.equals("history"))) {
+					SCXMLNode node = handleSCXMLNode(n,pn,isParallel,isHistory);
 					// continue recursion on the children of this node
 					getNodeHier(n, node);
 				} else if (name.equals("transition")) {
 					addEdge(processEdge(pn,n));
 				} else if (name.equals("final")) {
-					SCXMLNode node = handleSCXMLNode(n,pn,isParallel);
+					SCXMLNode node = handleSCXMLNode(n,pn,isParallel,false);
 					node.setFinal(true);
 					getNodeHier(n, node);
 				} else if (name.equals("initial")) {
@@ -285,7 +298,7 @@ public class SCXMLImportExport implements IImportExport {
 		System.out.println("Parsing file: "+filename);
 		Document doc = mxUtils.parseFile(filename);
 		doc.getDocumentElement().normalize();
-		root=handleSCXMLNode(doc.getDocumentElement(),null,false);
+		root=handleSCXMLNode(doc.getDocumentElement(),null,false,false);
 		root.setID(SCXMLNode.ROOTID);
 		getNodeHier(doc.getDocumentElement(),root);
 		System.out.println("Done reading file");
@@ -487,6 +500,9 @@ public class SCXMLImportExport implements IImportExport {
 		} else if (value.isFinal()) {
 			ret="<final";
 			close="</final>";
+		} else if (value.isHistoryNode()) {
+			ret="<history type=\""+((value.isDeepHistory())?"deep":"shallow")+"\"";
+			close="</history>";
 		} else {
 			ret="<state";
 			close="</state>";

@@ -71,33 +71,35 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         tabbedPane.addTab("SCXML ID", scrollPane);
         doc.addDocumentListener(changeListener);
 
-        undo=node.getOnEntryUndoManager();
-        doc=node.getOnEntryDoc();
-        onentryTextPane=new UndoJTextPane(node.getOnEntry(), doc, undo);
-        if (doc==null) {
-        	node.setOnEntryDoc(doc=onentryTextPane.getDocument());
-        	node.setOnEntryUndoManager(undo=onentryTextPane.getUndoManager());
+        if (!node.isHistoryNode()) {
+	        undo=node.getOnEntryUndoManager();
+	        doc=node.getOnEntryDoc();
+	        onentryTextPane=new UndoJTextPane(node.getOnEntry(), doc, undo);
+	        if (doc==null) {
+	        	node.setOnEntryDoc(doc=onentryTextPane.getDocument());
+	        	node.setOnEntryUndoManager(undo=onentryTextPane.getUndoManager());
+	        }
+	        onentryTextPane.setCaretPosition(0);
+	        onentryTextPane.setMargin(new Insets(5,5,5,5));
+	        scrollPane = new JScrollPane(onentryTextPane);
+	        scrollPane.setPreferredSize(new Dimension(400, 200));
+	        tabbedPane.addTab("On entry", scrollPane);
+	        doc.addDocumentListener(changeListener);
+	        
+	        undo=node.getOnExitUndoManager();
+	        doc=node.getOnExitDoc();
+	        onexitTextPane=new UndoJTextPane(node.getOnExit(), doc, undo);
+	        if (doc==null) {
+	        	node.setOnExitDoc(doc=onexitTextPane.getDocument());
+	        	node.setOnExitUndoManager(undo=onexitTextPane.getUndoManager());
+	        }
+	        onexitTextPane.setCaretPosition(0);
+	        onexitTextPane.setMargin(new Insets(5,5,5,5));
+	        scrollPane = new JScrollPane(onexitTextPane);
+	        scrollPane.setPreferredSize(new Dimension(400, 200));
+	        tabbedPane.addTab("On exit", scrollPane);
+	        doc.addDocumentListener(changeListener);
         }
-        onentryTextPane.setCaretPosition(0);
-        onentryTextPane.setMargin(new Insets(5,5,5,5));
-        scrollPane = new JScrollPane(onentryTextPane);
-        scrollPane.setPreferredSize(new Dimension(400, 200));
-        tabbedPane.addTab("On entry", scrollPane);
-        doc.addDocumentListener(changeListener);
-        
-        undo=node.getOnExitUndoManager();
-        doc=node.getOnExitDoc();
-        onexitTextPane=new UndoJTextPane(node.getOnExit(), doc, undo);
-        if (doc==null) {
-        	node.setOnExitDoc(doc=onexitTextPane.getDocument());
-        	node.setOnExitUndoManager(undo=onexitTextPane.getUndoManager());
-        }
-        onexitTextPane.setCaretPosition(0);
-        onexitTextPane.setMargin(new Insets(5,5,5,5));
-        scrollPane = new JScrollPane(onexitTextPane);
-        scrollPane.setPreferredSize(new Dimension(400, 200));
-        tabbedPane.addTab("On exit", scrollPane);
-        doc.addDocumentListener(changeListener);
         
         if (node.isFinal()) {
         	undo=node.getFinalUndoManager();

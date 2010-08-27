@@ -144,14 +144,28 @@ public class SCXMLGraph extends mxGraph
 					else gc.addSCXMLNode(nodeValue,node);
 				if (nodeValue.isClusterNode()) {
 					int numInitialChildren=0;
+					int numOutGoingTransitions=0;
 					int numChildren=node.getChildCount();			
 					for (int i=0;i<numChildren;i++) {
 						mxCell c=(mxCell) node.getChildAt(i);
 						if (c.isVertex()) {
 							SCXMLNode cValue = (SCXMLNode)c.getValue();
-							if (cValue.isInitial()) numInitialChildren++;
+							if (cValue.isInitial()) {
+								numInitialChildren++;
+							}
 							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes ("+nodeValue.getID()+") don't support a child marked as intiial.\n";
-							if (numInitialChildren>1) return "More than 1 children of "+nodeValue.getID()+" is marked as initial.\n";
+							//if (numInitialChildren>1) return "More than 1 children of "+nodeValue.getID()+" is marked as initial.\n";
+						} else {
+							if (nodeValue.isHistoryNode()) {
+								if (c.getSource().equals(node)) {
+									numOutGoingTransitions++;
+									if (numOutGoingTransitions>1) return "History node '"+nodeValue.getID()+"' has more than 1 outgoing transition.\n";
+									if (!StringUtils.isEmptyString(((SCXMLEdge)c.getValue()).getCondition()) ||
+											!StringUtils.isEmptyString(((SCXMLEdge)c.getValue()).getEvent())) {
+										return "Outgoing transition of history node has non null event or condition.\n";
+									}
+								}
+							}
 						}
 					}
 				}

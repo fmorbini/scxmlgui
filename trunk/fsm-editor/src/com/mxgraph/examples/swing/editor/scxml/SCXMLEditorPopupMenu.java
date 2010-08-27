@@ -26,7 +26,9 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsOutso
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContentInNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleWithTargetAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsHistory;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
@@ -55,13 +57,16 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 		// edit node/transition (change text accordingly to type of element under cursor)
 		if (c!=null) {
 			if (c.isEdge()) {
+				SCXMLNode source=(SCXMLNode) c.getSource().getValue();				
 				if (!inOutsourcedNode) {
 					// for an edge, find out if the pointer is on a control point, or not.
 					// if on a control point find out if it's the beginning or end of the endge.
 					// -add control point if not on a control point
 					// -remove control point if on one that is neither the beginning nor the end.
-					add(editor.bind(mxResources.get("editEdge"), new EditEdgeAction(c,screenCoord)));
-					addSeparator();
+					if (!((source!=null) && (source.isHistoryNode()))) {
+						add(editor.bind(mxResources.get("editEdge"), new EditEdgeAction(c,screenCoord)));
+						addSeparator();
+					}
 					// if the edge is not a loop you can add/remove corners
 					if (c.getSource()!=c.getTarget()) {
 						mxCellState cellState=graph.getView().getState(c);
@@ -79,7 +84,13 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 						add(menuItem);
 					}
 				}
-			} else if (c.isVertex()) {				
+			} else if (c.isVertex()) {
+				mxICell parent = c.getParent();
+				boolean isHistoryNode=((SCXMLNode)(c.getValue())).isHistoryNode();
+				boolean isParallelNode=((SCXMLNode)(c.getValue())).isParallel();
+				boolean isInitialNode=((SCXMLNode)(c.getValue())).isInitial();
+				boolean isFinalNode=((SCXMLNode)(c.getValue())).isFinal();
+				boolean isClusterNode=((SCXMLNode)(c.getValue())).isClusterNode();
 				if (!inOutsourcedNode) {
 					// add node in case the cell under the pointer is a swimlane
 					boolean addNodeEnabled=graph.isSwimlane(c) && (editor.getCurrentFileIO()!=null);
@@ -87,27 +98,44 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					addSeparator();
 					mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
 					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,screenCoord))).setEnabled(c!=root);
-					add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(c,screenCoord)));
-					add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,screenCoord)));
+					if (!isHistoryNode) {
+						add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(c,screenCoord)));
+						add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,screenCoord)));
+					}
 					if (c!=root) {
-						add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
-						JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,screenCoord)));
-						menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
-						add(menuItem2);
-						addSeparator();
+						if (!isHistoryNode) {
+							add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
+							JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,screenCoord)));
+							menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
+							add(menuItem2);
+						}
+						if (!isHistoryNode) addSeparator();
 						JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
 						menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());
 						add(menuItem);
-						menuItem = new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsFinalNode"), new SetNodeAsFinal(c)));
-						menuItem.setSelected(((SCXMLNode)(c.getValue())).isFinal());
-						add(menuItem);
-						menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsClusterNode"), new SetNodeAsCluster(c)));
-						menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
-						menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
-						add(menuItem);
-						menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
-						menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
-						add(menuItem);
+						if (!isHistoryNode) {
+							menuItem = new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsFinalNode"), new SetNodeAsFinal(c)));
+							menuItem.setSelected(((SCXMLNode)(c.getValue())).isFinal());
+							add(menuItem);
+							menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsClusterNode"), new SetNodeAsCluster(c)));
+							menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
+							menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
+							add(menuItem);
+							menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
+							menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
+							add(menuItem);
+						}
+						if ((parent!=root) && ((SCXMLNode)parent.getValue()).isClusterNode()) {
+							if (!isParallelNode && !isClusterNode && !isFinalNode) {
+								addSeparator();
+								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsDeepHistoryNode"), new SetNodeAsHistory(c,true)));
+								menuItem.setSelected(((SCXMLNode)(c.getValue())).isDeepHistory());
+								add(menuItem);
+								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsShallowHistoryNode"), new SetNodeAsHistory(c,false)));
+								menuItem.setSelected(((SCXMLNode)(c.getValue())).isShallowHistory());
+								add(menuItem);
+							}
+						}
 					}
 				}
 				if (((SCXMLNode)(c.getValue())).isOutsourcedNode()) {
