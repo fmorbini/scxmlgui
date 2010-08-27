@@ -29,11 +29,14 @@ public class SCXMLNode implements Serializable {
 	public static final String INITEXE="initexe";
 	public static final String ONEXITEXE="onexitexe";
 
+	public static final String HISTORY="history";
 	public static final String PARALLEL="parallel";
 	public static final String NORMAL="normal";
 	public static final String STYLE="style";
 	public static final String DATAMODEL="datamodel";
 	public static final String DONEDATA="donedata";
+	
+	public enum HISTORYTYPE {DEEP,SHALLOW};
 	
 	public static final String DEFAULTFILLCOLOR="#fcd087";
 	public static final String DEFAULTSTROKECOLOR="#000000";
@@ -43,6 +46,8 @@ public class SCXMLNode implements Serializable {
 	public static final String INITIALFILLCOLOR="#cffc87";
 	public static final String FINALSTROKECOLOR="#FF0000";
 	public static final String CLUSTERSHAPE="swimlane";
+	public static final String DEEPHISTORYFILLCOLOR="#bb00a6";
+	public static final String SHALLOWHISTORYFILLCOLOR="#dd6fd1";
 	
 	public static final String DATAMODELUNDO="DMundo";
 	public static final String DATAMODELDOC="DMdoc";
@@ -285,6 +290,23 @@ public class SCXMLNode implements Serializable {
 	}
 	public Boolean isInitial() {
 		return (Boolean)node.get(INITIAL);
+	}
+	public void setAsHistory(final HISTORYTYPE type) {
+		if (type==null) this.setFillColor(DEFAULTFILLCOLOR);
+		else if (type.equals(HISTORYTYPE.DEEP)) this.setFillColor(DEEPHISTORYFILLCOLOR);
+		else if (type.equals(HISTORYTYPE.SHALLOW)) this.setFillColor(SHALLOWHISTORYFILLCOLOR);
+		node.put(HISTORY, type);
+	}
+	public Boolean isHistoryNode() {
+		return (node.get(HISTORY) instanceof HISTORYTYPE);
+	}
+	public Boolean isDeepHistory() {
+		return ((node.get(HISTORY)!=null) &&
+				(node.get(HISTORY).equals(HISTORYTYPE.DEEP)));
+	}
+	public Boolean isShallowHistory() {
+		return ((node.get(HISTORY)!=null) &&
+				(node.get(HISTORY).equals(HISTORYTYPE.SHALLOW)));
 	}
 	public void setCluster(Boolean b) {
 		if (b) setShape(CLUSTERSHAPE);

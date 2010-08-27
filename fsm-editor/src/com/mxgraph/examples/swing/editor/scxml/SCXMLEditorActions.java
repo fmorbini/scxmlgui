@@ -430,7 +430,35 @@ public class SCXMLEditorActions
 		}
 	}
 
-
+	public static class SetNodeAsHistory extends AbstractAction
+	{
+		private mxCell cell;
+		private boolean deep;
+		
+		public SetNodeAsHistory(mxCell c,boolean d) {
+			cell=c;
+			this.deep=d;
+		}
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			mxGraph graph = editor.getGraphComponent().getGraph();
+			assert(cell.isVertex());
+			SCXMLNode n=(SCXMLNode) cell.getValue();
+			if (deep) {
+				if (n.isDeepHistory())
+					n.setAsHistory(null);
+				else
+					n.setAsHistory(SCXMLNode.HISTORYTYPE.DEEP);
+			} else {
+				if (n.isShallowHistory())
+					n.setAsHistory(null);
+				else
+					n.setAsHistory(SCXMLNode.HISTORYTYPE.SHALLOW);
+			}
+			graph.setCellStyle(n.getStyle(),cell);
+		}
+	}
 	/**
 	 *
 	 */
