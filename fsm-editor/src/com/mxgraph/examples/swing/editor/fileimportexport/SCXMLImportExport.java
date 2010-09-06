@@ -577,8 +577,8 @@ public class SCXMLImportExport implements IImportExport {
 				SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
 				assert((edgeValue!=null) && (targetValue!=null));
 				assert(!targetValue.getID().equals(""));
-				String cond=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition());
-				String event=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent());
+				String cond=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition()));
+				String event=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent()));
 				String exe=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe());
 				ret="<transition";
 				if (!StringUtils.isEmptyString(event))
