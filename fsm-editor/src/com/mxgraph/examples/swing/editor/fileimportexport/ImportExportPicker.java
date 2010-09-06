@@ -89,7 +89,7 @@ public class ImportExportPicker {
 			for(FileFilter ff1 : fileIO.keySet()) {
 				if ((io=fileIO.get(ff1)).canImport())
 					try {
-						io.read(fileName, graphComponent);
+						io.read(fileName, graphComponent,fc);
 						foundImporter=io;
 						break;
 					} catch (Exception e) {}
@@ -98,7 +98,7 @@ public class ImportExportPicker {
 			else return foundImporter;
 		} else {
 			// run the selected importer
-			io.read(fileName,graphComponent);
+			io.read(fileName,graphComponent,fc);
 			return io;
 		}
 	}

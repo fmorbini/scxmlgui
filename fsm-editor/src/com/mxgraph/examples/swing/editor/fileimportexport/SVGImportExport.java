@@ -2,6 +2,8 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.IOException;
 
+import javax.swing.JFileChooser;
+
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxUtils;
@@ -20,7 +22,7 @@ public class SVGImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws IOException {
 	}
 
 	@Override

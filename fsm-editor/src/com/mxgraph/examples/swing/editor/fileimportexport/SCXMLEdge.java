@@ -3,11 +3,14 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
+
+import com.sun.org.apache.xerces.internal.impl.dtd.models.SimpleContentModel;
 
 public class SCXMLEdge implements Serializable {
 	private static final long serialVersionUID = -136975794270718480L;
@@ -30,6 +33,8 @@ public class SCXMLEdge implements Serializable {
 	public static final String EXEUNDO="EXEundo";
 	public static final String EXEDOC="EXEdoc";
 
+	public static final String MULTIPLETARGETS="LINKEDEDGES";
+
 	private HashMap<String,Object> edge;
 	public SCXMLEdge() {
 		edge=new HashMap<String, Object>();
@@ -37,6 +42,51 @@ public class SCXMLEdge implements Serializable {
 		setEvent("");
 	}
 
+	public ArrayList<SCXMLEdge> getLinkedEdges() {
+		return (ArrayList<SCXMLEdge>) edge.get(MULTIPLETARGETS);
+	}
+	public void addLinkedEdge(SCXMLEdge e) throws Exception {
+		ArrayList<SCXMLEdge> mts = (ArrayList<SCXMLEdge>) edge.get(MULTIPLETARGETS);
+		if (mts==null) edge.put(MULTIPLETARGETS,mts=new ArrayList<SCXMLEdge>());
+		mts.add(e);
+		if (!checkLinkedEdges()) throw new Exception("Incorrect linked edges.");
+	}
+	public void setLinkedEdges(ArrayList<SCXMLEdge> es) throws Exception {
+		edge.put(MULTIPLETARGETS,es);
+		if (!checkLinkedEdges()) throw new Exception("Incorrect linked edges.");
+	}
+	public boolean checkLinkedEdges() {
+		ArrayList<SCXMLEdge> edges = getLinkedEdges();
+		Document exeDoc = null;
+		Document cndDoc = null;
+		Document evtDoc = null;
+		UndoManager exeUndo=null;
+		UndoManager evtUndo=null;
+		UndoManager cndUndo=null;
+		boolean isFirst=true;
+		if (edges!=null) {
+			for (SCXMLEdge edge:edges) {
+				if (isFirst) {
+					exeDoc = edge.getExeDoc();
+					cndDoc = edge.getConditionDoc();
+					evtDoc = edge.getEventDoc();
+					exeUndo = edge.getExeUndoManager();
+					cndUndo = edge.getEventUndoManager();
+					cndUndo = edge.getConditionUndoManager();
+					isFirst=false;
+				} else {
+					if (exeDoc!=edge.getExeDoc()) return false;
+					if (cndDoc!=edge.getConditionDoc()) return false;
+					if (evtDoc!=edge.getEventDoc()) return false;
+					if (exeUndo!=edge.getExeUndoManager()) return false;
+					if (cndUndo!=edge.getConditionUndoManager()) return false;
+					if (evtUndo!=edge.getEventUndoManager()) return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	public boolean isCycle() {
 		return getSCXMLSource().equals(getSCXMLTarget());
 	}
