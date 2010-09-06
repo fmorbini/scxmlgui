@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import com.mxgraph.swing.mxGraphComponent;
@@ -26,7 +27,7 @@ public class IMGImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws IOException {
 	}
 
 	@Override

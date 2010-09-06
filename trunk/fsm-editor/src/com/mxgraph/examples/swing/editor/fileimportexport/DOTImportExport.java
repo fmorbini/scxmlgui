@@ -2,6 +2,8 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.IOException;
 
+import javax.swing.JFileChooser;
+
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
@@ -41,7 +43,7 @@ public class DOTImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws IOException {
 		// TODO Auto-generated method stub
 
 	}

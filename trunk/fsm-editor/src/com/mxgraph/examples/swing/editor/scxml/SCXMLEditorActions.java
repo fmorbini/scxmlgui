@@ -34,6 +34,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.html.HTML;
@@ -686,23 +687,7 @@ public class SCXMLEditorActions
 		public OpenAction() {
 			this.file=null;
 		}
-
-		private JFileChooser getFileToOpen(SCXMLGraphEditor editor) {
-			String dirOfLastOpenedFile=editor.menuBar.getLastOpenedDir();
-			String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():((dirOfLastOpenedFile!=null)?dirOfLastOpenedFile:System.getProperty("user.dir")));
-			JFileChooser fc = new JFileChooser(wd);
-			
-			ImportExportPicker fileIO=editor.getIOPicker();
-			fileIO.addImportFiltersToFileChooser(fc);
-
-			if (file!=null) fc.setSelectedFile(file);
-			else {
-				int rc = fc.showDialog(null, mxResources.get("openFile"));
-				if (rc != JFileChooser.APPROVE_OPTION) fc.setSelectedFile(null);
-			}
-			return fc;
-		}
-		
+				
 		/**
 		 * 
 		 */
@@ -714,7 +699,7 @@ public class SCXMLEditorActions
 				if (AskToSaveIfRequired.check(editor)) {
 					SCXMLGraph graph = editor.getGraphComponent().getGraph();
 					if (graph != null) {
-						JFileChooser fc = getFileToOpen(editor);
+						SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);
 
 						ImportExportPicker fileIO=editor.getIOPicker();
 
@@ -727,8 +712,10 @@ public class SCXMLEditorActions
 								IImportExport fie=fileIO.read(fc,editor);
 
 								// apply layout to each cluster from the leaves up:
-								mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-								clusterLayout.execute(graph.getDefaultParent());
+								if (fc.ignoreStoredLayout()) {
+									mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+									clusterLayout.execute(graph.getDefaultParent());
+								}
 								
 								editor.setModified(false);
 								editor.setCurrentFile(fc.getSelectedFile(),fie);

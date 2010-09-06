@@ -516,7 +516,7 @@ public class SCXMLNode implements Serializable {
 		n.setID(getID());
 		return n;
 	}
-	public void setGeometry(int x, int y, int w, int h) {
+	public void setGeometry(double x, double y, double w, double h) {
 		node.put(GEOX, x);
 		node.put(GEOY, y);
 		node.put(GEOW, w);
@@ -524,11 +524,11 @@ public class SCXMLNode implements Serializable {
 	}
 	public mxGeometry getGeometry() {		
 		if (node.containsKey(GEOX)) {
-			int x,y,h,w;
-			x=(Integer)node.get(GEOX);
-			y=(Integer)node.get(GEOY);
-			w=(Integer)node.get(GEOW);
-			h=(Integer)node.get(GEOH);
+			double x,y,h,w;
+			x=(Double)node.get(GEOX);
+			y=(Double)node.get(GEOY);
+			w=(Double)node.get(GEOW);
+			h=(Double)node.get(GEOH);
 			return new mxGeometry(x, y, w, h);
 		}
 		else return null;

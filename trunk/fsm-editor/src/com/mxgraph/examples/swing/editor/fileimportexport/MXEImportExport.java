@@ -2,6 +2,8 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.IOException;
 
+import javax.swing.JFileChooser;
+
 import org.w3c.dom.Document;
 
 import com.mxgraph.io.mxCodec;
@@ -22,7 +24,7 @@ public class MXEImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent) throws Exception {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws Exception {
 		Document document = mxUtils.parse(mxUtils.readFile(from));
 		mxCodec codec = new mxCodec(document);
 		codec.decode(document.getDocumentElement(),graphComponent.getGraph().getModel());

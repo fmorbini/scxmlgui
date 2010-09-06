@@ -52,6 +52,7 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorMenuBar;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
@@ -279,7 +280,7 @@ public class SCXMLGraphEditor extends JPanel
 			file2importer.put(fileName, ie=new SCXMLImportExport());								
 			// read the graph, this will throw an exception if something goes wrong
 			System.out.println("reading "+fileName);
-			ie.readInGraph(ig=new SCXMLGraph(), fileName);
+			ie.readInGraph(ig=new SCXMLGraph(),fileName,preferences.getBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT, true));
 			ig.setEditor(this);
 			file2graph.put(fileName, ig);
 		}
