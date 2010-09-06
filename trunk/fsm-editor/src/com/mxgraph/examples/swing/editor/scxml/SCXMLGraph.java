@@ -517,7 +517,7 @@ public class SCXMLGraph extends mxGraph
 				SCXMLEdge v=(SCXMLEdge) ((mxCell)cell).getValue();
 				tip+="order: "+v.getOrder()+"<br>";
 				tip+="event: "+v.getEvent()+"<br>";
-				tip+="condition: "+v.getCondition()+"<br>";
+				tip+="condition: <pre>"+XMLUtils.escapeStringForXML(v.getCondition())+"</pre><br>";
 				tip+="exe: <pre>"+XMLUtils.escapeStringForXML(v.getExe())+"</pre><br>";
 				tip += "</html>";
 			} else if (((mxCell)cell).isVertex()) {
