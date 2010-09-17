@@ -308,12 +308,12 @@ public class mxGraphHierarchyModel
 			for (Object edge:conns) {
 				Object otherSide=graph.getTerminalOutsideSet(edge, descendants);
 				Object normalizedOtherSide=descendant2ancestor.get(otherSide);
-				//System.out.println("otherside: "+((mxCell)otherSide).getValue());
-				assert(normalizedOtherSide!=null);
-				//outgoing from vertices[i] to normalizedOtherSide
-				ArrayList<Object> list = outgoingEdgesToSameTargetFromHere.get(normalizedOtherSide);
-				if (list==null) outgoingEdgesToSameTargetFromHere.put(normalizedOtherSide,list=new ArrayList<Object>());
-				list.add(edge);
+				if (normalizedOtherSide!=null) {
+					//outgoing from vertices[i] to normalizedOtherSide
+					ArrayList<Object> list = outgoingEdgesToSameTargetFromHere.get(normalizedOtherSide);
+					if (list==null) outgoingEdgesToSameTargetFromHere.put(normalizedOtherSide,list=new ArrayList<Object>());
+					list.add(edge);
+				}
 			}
 			
 			for(Object target:outgoingEdgesToSameTargetFromHere.keySet()) {

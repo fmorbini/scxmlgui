@@ -238,7 +238,6 @@ public class SCXMLNode implements Serializable {
 	}
 	public String getDoneData() {
 		String ret=null;
-		assert(isFinal());
 		Document dmd = getFinalDataDoc();
 		if (dmd!=null) {
 			try {

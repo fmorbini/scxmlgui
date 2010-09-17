@@ -1,7 +1,9 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,58 +34,50 @@ public class SCXMLImportExport implements IImportExport {
 	private HashMap<String,SCXMLNode> internalID2nodes=new HashMap<String, SCXMLNode>();
 	private HashMap<String,ArrayList<SCXMLNode>> internalID2clusters=new HashMap<String, ArrayList<SCXMLNode>>();
 	private HashMap<String,SCXMLNode> scxmlID2nodes=new HashMap<String, SCXMLNode>();
-	private HashMap<String,HashMap<String,ArrayList<SCXMLEdge>>> fromToEdges=new HashMap<String, HashMap<String,ArrayList<SCXMLEdge>>>();
+	private HashMap<String,HashMap<String,HashSet<SCXMLEdge>>> fromToEdges=new HashMap<String, HashMap<String,HashSet<SCXMLEdge>>>();
 	private int internalIDcounter=11;
 
-	private ArrayList<SCXMLEdge> getEdges(String SCXMLfromID,String SCXMLtoID) {
+	private HashSet<SCXMLEdge> getEdges(String SCXMLfromID,String SCXMLtoID) {
 		assert(!SCXMLfromID.equals(""));
-		HashMap<String, ArrayList<SCXMLEdge>> toEdge=fromToEdges.get(SCXMLfromID);
+		HashMap<String, HashSet<SCXMLEdge>> toEdge=fromToEdges.get(SCXMLfromID);
 		return (toEdge==null)?null:toEdge.get(SCXMLtoID);
 	}
 	private int getNumEdgesFrom(String SCXMLfromID) {
 		assert(!SCXMLfromID.equals(""));
-		HashMap<String, ArrayList<SCXMLEdge>> toEdge=fromToEdges.get(SCXMLfromID);
+		HashMap<String, HashSet<SCXMLEdge>> toEdge=fromToEdges.get(SCXMLfromID);
 		if (toEdge==null) return 0;
 		else {
 			int tot=0;
-			for(ArrayList<SCXMLEdge> es:toEdge.values()) {
+			for(HashSet<SCXMLEdge> es:toEdge.values()) {
 				tot+=es.size();
 			}
 			return tot;
 		}
 	}
 	private void addEdge(HashMap<String,Object> ec) throws Exception {
-		System.out.println("add edge: "+ec.get(SCXMLEdge.SOURCE)+"->"+ec.get(SCXMLEdge.TARGET));
-		addEdge((String)ec.get(SCXMLEdge.SOURCE),(String[])ec.get(SCXMLEdge.TARGET),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE));
+		System.out.println("add edge: "+ec.get(SCXMLEdge.SOURCE)+"->"+ec.get(SCXMLEdge.TARGETS));
+		addEdge((String)ec.get(SCXMLEdge.SOURCE),(ArrayList<String>) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE));
 	}
-	private void addEdge(String SCXMLfromID,String[] targets,String cond,String event,String content) throws Exception {
-		SCXMLEdge firstEdge=null;
-		int i=0;
-		while(true) {			
-			String target=(targets==null)?null:targets[i++];
-			ArrayList<SCXMLEdge> edges = getEdges(SCXMLfromID, target);
-			SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,target,cond, event, content);
-			if (firstEdge==null) {
-				firstEdge=edge;
-			} else {
-				firstEdge.addLinkedEdge(edge);
-			}
-			edge.setInternalID(getNextInternalID());
+	private void addEdge(String SCXMLfromID,ArrayList<String> targets,String cond,String event,String content) throws Exception {
+		SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,targets,cond, event, content);
+		edge.setInternalID(getNextInternalID());
+		int oe=getNumEdgesFrom(SCXMLfromID);
+		edge.setOrder((oe<=0)?0:oe-1);
+
+		for(String target:targets) {
+			HashSet<SCXMLEdge> edges = getEdges(SCXMLfromID, target);
 			if (edges==null) {
-				edges=new ArrayList<SCXMLEdge>();
+				edges=new HashSet<SCXMLEdge>();
 				edges.add(edge);
-				HashMap<String, ArrayList<SCXMLEdge>> toEdges=fromToEdges.get(SCXMLfromID);
+				HashMap<String, HashSet<SCXMLEdge>> toEdges=fromToEdges.get(SCXMLfromID);
 				if (toEdges==null) {
-					toEdges=new HashMap<String, ArrayList<SCXMLEdge>>();
+					toEdges=new HashMap<String, HashSet<SCXMLEdge>>();
 					fromToEdges.put(SCXMLfromID, toEdges);
 				}
 				toEdges.put(target,edges);
 			} else {
 				edges.add(edge);
 			}
-			int oe=getNumEdgesFrom(SCXMLfromID);
-			edge.setOrder((oe<=0)?0:oe-1);
-			if ((target==null) || (i>=targets.length)) break;
 		}
 	}
 	private void setNodeAsChildrenOf(SCXMLNode node,SCXMLNode pn) {
@@ -229,8 +223,8 @@ public class SCXMLImportExport implements IImportExport {
 								c.getNodeName().toLowerCase().equals("transition")) {
 							HashMap<String, Object> edgeContent = processEdge(pn,c);
 							//pn.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
-							String[] inNames=(String[]) edgeContent.get(SCXMLEdge.TARGET);
-							if (inNames.length>1) throw new Exception("Unhandled multiple initial states. Report test case.");
+							ArrayList<String> inNames=(ArrayList<String>) edgeContent.get(SCXMLEdge.TARGETS);
+							if (inNames.size()>1) throw new Exception("Unhandled multiple initial states. Report test case.");
 							for(String inName:inNames) {
 								if (inName!=null) {
 									SCXMLNode in =getNodeFromSCXMLID(inName);
@@ -301,14 +295,14 @@ public class SCXMLImportExport implements IImportExport {
 		Node eventNode = att.getNamedItem("event");
 		String event=(eventNode!=null)?StringUtils.removeLeadingAndTrailingSpaces(eventNode.getNodeValue()):"";
 		Node targetNode = att.getNamedItem("target");
-		String[] targets=null;
+		ArrayList<String> targets=null;
 		if (targetNode!=null)
-			targets=StringUtils.cleanupSpaces(targetNode.getNodeValue()).split("[\\s]");
-		if ((targets!=null) && (targets.length>1)) throw new Exception("multiple targets not supported.");
+			targets=new ArrayList<String>(Arrays.asList(StringUtils.cleanupSpaces(targetNode.getNodeValue()).split("[\\s]")));
+		//if ((targets!=null) && (targets.size()>1)) throw new Exception("multiple targets not supported.");
 		String exe=collectAllChildrenInString(n);
 		ret.put(SCXMLEdge.CONDITION,cond);
 		ret.put(SCXMLEdge.EVENT,event);
-		ret.put(SCXMLEdge.TARGET,targets);
+		ret.put(SCXMLEdge.TARGETS,targets);
 		ret.put(SCXMLEdge.SOURCE,pn.getID());
 		ret.put(SCXMLEdge.EDGEEXE,exe);
 		return ret;
@@ -397,12 +391,12 @@ public class SCXMLImportExport implements IImportExport {
 			}
 			// then add the edges
 			for (String fromSCXMLID:fromToEdges.keySet()) {
-				HashMap<String, ArrayList<SCXMLEdge>> toEdge = fromToEdges.get(fromSCXMLID);
+				HashMap<String, HashSet<SCXMLEdge>> toEdge = fromToEdges.get(fromSCXMLID);
 				for (String toSCXMLID:toEdge.keySet()) {
-					ArrayList<SCXMLEdge> es=toEdge.get(toSCXMLID);
+					HashSet<SCXMLEdge> es=toEdge.get(toSCXMLID);
 					for (SCXMLEdge e:es) {
-						mxCell ce = addOrUpdateEdge(graph,e);
-						ce.setStyle(e.getStyle());
+						ArrayList<mxCell> ces = addOrUpdateEdge(graph,e);
+						for (mxCell ce:ces) ce.setStyle(e.getStyle());
 					}
 				}
 			}
@@ -411,13 +405,16 @@ public class SCXMLImportExport implements IImportExport {
 		}
 	}
 	
-	private mxCell addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge) {
+	private ArrayList<mxCell> addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge) {
+		ArrayList<mxCell> ret=new ArrayList<mxCell>();
 		mxCell source=internalID2cell.get(scxmlID2nodes.get(edge.getSCXMLSource()).getInternalID());
-		mxCell target=internalID2cell.get(scxmlID2nodes.get(edge.getSCXMLTarget()).getInternalID());
-		//String label=(String)edge.edge.get(EVENT);
-		mxCell e=(mxCell) graph.insertEdge(internalID2cell.get(root.getInternalID()), edge.getInternalID(),edge,source,target);
-		internalID2cell.put(edge.getInternalID(),e);
-		return e;
+		for(String targetSCXMLID:edge.getSCXMLTargets()) {
+			mxCell target=internalID2cell.get(scxmlID2nodes.get(targetSCXMLID).getInternalID());
+			mxCell e=(mxCell) graph.insertEdge(internalID2cell.get(root.getInternalID()), edge.getInternalID(),edge,source,target);
+			internalID2cell.put(edge.getInternalID(),e);
+			ret.add(e);
+		}
+		return ret;
 	}
 	private mxCell addOrUpdateNode(SCXMLGraph graph, SCXMLNode node, SCXMLNode parent) {
 		mxCell n=internalID2cell.get(node.getInternalID());

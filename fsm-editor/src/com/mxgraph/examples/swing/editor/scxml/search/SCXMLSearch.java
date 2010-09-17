@@ -137,11 +137,11 @@ public class SCXMLSearch {
         Document doc = new Document();
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
         doc.add(new Field("source", new StringReader(v.getSCXMLSource().toLowerCase())));
-        doc.add(new Field("target", new StringReader(v.getSCXMLTarget().toLowerCase())));
+        doc.add(new Field("target", new StringReader(v.getSCXMLTargets().toString().toLowerCase())));
         doc.add(new Field("eve", new StringReader(v.getEvent().toLowerCase())));
         doc.add(new Field("cnd", new StringReader(v.getCondition().toLowerCase())));
         doc.add(new Field("eexe", new StringReader(v.getExe().toLowerCase())));
-        doc.add(new Field("all", new StringReader((v.getSCXMLSource()+" "+v.getSCXMLTarget()+" "+v.getEvent()+" "+v.getCondition()+" "+v.getExe()).toLowerCase())));
+        doc.add(new Field("all", new StringReader((v.getSCXMLSource()+" "+v.getSCXMLTargets().toString()+" "+v.getEvent()+" "+v.getCondition()+" "+v.getExe()).toLowerCase())));
         return doc;
 	}
 	private Document createDocumentForSCXMLNode(SCXMLNode v,String cellID) {
