@@ -10,21 +10,17 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
 
-import com.sun.org.apache.xerces.internal.impl.dtd.models.SimpleContentModel;
-
 public class SCXMLEdge implements Serializable {
 	private static final long serialVersionUID = -136975794270718480L;
 	
-	public static final String FROM="from";
-	public static final String TO="to";
 	public static final String INTERNALID="internalID";
 	public static final String CONDITION="cond";
 	public static final String EVENT="event";
 	public static final String EDGEEXE="edgeexe";
-	public static final String TARGET="target";
+	public static final String TARGETS="targets";
 	public static final String SOURCE="source";
-	public static final String EDGEORDER="edgeOrder";
-	public static final String WITHTARGET="withTarget";
+	public static final String EDGEORDER="edgeOrder"; // the order of this edge with respect to the other edges exiting the same node
+	public static final String WITHTARGET="withTarget"; // an edge can be without target (event handler)
 
 	public static final String EVENTUNDO="EVENTundo";
 	public static final String EVENTDOC="EVENTdoc";
@@ -33,62 +29,33 @@ public class SCXMLEdge implements Serializable {
 	public static final String EXEUNDO="EXEundo";
 	public static final String EXEDOC="EXEdoc";
 
-	public static final String MULTIPLETARGETS="LINKEDEDGES";
-
 	private HashMap<String,Object> edge;
 	public SCXMLEdge() {
 		edge=new HashMap<String, Object>();
 		edge.put(WITHTARGET, false);
+		setSCXMLTargets(new ArrayList<String>());
 		setEvent("");
 	}
-
-	public ArrayList<SCXMLEdge> getLinkedEdges() {
-		return (ArrayList<SCXMLEdge>) edge.get(MULTIPLETARGETS);
-	}
-	public void addLinkedEdge(SCXMLEdge e) throws Exception {
-		ArrayList<SCXMLEdge> mts = (ArrayList<SCXMLEdge>) edge.get(MULTIPLETARGETS);
-		if (mts==null) edge.put(MULTIPLETARGETS,mts=new ArrayList<SCXMLEdge>());
-		mts.add(e);
-		if (!checkLinkedEdges()) throw new Exception("Incorrect linked edges.");
-	}
-	public void setLinkedEdges(ArrayList<SCXMLEdge> es) throws Exception {
-		edge.put(MULTIPLETARGETS,es);
-		if (!checkLinkedEdges()) throw new Exception("Incorrect linked edges.");
-	}
-	public boolean checkLinkedEdges() {
-		ArrayList<SCXMLEdge> edges = getLinkedEdges();
-		Document exeDoc = null;
-		Document cndDoc = null;
-		Document evtDoc = null;
-		UndoManager exeUndo=null;
-		UndoManager evtUndo=null;
-		UndoManager cndUndo=null;
-		boolean isFirst=true;
-		if (edges!=null) {
-			for (SCXMLEdge edge:edges) {
-				if (isFirst) {
-					exeDoc = edge.getExeDoc();
-					cndDoc = edge.getConditionDoc();
-					evtDoc = edge.getEventDoc();
-					exeUndo = edge.getExeUndoManager();
-					cndUndo = edge.getEventUndoManager();
-					cndUndo = edge.getConditionUndoManager();
-					isFirst=false;
-				} else {
-					if (exeDoc!=edge.getExeDoc()) return false;
-					if (cndDoc!=edge.getConditionDoc()) return false;
-					if (evtDoc!=edge.getEventDoc()) return false;
-					if (exeUndo!=edge.getExeUndoManager()) return false;
-					if (cndUndo!=edge.getConditionUndoManager()) return false;
-					if (evtUndo!=edge.getEventUndoManager()) return false;
-				}
-			}
+	public SCXMLEdge(String fromSCXMLID,ArrayList<String> toSCXMLIDs,String cond,String event, String content) {
+		edge=new HashMap<String, Object>();
+		edge.put(CONDITION,cond);
+		edge.put(EVENT,event);
+		edge.put(EDGEEXE,content);
+		edge.put(SOURCE, fromSCXMLID);
+		if (toSCXMLIDs==null) {
+			ArrayList<String> targets = new ArrayList<String>();
+			targets.add(fromSCXMLID);
+			edge.put(TARGETS, targets);
+			edge.put(WITHTARGET, false);
+		} else {
+			edge.put(TARGETS, toSCXMLIDs);
+			edge.put(WITHTARGET, true);
 		}
-		return true;
 	}
 	
 	public boolean isCycle() {
-		return getSCXMLSource().equals(getSCXMLTarget());
+		ArrayList<String> targets = getSCXMLTargets();
+		return (targets.size()==1) && (getSCXMLSource().equals(targets.get(0)));
 	}
 	public boolean isCycleWithTarget() {
 		return isCycle() && (Boolean)edge.get(WITHTARGET);
@@ -97,16 +64,16 @@ public class SCXMLEdge implements Serializable {
 		edge.put(WITHTARGET, withTarget);
 	}
 	public String getSCXMLSource() {
-		return (String)edge.get(FROM);
+		return (String)edge.get(SOURCE);
 	}
 	public void setSCXMLSource(String sourceID) {
-		edge.put(FROM, sourceID);
+		edge.put(SOURCE, sourceID);
 	}
-	public String getSCXMLTarget() {
-		return (String)edge.get(TO);
+	public ArrayList<String> getSCXMLTargets() {
+		return (ArrayList<String>)edge.get(TARGETS);
 	}
-	public void setSCXMLTarget(String targetID) {
-		edge.put(TO, targetID);		
+	public void setSCXMLTargets(ArrayList<String> targetIDs) {
+		edge.put(TARGETS, targetIDs);		
 	}
 	public String getInternalID() {
 		return (String)edge.get(INTERNALID);
@@ -164,20 +131,6 @@ public class SCXMLEdge implements Serializable {
 	}
 	public void setExe(String e) {
 		edge.put(EDGEEXE, e);
-	}
-	public SCXMLEdge(String fromSCXMLID,String toSCXMLID,String cond,String event, String content) {
-		edge=new HashMap<String, Object>();
-		edge.put(CONDITION,cond);
-		edge.put(EVENT,event);
-		edge.put(EDGEEXE,content);
-		edge.put(FROM, fromSCXMLID);
-		if (toSCXMLID==null) {
-			edge.put(TO, fromSCXMLID);
-			edge.put(WITHTARGET, false);
-		} else {
-			edge.put(TO, toSCXMLID);
-			edge.put(WITHTARGET, true);
-		}
 	}
 	// getter and setter for document and undomanager for editing event 
 	public UndoManager getEventUndoManager() {
@@ -256,7 +209,7 @@ public class SCXMLEdge implements Serializable {
 		edge=hash;
 	}
 	public String toString() {
-		return getSCXMLSource()+"-["+getCondition()+","+getEvent()+"]->"+getSCXMLTarget();
+		return getSCXMLSource()+"-["+getCondition()+","+getEvent()+"]->"+getSCXMLTargets();
 	}
 	
 	public String getStyle() {

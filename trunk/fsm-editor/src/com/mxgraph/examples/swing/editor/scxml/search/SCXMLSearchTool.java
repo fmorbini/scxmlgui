@@ -147,7 +147,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 				s=n.getID();
 			} else {
 				SCXMLEdge e=(SCXMLEdge) c.getValue();
-				s=e.getSCXMLSource()+"-["+e.getCondition()+","+e.getEvent()+"]->"+e.getSCXMLTarget();
+				s=e.getSCXMLSource()+"-["+e.getCondition()+","+e.getEvent()+"]->"+e.getSCXMLTargets();
 			}
 			setText(index+": "+s);
 			if (isSelected) {

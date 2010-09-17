@@ -6910,8 +6910,6 @@ public class mxGraph extends mxEventSource
 	}
 	public List<Set<Object>> connectedComponents(Object parent,boolean isolate){
 		HashMap<Object,Integer> components=new HashMap<Object, Integer>();
-		int currentComponent=0; 
-		Stack<Object> cells=new Stack<Object>();
 
 		HashMap<Object,HashSet<Object>> descendants4vertex=new HashMap<Object, HashSet<Object>>();
 		HashMap<Object,Object[]> connections4vertex=new HashMap<Object, Object[]>();
@@ -6922,6 +6920,7 @@ public class mxGraph extends mxEventSource
 			if (model.isVertex(childCell)) {
 				HashSet<Object> descendants = new HashSet<Object>();
 				Object[] conns = getEdgesForSwimlane(childCell, parent, true,true,false,descendants);
+				assert(descendants.contains(childCell));
 				descendants4vertex.put(childCell, descendants);
 				connections4vertex.put(childCell, conns);
 				for (Object d:descendants) {
@@ -6932,6 +6931,8 @@ public class mxGraph extends mxEventSource
 		}
 		
 		
+		int currentComponent=0; 
+		Stack<Object> cells=new Stack<Object>();
 		for (int i = 0; i < childCount; i++) {
 			Object childCell = model.getChildAt(parent, i);
 			cells.push(childCell);
@@ -6950,8 +6951,7 @@ public class mxGraph extends mxEventSource
 						{
 							Object connCell = getTerminalOutsideSet(conns[j], descendants);
 							connCell=descendant2ancestor.get(connCell);
-							assert(connCell!=null);
-							cells.push(connCell);
+							if (connCell!=null) cells.push(connCell);
 						}
 					}
 				}
