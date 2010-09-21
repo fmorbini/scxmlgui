@@ -64,6 +64,10 @@ public class SCXMLImportExport implements IImportExport {
 		int oe=getNumEdgesFrom(SCXMLfromID);
 		edge.setOrder((oe<=0)?0:oe-1);
 
+		if (targets==null) {
+			targets=new ArrayList<String>();
+			targets.add(null);
+		}
 		for(String target:targets) {
 			HashSet<SCXMLEdge> edges = getEdges(SCXMLfromID, target);
 			if (edges==null) {
