@@ -62,7 +62,7 @@ public class SCXMLImportExport implements IImportExport {
 		SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,targets,cond, event, content);
 		edge.setInternalID(getNextInternalID());
 		int oe=getNumEdgesFrom(SCXMLfromID);
-		edge.setOrder((oe<=0)?0:oe-1);
+		edge.setOrder((oe<=0)?0:oe);
 
 		if (targets==null) {
 			targets=new ArrayList<String>();
@@ -414,6 +414,7 @@ public class SCXMLImportExport implements IImportExport {
 		mxCell source=internalID2cell.get(scxmlID2nodes.get(edge.getSCXMLSource()).getInternalID());
 		for(String targetSCXMLID:edge.getSCXMLTargets()) {
 			mxCell target=internalID2cell.get(scxmlID2nodes.get(targetSCXMLID).getInternalID());
+			System.out.println("add edge to graph: "+edge);
 			mxCell e=(mxCell) graph.insertEdge(internalID2cell.get(root.getInternalID()), edge.getInternalID(),edge,source,target);
 			internalID2cell.put(edge.getInternalID(),e);
 			ret.add(e);
