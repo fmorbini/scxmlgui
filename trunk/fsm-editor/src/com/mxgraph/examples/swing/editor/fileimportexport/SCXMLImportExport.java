@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraphView;
@@ -56,17 +58,17 @@ public class SCXMLImportExport implements IImportExport {
 	}
 	private void addEdge(HashMap<String,Object> ec) throws Exception {
 		System.out.println("add edge: "+ec.get(SCXMLEdge.SOURCE)+"->"+ec.get(SCXMLEdge.TARGETS));
-		addEdge((String)ec.get(SCXMLEdge.SOURCE),(ArrayList<String>) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE));
+		addEdge((String)ec.get(SCXMLEdge.SOURCE),(ArrayList<String>) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE),(HashMap<String,String>)ec.get(SCXMLEdge.EDGEGEO));
 	}
-	private void addEdge(String SCXMLfromID,ArrayList<String> targets,String cond,String event,String content) throws Exception {
-		SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,targets,cond, event, content);
+	private void addEdge(String SCXMLfromID,ArrayList<String> targets,String cond,String event,String content, HashMap<String, String> geometry) throws Exception {
+		SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,targets,cond, event, content,geometry);
 		edge.setInternalID(getNextInternalID());
 		int oe=getNumEdgesFrom(SCXMLfromID);
 		edge.setOrder((oe<=0)?0:oe);
 
 		if (targets==null) {
 			targets=new ArrayList<String>();
-			targets.add(null);
+			targets.add(SCXMLfromID);
 		}
 		for(String target:targets) {
 			HashSet<SCXMLEdge> edges = getEdges(SCXMLfromID, target);
@@ -195,7 +197,6 @@ public class SCXMLImportExport implements IImportExport {
 		return node;
 	}
 
-	private static final Pattern sizeElementPattern = Pattern.compile("([a-z])=([\\deE\\+\\-\\.]+)");
 	public void getNodeHier(Node el, SCXMLNode pn) throws Exception {
 		//addTransitionsToInitialNodes(el,pid);
 		NodeList states = el.getChildNodes();
@@ -258,33 +259,7 @@ public class SCXMLImportExport implements IImportExport {
 				break;
 			case Node.COMMENT_NODE:
 				String positionString=n.getNodeValue();
-				Matcher m = sizeElementPattern.matcher(positionString);				
-				double x=0,y=0,h=0,w=0;
-				boolean foundX=false,foundY=false,foundW=false,foundH=false;
-				while(m.find()) {
-					String varName=m.group(1);
-					String varValue=m.group(2);
-					try {
-						double v=Double.parseDouble(varValue);
-						if (varName.equals("x")) {
-							x=v;
-							foundX=true;
-						} else if (varName.equals("y")) {
-							y=v;
-							foundY=true;
-						} else if (varName.equals("w")) {
-							w=v;
-							foundW=true;
-						} else if (varName.equals("h")) {
-							h=v;
-							foundH=true;
-						}
-					} catch (NumberFormatException e) {
-					}
-				}
-				if (foundX && foundY && foundW && foundH) {
-					pn.setGeometry(x,y,w,h);
-				}
+				readNodeGeometry(pn,positionString);
 				break;
 			}
 		}
@@ -303,12 +278,14 @@ public class SCXMLImportExport implements IImportExport {
 		if (targetNode!=null)
 			targets=new ArrayList<String>(Arrays.asList(StringUtils.cleanupSpaces(targetNode.getNodeValue()).split("[\\s]")));
 		//if ((targets!=null) && (targets.size()>1)) throw new Exception("multiple targets not supported.");
+		HashMap<String,String> edgeGeometry=readEdgeGeometry(n);
 		String exe=collectAllChildrenInString(n);
 		ret.put(SCXMLEdge.CONDITION,cond);
 		ret.put(SCXMLEdge.EVENT,event);
 		ret.put(SCXMLEdge.TARGETS,targets);
 		ret.put(SCXMLEdge.SOURCE,pn.getID());
 		ret.put(SCXMLEdge.EDGEEXE,exe);
+		ret.put(SCXMLEdge.EDGEGEO,edgeGeometry);
 		return ret;
 	}
 	private String collectAllChildrenInString(Node n) {
@@ -399,7 +376,7 @@ public class SCXMLImportExport implements IImportExport {
 				for (String toSCXMLID:toEdge.keySet()) {
 					HashSet<SCXMLEdge> es=toEdge.get(toSCXMLID);
 					for (SCXMLEdge e:es) {
-						ArrayList<mxCell> ces = addOrUpdateEdge(graph,e);
+						ArrayList<mxCell> ces = addOrUpdateEdge(graph,e,toSCXMLID,ignoreStoredLayout);
 						for (mxCell ce:ces) ce.setStyle(e.getStyle());
 					}
 				}
@@ -409,15 +386,21 @@ public class SCXMLImportExport implements IImportExport {
 		}
 	}
 	
-	private ArrayList<mxCell> addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge) {
+	private ArrayList<mxCell> addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge, String toSCXMLID, boolean ignoreStoredLayout) {
 		ArrayList<mxCell> ret=new ArrayList<mxCell>();
 		mxCell source=internalID2cell.get(scxmlID2nodes.get(edge.getSCXMLSource()).getInternalID());
 		for(String targetSCXMLID:edge.getSCXMLTargets()) {
-			mxCell target=internalID2cell.get(scxmlID2nodes.get(targetSCXMLID).getInternalID());
-			System.out.println("add edge to graph: "+edge);
-			mxCell e=(mxCell) graph.insertEdge(internalID2cell.get(root.getInternalID()), edge.getInternalID(),edge,source,target);
-			internalID2cell.put(edge.getInternalID(),e);
-			ret.add(e);
+			if (targetSCXMLID.equals(toSCXMLID)) {
+				mxCell target=internalID2cell.get(scxmlID2nodes.get(targetSCXMLID).getInternalID());
+				System.out.println("add edge ("+source+"->"+target+")to graph: "+edge);
+				mxCell e=(mxCell) graph.insertEdge(internalID2cell.get(root.getInternalID()), edge.getInternalID(),edge,source,target);
+				if (!ignoreStoredLayout) {
+					mxGeometry geo=edge.getEdgeGeometry(toSCXMLID);
+					if (geo!=null) e.setGeometry(geo);
+				}
+				internalID2cell.put(edge.getInternalID(),e);
+				ret.add(e);
+			}
 		}
 		return ret;
 	}
@@ -505,7 +488,7 @@ public class SCXMLImportExport implements IImportExport {
 		}
 	}
 	
-	private String mxVertex2SCXMLString(mxGraphView view, mxCell n, boolean isRoot) {
+	private String mxVertex2SCXMLString(mxGraphView view, mxCell n, boolean isRoot) throws Exception {
 		String ret="";
 		String src=null;
 		String ID=null;
@@ -524,7 +507,7 @@ public class SCXMLImportExport implements IImportExport {
 		onentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnEntry());
 		onexit=StringUtils.removeLeadingAndTrailingSpaces(value.getOnExit());
 
-		transitions=edgesOfmxVertex2SCXMLString(n,value);
+		transitions=edgesOfmxVertex2SCXMLString(n,value,view);
 
 		SCXMLNode initialChild=getInitialChildOfmxCell(n);
 		if (initialChild!=null) oninitialentry=StringUtils.removeLeadingAndTrailingSpaces(initialChild.getOnInitialEntry());
@@ -557,7 +540,9 @@ public class SCXMLImportExport implements IImportExport {
 		ret+=">";
 
 		// save the geometric information of this node:
-		ret+="<!-- "+getGeometryString(view,n)+" -->";
+		String nodeGeometry=getGeometryString(view,n);
+		if (!StringUtils.isEmptyString(nodeGeometry))
+			ret+="<!-- "+nodeGeometry+" -->";
 		if (!StringUtils.isEmptyString(datamodel))
 			ret+="<datamodel>"+datamodel+"</datamodel>";
 		if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
@@ -583,21 +568,84 @@ public class SCXMLImportExport implements IImportExport {
 		return ret;
 	}
 	private String getGeometryString(mxGraphView view, mxCell n) {
-		System.out.println("SCALE: "+view.getScale());
 		double scale = view.getScale();
 		mxCellState ns=view.getState(n);
-		mxICell p = n.getParent();
-		double xp=0;
-		double yp=0;
-		if (p!=null) {
-			mxCellState ps=view.getState(p);
-			if (ps!=null) {
-				xp=ps.getX();
-				yp=ps.getY();
+		if (n.isVertex()) {
+			mxICell p = n.getParent();
+			double xp=0;
+			double yp=0;
+			if (p!=null) {
+				mxCellState ps=view.getState(p);
+				if (ps!=null) {
+					xp=ps.getX();
+					yp=ps.getY();
+				}
+			}
+			if (ns!=null) return " node-size-and-position x="+((ns.getX()-xp)/scale)+" y="+((ns.getY()-yp)/scale)+" w="+(ns.getWidth()/scale)+" h="+(ns.getHeight()/scale);
+			else return null;
+		} else if (n.isEdge()) {			
+			String target=getIDOfThisEdgeTarget(n);
+			mxGeometry geo = n.getGeometry();
+			mxPoint offset = geo.getOffset();
+			List<mxPoint> points = geo.getPoints();			
+			String ret=null;
+			if ((points!=null) || (offset!=null)) {
+				ret=" edge-path ["+((StringUtils.isEmptyString(target))?"":target)+"] ";
+				if (points!=null) {
+					for (mxPoint p:points) {
+						ret+=" x="+p.getX()+" y="+p.getY();
+					}
+				}
+				if (offset!=null) {
+					mxPoint pt = view.getPoint(ns, geo);
+					ret+=" pointx="+geo.getX()+" pointy="+geo.getY()+" offsetx="+(offset.getX())+" offsety="+(offset.getY());
+				}
+			}
+			return ret;
+		} else return null;
+	}
+	private String getIDOfThisEdgeTarget(mxCell n) {
+		String targetID=((SCXMLNode) n.getTarget().getValue()).getID();
+		assert(!StringUtils.isEmptyString(targetID));
+		return targetID;
+	}
+	private static final String numberPattern="[\\deE\\+\\-\\.]+";
+	public static final String xyPatternString="[\\s]*x=("+numberPattern+")[\\s]*y=("+numberPattern+")[\\s]*";
+	public static final String offsetPatternString="[\\s]*pointx=("+numberPattern+")[\\s]*pointy=("+numberPattern+")[\\s]*offsetx=("+numberPattern+")[\\s]*offsety=("+numberPattern+")[\\s]*";
+	public static final Pattern xyPattern=Pattern.compile(xyPatternString);
+	public static final Pattern offsetPattern=Pattern.compile(offsetPatternString);
+	private static final Pattern nodesizePattern = Pattern.compile("[\\s]*node-size-and-position[\\s]*"+xyPatternString+"[\\s]*w=("+numberPattern+")[\\s]*h=("+numberPattern+")[\\s]*");
+	public static final Pattern edgepathPattern = Pattern.compile("[\\s]*edge-path[\\s]*\\[(.*)\\](("+xyPatternString+")*[\\s]*("+offsetPatternString+")*)[\\s]*");
+	private void readNodeGeometry(SCXMLNode pn, String positionString) {
+		Matcher m = nodesizePattern.matcher(positionString);		
+		if (m.matches() && (m.groupCount()==4)) {
+			try {
+				double x=Double.parseDouble(m.group(1));
+				double y=Double.parseDouble(m.group(2));
+				double w=Double.parseDouble(m.group(3));
+				double h=Double.parseDouble(m.group(4));
+				((SCXMLNode) pn).setGeometry(x,y,w,h);
+			} catch (Exception e) {
 			}
 		}
-		if (ns!=null) return "x="+((ns.getX()-xp)/scale)+" y="+((ns.getY()-yp)/scale)+" w="+(ns.getWidth()/scale)+" h="+(ns.getHeight()/scale);
-		else return "";
+	}
+	private HashMap<String,String> readEdgeGeometry(Node root) {
+		// this will search for all geometries available (one geometry for each edge target)
+		HashMap<String,String> ret=new HashMap<String, String>();
+		NodeList states = root.getChildNodes();
+		for (int s = 0; s < states.getLength(); s++) {
+			Node n = states.item(s);
+			switch (n.getNodeType()) {
+			case Node.COMMENT_NODE:
+				String comment=n.getNodeValue();
+				Matcher m = edgepathPattern.matcher(comment);
+				if (m.matches()) {
+					ret.put(m.group(1),m.group(2));
+				}
+				break;
+			}
+		}
+		return (ret.isEmpty())?null:ret;
 	}
 	private SCXMLNode getInitialChildOfmxCell(mxCell n) {
 		int nc=n.getChildCount();
@@ -612,42 +660,81 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		return null;
 	}
-	private String edgesOfmxVertex2SCXMLString(mxCell n, SCXMLNode value) {
-		int ec=n.getEdgeCount();
-		String[] sortedEdges=new String[ec];
+	private String edgesOfmxVertex2SCXMLString(mxCell n, SCXMLNode value, mxGraphView view) throws Exception {
+		HashMap<Integer,ArrayList<mxCell>> edges=buildListSortedEdges(n);
 		int maxOutgoingEdge=-1;
+		for(Integer order:edges.keySet()) if (order>maxOutgoingEdge) maxOutgoingEdge=order;
+		if (!edges.isEmpty() && (maxOutgoingEdge>=0)) {
+			String[] sortedEdges=new String[maxOutgoingEdge+1];
+			for(int order=0;order<=maxOutgoingEdge;order++) {
+				ArrayList<mxCell> edges4order = edges.get(order);
+				if ((edges4order!=null) && !edges4order.isEmpty()) {
+					mxCell e=edges4order.get(0);
+					mxCell source=(mxCell) e.getSource();
+					mxCell target=(mxCell) e.getTarget();
+					SCXMLNode targetValue=(SCXMLNode) target.getValue();
+					SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
+					String ret="";
+					String cond=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition()));
+					String event=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent()));
+					String exe=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe());
+					ret="<transition";
+					if (!StringUtils.isEmptyString(event))
+						ret+=" event=\""+event+"\"";
+					if (!StringUtils.isEmptyString(cond))
+						ret+=" cond=\""+cond+"\"";
+					if ((!edgeValue.isCycle()) || edgeValue.isCycleWithTarget()) {
+						ret+=" target=\"";
+						boolean first=true;
+						for(mxCell edge:edges4order) {
+							if (first) first=false;
+							else ret+=" ";
+							ret+=((SCXMLNode)edge.getTarget().getValue()).getID();
+						}
+						ret+="\"";
+					}
+					ret+=">";
+					if (!StringUtils.isEmptyString(exe))
+						ret+=exe;
+					for(mxCell edge:edges4order) {
+						String edgeGeometry=getGeometryString(view,edge);
+						if (!StringUtils.isEmptyString(edgeGeometry))
+							ret+="<!-- "+edgeGeometry+" -->";
+					}
+					ret+="</transition>";
+					if (maxOutgoingEdge<order) maxOutgoingEdge=order;
+					sortedEdges[order]=ret;
+				}
+			}
+			String ret="";
+			for (int i=0;i<=maxOutgoingEdge;i++) {
+				ret+=sortedEdges[i];
+			}
+			return ret;
+		} else return null;
+	}
+	private HashMap<Integer, ArrayList<mxCell>> buildListSortedEdges(mxCell n) throws Exception {
+		HashMap<Integer, ArrayList<mxCell>> ret=new HashMap<Integer, ArrayList<mxCell>>();
+		int ec=n.getEdgeCount();
 		for(int i=0;i<ec;i++) {
 			mxCell e=(mxCell) n.getEdgeAt(i);
 			mxCell source=(mxCell) e.getSource();
 			mxCell target=(mxCell) e.getTarget();
 			if (source==n) {
-				String ret="";
-				SCXMLNode targetValue=(SCXMLNode) target.getValue();
 				SCXMLEdge edgeValue=(SCXMLEdge) e.getValue();
-				assert((edgeValue!=null) && (targetValue!=null));
-				assert(!targetValue.getID().equals(""));
-				String cond=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition()));
-				String event=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent()));
-				String exe=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe());
-				ret="<transition";
-				if (!StringUtils.isEmptyString(event))
-					ret+=" event=\""+event+"\"";
-				if (!StringUtils.isEmptyString(cond))
-					ret+=" cond=\""+cond+"\"";
-				if ((!edgeValue.isCycle()) || edgeValue.isCycleWithTarget())
-					ret+=" target=\""+targetValue.getID()+"\"";
-				if (!StringUtils.isEmptyString(exe))
-					ret+=">"+exe+"</transition>";
-				else
-					ret+="/>";
 				int order=edgeValue.getOrder();
-				if (maxOutgoingEdge<order) maxOutgoingEdge=order;
-				sortedEdges[order]=ret;
+				ArrayList<mxCell> edges4order = ret.get(order);
+				if (edges4order==null) ret.put(order, edges4order=new ArrayList<mxCell>());				
+				edges4order.add(e);				
 			}
 		}
-		String ret="";
-		for (int i=0;i<=maxOutgoingEdge;i++) {
-			ret+=sortedEdges[i];
+		for(ArrayList<mxCell>edges:ret.values()) {
+			if (edges.size()>1) {
+				SCXMLEdge first=(SCXMLEdge)edges.get(0).getValue();
+				for (mxCell edge:edges) {
+					if (edge.getValue()!=first) throw new Exception("Error in multitarget edges.");
+				}
+			}
 		}
 		return ret;
 	}

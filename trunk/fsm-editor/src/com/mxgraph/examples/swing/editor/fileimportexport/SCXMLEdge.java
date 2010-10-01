@@ -5,10 +5,17 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Matcher;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
+
+import com.mxgraph.examples.swing.editor.utils.StringUtils;
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxGraphModel;
+import com.mxgraph.util.mxPoint;
 
 public class SCXMLEdge implements Serializable {
 	private static final long serialVersionUID = -136975794270718480L;
@@ -16,6 +23,7 @@ public class SCXMLEdge implements Serializable {
 	public static final String INTERNALID="internalID";
 	public static final String CONDITION="cond";
 	public static final String EVENT="event";
+	public static final String EDGEGEO="edgeSavedGeometry";
 	public static final String EDGEEXE="edgeexe";
 	public static final String TARGETS="targets";
 	public static final String SOURCE="source";
@@ -36,12 +44,13 @@ public class SCXMLEdge implements Serializable {
 		setSCXMLTargets(new ArrayList<String>());
 		setEvent("");
 	}
-	public SCXMLEdge(String fromSCXMLID,ArrayList<String> toSCXMLIDs,String cond,String event, String content) {
+	public SCXMLEdge(String fromSCXMLID,ArrayList<String> toSCXMLIDs,String cond,String event, String content, HashMap<String, String> geometry) {
 		edge=new HashMap<String, Object>();
 		edge.put(CONDITION,cond);
 		edge.put(EVENT,event);
 		edge.put(EDGEEXE,content);
 		edge.put(SOURCE, fromSCXMLID);
+		edge.put(EDGEGEO, geometry);
 		if (toSCXMLIDs==null) {
 			ArrayList<String> targets = new ArrayList<String>();
 			targets.add(fromSCXMLID);
@@ -68,6 +77,39 @@ public class SCXMLEdge implements Serializable {
 	}
 	public void setSCXMLSource(String sourceID) {
 		edge.put(SOURCE, sourceID);
+	}
+	public mxGeometry getEdgeGeometry(String target) {
+		HashMap<String, String> geometries = (HashMap<String,String>)edge.get(EDGEGEO);
+		try{
+			if (geometries!=null) {
+				String geometry=geometries.get(target);
+				if (!StringUtils.isEmptyString(geometry)) {
+					ArrayList<mxPoint> points=new ArrayList<mxPoint>();
+					mxPoint offset=null,point=null;
+					Matcher m = SCXMLImportExport.xyPattern.matcher(geometry);
+					while (m.find()) {
+						points.add(new mxPoint(Double.parseDouble(m.group(1)), Double.parseDouble(m.group(2))));
+					}
+					m = SCXMLImportExport.offsetPattern.matcher(geometry);
+					while (m.find()) {
+						point=new mxPoint(Double.parseDouble(m.group(1)), Double.parseDouble(m.group(2)));
+						offset=new mxPoint(Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4)));
+					}
+					if ((!points.isEmpty()) || (offset!=null)) {
+						mxGeometry geo=new mxGeometry();
+						if (!points.isEmpty()) geo.setPoints(points);
+						if (offset!=null) {
+							geo.setX(point.getX());
+							geo.setY(point.getY());
+							geo.setOffset(offset);
+						}
+						geo.setRelative(true);
+						return geo;
+					}
+				}
+			}
+		} catch (Exception e) {}
+		return null;
 	}
 	public ArrayList<String> getSCXMLTargets() {
 		return (ArrayList<String>)edge.get(TARGETS);

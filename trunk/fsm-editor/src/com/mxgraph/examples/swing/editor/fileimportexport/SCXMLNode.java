@@ -233,7 +233,6 @@ public class SCXMLNode implements Serializable {
 		node.put(INITEXE,exe);
 	}
 	public void setDoneData(String dd) {
-		assert(isFinal());
 		node.put(DONEDATA,dd);
 	}
 	public String getDoneData() {
