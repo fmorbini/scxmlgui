@@ -52,7 +52,7 @@ public class SCXMLDatamodelEditor extends SCXMLElementEditor {
         } catch (Exception e) {
         	datamodelXML=datamodelText;
         }
-        undoTextPane=new UndoJTextPane(datamodelXML, doc, undo);
+        undoTextPane=new UndoJTextPane(datamodelXML, doc, undo, keyboardHandler);
         if (doc==null) {
         	root.setDatamodelDoc(doc=undoTextPane.getDocument());
         	root.setDatamodelUndoManager(undo=undoTextPane.getUndoManager());

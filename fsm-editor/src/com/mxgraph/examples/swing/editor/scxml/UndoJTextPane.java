@@ -16,6 +16,8 @@ import javax.swing.undo.UndoManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
+import com.mxgraph.examples.swing.editor.scxml.eleditor.EditorKeyboardHandler;
+
 public class UndoJTextPane extends RSyntaxTextArea {
 
 	private static final long serialVersionUID = -5128499045192330958L;
@@ -36,8 +38,10 @@ public class UndoJTextPane extends RSyntaxTextArea {
     {
         return false;
     }
-	public UndoJTextPane(String initText,Document d, UndoManager u) {
+	public UndoJTextPane(String initText,Document d, UndoManager u,EditorKeyboardHandler k) {
 		super();
+		setPopupMenu(null);
+		k.updateInputMap(getInputMap());
 		doc=d;
 		undo=u;
 		if (doc==null) {

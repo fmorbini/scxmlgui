@@ -43,7 +43,7 @@ public class SCXMLNamespaceEditor extends SCXMLElementEditor {
         
     	undo=node.getNAMESPACEUndoManager();
     	doc=node.getNAMESPACEDoc();
-    	namespaceTextPane=new UndoJTextPane(node.getNAMESPACE(), doc, undo);
+    	namespaceTextPane=new UndoJTextPane(node.getNAMESPACE(), doc, undo, keyboardHandler);
     	if (doc==null) {
     		node.setNAMESPACEDoc(doc=namespaceTextPane.getDocument());
     		node.setNAMESPACEUndoManager(undo=namespaceTextPane.getUndoManager());
