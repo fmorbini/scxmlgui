@@ -16,7 +16,7 @@ public class EditorKeyboardHandler {
 		updateInputMap(editor.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW));
 	}
 
-	protected void updateInputMap(InputMap map)
+	public void updateInputMap(InputMap map)
 	{
 		map.put(KeyStroke.getKeyStroke("control Z"), "undo");
 		map.put(KeyStroke.getKeyStroke("control Y"), "redo");			

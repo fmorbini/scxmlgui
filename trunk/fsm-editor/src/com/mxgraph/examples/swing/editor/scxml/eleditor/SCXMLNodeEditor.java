@@ -10,6 +10,8 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -74,7 +76,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         if (!node.isHistoryNode()) {
 	        undo=node.getOnEntryUndoManager();
 	        doc=node.getOnEntryDoc();
-	        onentryTextPane=new UndoJTextPane(node.getOnEntry(), doc, undo);
+	        onentryTextPane=new UndoJTextPane(node.getOnEntry(), doc, undo,keyboardHandler);
 	        if (doc==null) {
 	        	node.setOnEntryDoc(doc=onentryTextPane.getDocument());
 	        	node.setOnEntryUndoManager(undo=onentryTextPane.getUndoManager());
@@ -88,7 +90,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	        
 	        undo=node.getOnExitUndoManager();
 	        doc=node.getOnExitDoc();
-	        onexitTextPane=new UndoJTextPane(node.getOnExit(), doc, undo);
+	        onexitTextPane=new UndoJTextPane(node.getOnExit(), doc, undo, keyboardHandler);
 	        if (doc==null) {
 	        	node.setOnExitDoc(doc=onexitTextPane.getDocument());
 	        	node.setOnExitUndoManager(undo=onexitTextPane.getUndoManager());
@@ -104,7 +106,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         if (node.isFinal()) {
         	undo=node.getFinalUndoManager();
         	doc=node.getFinalDataDoc();
-        	finalTextPane=new UndoJTextPane(node.getDoneData(), doc, undo);
+        	finalTextPane=new UndoJTextPane(node.getDoneData(), doc, undo, keyboardHandler);
         	if (doc==null) {
         		node.setFinalDataDoc(doc=finalTextPane.getDocument());
         		node.setFinalUndoManager(undo=finalTextPane.getUndoManager());
@@ -119,7 +121,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
         if (node.isInitial()) {
         	undo=node.getInitialEntryUndoManager();
         	doc=node.getInitialEntryDoc();
-        	initialTextPane=new UndoJTextPane(node.getOnInitialEntry(), doc, undo);
+        	initialTextPane=new UndoJTextPane(node.getOnInitialEntry(), doc, undo, keyboardHandler);
         	if (doc==null) {
         		node.setInitialEntryDoc(doc=initialTextPane.getDocument());
         		node.setInitialEntryUndoManager(undo=initialTextPane.getUndoManager());

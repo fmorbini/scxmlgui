@@ -75,7 +75,7 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
         undo=edge.getExeUndoManager();
         doc=edge.getExeDoc();
-        exeTextPane=new UndoJTextPane(edge.getExe(), doc, undo);
+        exeTextPane=new UndoJTextPane(edge.getExe(), doc, undo, keyboardHandler);
         if (doc==null) {
         	edge.setExeDoc(doc=exeTextPane.getDocument());
         	edge.setExeUndoManager(undo=exeTextPane.getUndoManager());
