@@ -1849,6 +1849,12 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		return null;
 	}
 
+	public Collection<Object> getSiblingsOfCell(Object c) {
+		ArrayList<Object> ret = new ArrayList<Object>();
+		ret.add(c);
+		return ret;
+	}
+	
 	public boolean doesThisRectangleIntersectThisCell(Rectangle hit,Object cell,boolean hitSwimlaneContent,mxGraphView view) {
 		if (graph.isCellVisible(cell)) {			
 			if (view==null) view = graph.getView();

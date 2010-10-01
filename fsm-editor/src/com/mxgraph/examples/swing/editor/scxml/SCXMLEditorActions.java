@@ -219,14 +219,14 @@ public class SCXMLEditorActions
 
 	public static class AddCornerToEdgeAction extends AbstractAction
 	{
-		private Point pos,scaledPos;
+		private Point pos,unscaledPos;
 		private mxCell cell;
 		private int index;
 	
 		public AddCornerToEdgeAction(mxCell c, Point pt, Point unscaledPt,int i) {
 			this.cell=c;
 			this.pos=pt;
-			this.scaledPos=unscaledPt;
+			this.unscaledPos=unscaledPt;
 			this.index=i;
 		}
 		public void actionPerformed(ActionEvent e)
@@ -241,9 +241,9 @@ public class SCXMLEditorActions
 			
 			if (cg.isRelative()) {
 				mxCellState ps = gv.getState(cell.getParent());
-				pos=ps.relativizePointToThisState(scaledPos,gv.getScale(),gv.getTranslate());
+				pos=ps.relativizePointToThisState(unscaledPos,gv.getScale(),gv.getTranslate());
 			}
-			
+
 			List<mxPoint> ptsAlreadyThere = (cg.getPoints()==null)?new ArrayList<mxPoint>():new ArrayList<mxPoint>(cg.getPoints());
 			if (index>=ptsAlreadyThere.size())
 				ptsAlreadyThere.add(new mxPoint(pos.x, pos.y));

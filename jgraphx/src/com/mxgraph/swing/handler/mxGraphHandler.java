@@ -29,6 +29,7 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.util.Collection;
 import java.util.TooManyListenersException;
 
 import javax.swing.ImageIcon;
@@ -443,26 +444,36 @@ public class mxGraphHandler extends mxMouseControl implements
 		}
 	}
 
-	private mxCell highlightedCell=null;
+	private Collection<Object> highlightedCells=null;
+	private void cancelHighlight(Collection<Object> highlightedCells) {
+		if (highlightedCells!=null) {
+			mxIGraphModel model = graphComponent.getGraph().getModel();
+			for(Object hc:highlightedCells) {
+				model.highlightCell((mxCell)hc, null,null,null,null);
+			}
+		}
+	}
 	private void highlightEdgeUnderMouse(MouseEvent e) {
-		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);
+		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);		
 		mxIGraphModel model = graphComponent.getGraph().getModel();
 		if (cell!=null) {
 			if (cell.isEdge()) {
-				if (cell==highlightedCell) return;
+				Collection<Object> siblings = graphComponent.getSiblingsOfCell(cell);
+				if ((highlightedCells!=null) && (siblings.size()==highlightedCells.size()) && siblings.containsAll(highlightedCells)) return;
 				else {
+					for(Object s:siblings) {
+						Object parent = model.getParent(s);
+						model.add(parent,s,model.getChildCount(parent) - 1,true);
 
-					Object parent = model.getParent(cell);
-					model.add(parent, cell,model.getChildCount(parent) - 1,true);
-
-					model.highlightCell(cell, "#ff9b88","3","#ff0000","#ffffff");
-					model.highlightCell(highlightedCell, null,null,null,null);
-					highlightedCell=cell;
+						model.highlightCell((mxCell) s, "#ff9b88","3","#ff0000","#ffffff");
+						cancelHighlight(highlightedCells);
+					}
+					highlightedCells=siblings;
 				}
 			}
-		} else if (highlightedCell!=null) {
-			model.highlightCell(highlightedCell, null,null,null,null);
-			highlightedCell=cell;
+		} else if (highlightedCells!=null) {
+			cancelHighlight(highlightedCells);
+			highlightedCells=null;
 		}
 	}
 	/**

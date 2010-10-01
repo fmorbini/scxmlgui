@@ -3,6 +3,8 @@ package com.mxgraph.examples.swing.editor.scxml;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -11,6 +13,7 @@ import javax.swing.TransferHandler;
 import org.w3c.dom.Document;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
@@ -123,6 +126,27 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		return (validateGraph(graph.getModel().getRoot(),new Hashtable<Object, Object>(),warnings)==null);
 	}
 
+	@Override
+	public Collection<Object> getSiblingsOfCell(Object c) {
+		ArrayList<Object> ret=new ArrayList<Object>();
+		ret.add(c);
+		mxCell cell=(mxCell) c;
+		SCXMLEdge value=null;
+		ArrayList<String> targets=null;
+		if (cell.isEdge() && ((value=(SCXMLEdge)cell.getValue())!=null) && ((targets=value.getSCXMLTargets())!=null) &&
+				(targets.size()>1)) {
+			mxICell source = cell.getSource();
+			int numEdges=source.getEdgeCount();
+			for(int i=0;i<numEdges;i++) {
+				mxICell child = source.getEdgeAt(i);
+				if ((child!=c) && (child.getValue()==value)) {
+					ret.add(child);
+				}
+			}
+		}
+		return ret;
+	}
+	
 	@Override
 	protected TransferHandler createTransferHandler()
 	{
