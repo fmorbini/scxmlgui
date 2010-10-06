@@ -110,7 +110,7 @@ public class SCXMLGraph extends mxGraph
 				if (error!=null) return "On initial content of node "+nodeValue.getID()+" caused a parser error: "+error;
 				error=XMLUtils.isParsableXMLString(nodeValue.getDoneData());
 				if (error!=null) return "Done data of node "+nodeValue.getID()+" caused a parser error: "+error;
-				error=XMLUtils.isParsableXMLString(nodeValue.getDataModel());
+				error=XMLUtils.isParsableXMLString(nodeValue.getDatamodel());
 				if (error!=null) return "Data model of node "+nodeValue.getID()+" caused a parser error: "+error;
 				// check if the namespace has been included
 				String SCXMLid=nodeValue.getID();
@@ -123,7 +123,7 @@ public class SCXMLGraph extends mxGraph
 					mxIGraphModel model = getModel();
 					mxCell root = SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
 					SCXMLNode rootValue=(SCXMLNode) root.getValue();
-					String[] namespaces=rootValue.getNAMESPACE().split("\n");
+					String[] namespaces=rootValue.getNamespace().split("\n");
 
 					Pattern p = Pattern.compile("^[\\s]*xmlns:([^\\s=:]+)[\\s]*=.*$");
 					for(String ns:namespaces) {
@@ -392,12 +392,11 @@ public class SCXMLGraph extends mxGraph
 						// removing this edge may be causing.
 						mxCell source=(mxCell) cell.getSource();						
 						if (!cellSet.contains(source) && getAllOutgoingEdges(source).length>0) {
+							SCXMLChangeHandler.addStateOfNodeInCurrentEdit(source, model);
 							reOrderOutgoingEdges(source);
 						}
 					}				}
-
-				fireEvent(new mxEventObject(mxEvent.CELLS_REMOVED, "cells",
-						cells));
+				fireEvent(new mxEventObject(mxEvent.CELLS_REMOVED, "cells",cells));
 			}
 			finally
 			{
@@ -438,7 +437,9 @@ public class SCXMLGraph extends mxGraph
 			fireEvent(new mxEventObject(mxEvent.CONNECT_CELL, "edge", edge,
 					"terminal", terminal, "source", source, "previous",
 					previous));
+			SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) previous, model);
 			reOrderOutgoingEdges((mxCell) previous);
+			SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) terminal, model);
 			reOrderOutgoingEdges((mxCell) terminal);
 			updateConnectionOfSCXMLEdge((SCXMLEdge) ((mxCell)edge).getValue(),(source)?terminal:null,(source)?null:terminal,previous);
 		} catch (Exception e) {

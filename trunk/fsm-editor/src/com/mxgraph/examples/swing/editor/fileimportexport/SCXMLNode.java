@@ -7,8 +7,8 @@ import java.util.HashMap;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.undo.UndoManager;
 
+import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxGeometry;
 
@@ -118,10 +118,10 @@ public class SCXMLNode implements Serializable {
 		return !StringUtils.isEmptyString(getSRC());
 	}
 	// getter and setter for document and undomanager for the SRC field of a node
-	public UndoManager getSRCUndoManager() {
-		return (UndoManager) node.get(SRCUNDO);
+	public MyUndoManager getSRCUndoManager() {
+		return (MyUndoManager) node.get(SRCUNDO);
 	}
-	public UndoManager setSRCUndoManager(UndoManager um) {
+	public MyUndoManager setSRCUndoManager(MyUndoManager um) {
 		node.put(SRCUNDO,um);
 		return um;
 	}
@@ -132,9 +132,9 @@ public class SCXMLNode implements Serializable {
 		node.put(SRCDOC,doc);
 		return doc;
 	}
-	public String getNAMESPACE() {
+	public String getNamespace() {
 		String ret=null;
-		Document dmd = getNAMESPACEDoc();
+		Document dmd = getNamespaceDoc();
 		if (dmd!=null) {
 			try {
 				ret=dmd.getText(0, dmd.getLength());
@@ -146,27 +146,27 @@ public class SCXMLNode implements Serializable {
 			ret=(String)node.get(NAMESPACE);
 		return (ret==null)?"":ret;
 	}
-	public void setNAMESPACE(String namespace) {
+	public void setNamespace(String namespace) {
 		node.put(NAMESPACE, namespace);
 	}
 	// getter and setter for document and undomanager for the NAMESPACE field of a node
-	public UndoManager getNAMESPACEUndoManager() {
-		return (UndoManager) node.get(NAMESPACEUNDO);
+	public MyUndoManager getNamespaceUndoManager() {
+		return (MyUndoManager) node.get(NAMESPACEUNDO);
 	}
-	public UndoManager setNAMESPACEUndoManager(UndoManager um) {
+	public MyUndoManager setNamespaceUndoManager(MyUndoManager um) {
 		node.put(NAMESPACEUNDO,um);
 		return um;
 	}
-	public Document getNAMESPACEDoc() {
+	public Document getNamespaceDoc() {
 		return (Document) node.get(NAMESPACEDOC);
 	}
-	public Document setNAMESPACEDoc(Document doc) {
+	public Document setNamespaceDoc(Document doc) {
 		node.put(NAMESPACEDOC,doc);
 		return doc;
 	}
 	public String getID() {
 		String ret=null;
-		Document dmd = getSCXMLIDDoc();
+		Document dmd = getIDDoc();
 		if (dmd!=null) {
 			try {
 				ret=dmd.getText(0, dmd.getLength());
@@ -211,7 +211,7 @@ public class SCXMLNode implements Serializable {
 	}
 	public String getOnInitialEntry() {
 		String ret=null;
-		Document dmd = getInitialEntryDoc();
+		Document dmd = getOnInitialEntryDoc();
 		if (dmd!=null) {
 			try {
 				ret=dmd.getText(0, dmd.getLength());
@@ -237,7 +237,7 @@ public class SCXMLNode implements Serializable {
 	}
 	public String getDoneData() {
 		String ret=null;
-		Document dmd = getFinalDataDoc();
+		Document dmd = getDoneDataDoc();
 		if (dmd!=null) {
 			try {
 				ret=dmd.getText(0, dmd.getLength());
@@ -249,14 +249,14 @@ public class SCXMLNode implements Serializable {
 			ret=(String)node.get(DONEDATA);
 		return (ret==null)?"":ret;
 	}
-	public void setDataModel(String dm) {
+	public void setDatamodel(String dm) {
 		node.put(DATAMODEL,dm);
 	}
 	public void addToDataModel(String dm) {
-		String pdm=getDataModel();
+		String pdm=getDatamodel();
 		node.put(DATAMODEL,(pdm==null)?dm:pdm+dm);
 	}
-	public String getDataModel() {
+	public String getDatamodel() {
 		String ret=null;
 		Document dmd = getDatamodelDoc();
 		if (dmd!=null) {
@@ -298,6 +298,7 @@ public class SCXMLNode implements Serializable {
 	public Boolean isHistoryNode() {
 		return (node.get(HISTORY) instanceof HISTORYTYPE);
 	}
+	public HISTORYTYPE getHistoryType() {return (HISTORYTYPE) node.get(HISTORY); }
 	public Boolean isDeepHistory() {
 		return ((node.get(HISTORY)!=null) &&
 				(node.get(HISTORY).equals(HISTORYTYPE.DEEP)));
@@ -393,10 +394,10 @@ public class SCXMLNode implements Serializable {
 		return ret;
 	}
 	// getter and setter for document and undomanager for the datamodel editor
-	public UndoManager getDatamodelUndoManager() {
-		return (UndoManager) node.get(DATAMODELUNDO);
+	public MyUndoManager getDatamodelUndoManager() {
+		return (MyUndoManager) node.get(DATAMODELUNDO);
 	}
-	public UndoManager setDatamodelUndoManager(UndoManager um) {
+	public MyUndoManager setDatamodelUndoManager(MyUndoManager um) {
 		node.put(DATAMODELUNDO,um);
 		return um;
 	}
@@ -408,10 +409,10 @@ public class SCXMLNode implements Serializable {
 		return doc;
 	}
 	// getter and setter for document and undomanager for the onentry editor
-	public UndoManager getOnEntryUndoManager() {
-		return (UndoManager) node.get(ONENTRYUNDO);
+	public MyUndoManager getOnEntryUndoManager() {
+		return (MyUndoManager) node.get(ONENTRYUNDO);
 	}
-	public UndoManager setOnEntryUndoManager(UndoManager um) {
+	public MyUndoManager setOnEntryUndoManager(MyUndoManager um) {
 		node.put(ONENTRYUNDO,um);
 		return um;
 	}
@@ -423,10 +424,10 @@ public class SCXMLNode implements Serializable {
 		return doc;
 	}
 	// getter and setter for document and undomanager for the onexit editor
-	public UndoManager getOnExitUndoManager() {
-		return (UndoManager) node.get(ONEXITUNDO);
+	public MyUndoManager getOnExitUndoManager() {
+		return (MyUndoManager) node.get(ONEXITUNDO);
 	}
-	public UndoManager setOnExitUndoManager(UndoManager um) {
+	public MyUndoManager setOnExitUndoManager(MyUndoManager um) {
 		node.put(ONEXITUNDO,um);
 		return um;
 	}
@@ -438,47 +439,47 @@ public class SCXMLNode implements Serializable {
 		return doc;
 	}
 	// getter and setter for document and undomanager for the executable content for the the editor for the initial entry in an initial node
-	public UndoManager getInitialEntryUndoManager() {
-		return (UndoManager) node.get(ONINITIALENTRYUNDO);
+	public MyUndoManager getOnInitialEntryUndoManager() {
+		return (MyUndoManager) node.get(ONINITIALENTRYUNDO);
 	}
-	public UndoManager setInitialEntryUndoManager(UndoManager um) {
+	public MyUndoManager setOnInitialEntryUndoManager(MyUndoManager um) {
 		node.put(ONINITIALENTRYUNDO,um);
 		return um;
 	}
-	public Document getInitialEntryDoc() {
+	public Document getOnInitialEntryDoc() {
 		return (Document) node.get(ONINITIALENTRYDOC);
 	}
-	public Document setInitialEntryDoc(Document doc) {
+	public Document setOnInitialEntryDoc(Document doc) {
 		node.put(ONINITIALENTRYDOC,doc);
 		return doc;
 	}
 	// getter and setter for document and undomanager for the donedata field of a final node
-	public UndoManager getFinalUndoManager() {
-		return (UndoManager) node.get(FINALDONEDATAUNDO);
+	public MyUndoManager getDoneDataUndoManager() {
+		return (MyUndoManager) node.get(FINALDONEDATAUNDO);
 	}
-	public UndoManager setFinalUndoManager(UndoManager um) {
+	public MyUndoManager setDoneDataUndoManager(MyUndoManager um) {
 		node.put(FINALDONEDATAUNDO,um);
 		return um;
 	}
-	public Document getFinalDataDoc() {
+	public Document getDoneDataDoc() {
 		return (Document) node.get(FINALDONEDATADOC);
 	}
-	public Document setFinalDataDoc(Document doc) {
+	public Document setDoneDataDoc(Document doc) {
 		node.put(FINALDONEDATADOC,doc);
 		return doc;
 	}
 	// getter and setter for document and undomanager for the SCXML ID field of a node
-	public UndoManager getSCXMLIDUndoManager() {
-		return (UndoManager) node.get(SCXMLIDUNDO);
+	public MyUndoManager getIDUndoManager() {
+		return (MyUndoManager) node.get(SCXMLIDUNDO);
 	}
-	public UndoManager setSCXMLIDUndoManager(UndoManager um) {
+	public MyUndoManager setIDUndoManager(MyUndoManager um) {
 		node.put(SCXMLIDUNDO,um);
 		return um;
 	}
-	public Document getSCXMLIDDoc() {
+	public Document getIDDoc() {
 		return (Document) node.get(SCXMLIDDOC);
 	}
-	public Document setSCXMLIDDoc(Document doc) {
+	public Document setIDDoc(Document doc) {
 		node.put(SCXMLIDDOC,doc);
 		return doc;
 	}
@@ -490,12 +491,12 @@ public class SCXMLNode implements Serializable {
 		// real value of the property they represent (the document)
 		n.setDatamodelDoc(null);
 		n.setDatamodelUndoManager(null);
-		n.setDataModel(getDataModel());
-		n.setFinalDataDoc(null);
-		n.setFinalUndoManager(null);
+		n.setDatamodel(getDatamodel());
+		n.setDoneDataDoc(null);
+		n.setDoneDataUndoManager(null);
 		n.setDoneData(getDoneData());
-		n.setInitialEntryDoc(null);
-		n.setInitialEntryUndoManager(null);
+		n.setOnInitialEntryDoc(null);
+		n.setOnInitialEntryUndoManager(null);
 		n.setOnInitialEntry(getOnInitialEntry());
 		n.setOnEntryDoc(null);
 		n.setOnEntryUndoManager(null);
@@ -503,14 +504,14 @@ public class SCXMLNode implements Serializable {
 		n.setOnExitDoc(null);
 		n.setOnExitUndoManager(null);
 		n.setOnExit(getOnExit());
-		n.setSCXMLIDDoc(null);
-		n.setSCXMLIDUndoManager(null);
+		n.setIDDoc(null);
+		n.setIDUndoManager(null);
 		n.setSRC(getSRC());
 		n.setSRCDoc(null);
 		n.setSRCUndoManager(null);
-		n.setNAMESPACE(getNAMESPACE());
-		n.setNAMESPACEDoc(null);
-		n.setNAMESPACEUndoManager(null);
+		n.setNamespace(getNamespace());
+		n.setNamespaceDoc(null);
+		n.setNamespaceUndoManager(null);
 		n.setID(getID());
 		return n;
 	}

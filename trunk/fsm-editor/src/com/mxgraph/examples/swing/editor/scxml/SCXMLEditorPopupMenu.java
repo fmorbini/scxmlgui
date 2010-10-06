@@ -13,20 +13,18 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.AddCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditDatamodelAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeOrderAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNamespaceAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNodeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.RemoveCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsCluster;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsFinal;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsHistory;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsInitial;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsOutsourced;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContentInNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleWithTargetAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsHistory;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
@@ -88,7 +86,6 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 				mxICell parent = c.getParent();
 				boolean isHistoryNode=((SCXMLNode)(c.getValue())).isHistoryNode();
 				boolean isParallelNode=((SCXMLNode)(c.getValue())).isParallel();
-				boolean isInitialNode=((SCXMLNode)(c.getValue())).isInitial();
 				boolean isFinalNode=((SCXMLNode)(c.getValue())).isFinal();
 				boolean isClusterNode=((SCXMLNode)(c.getValue())).isClusterNode();
 				if (!inOutsourcedNode) {
@@ -97,11 +94,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					add(editor.bind(mxResources.get("addNode"), new AddAction(mousePt,c))).setEnabled(addNodeEnabled);
 					addSeparator();
 					mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
-					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,screenCoord))).setEnabled(c!=root);
-					if (!isHistoryNode) {
-						add(editor.bind(mxResources.get("editNamespace"), new EditNamespaceAction(c,screenCoord)));
-						add(editor.bind(mxResources.get("editDataModel"), new EditDatamodelAction(c,screenCoord)));
-					}
+					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,root,screenCoord)));
 					if (c!=root) {
 						if (!isHistoryNode) {
 							add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);

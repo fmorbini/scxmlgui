@@ -149,13 +149,13 @@ public class SCXMLSearch {
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
         doc.add(new Field("id", new StringReader(v.getID().toLowerCase())));
         doc.add(new Field("inc", new StringReader(v.getSRC().toLowerCase())));
-        doc.add(new Field("dm", new StringReader(v.getDataModel().toLowerCase())));
-        doc.add(new Field("ns", new StringReader(v.getNAMESPACE().toLowerCase())));
+        doc.add(new Field("dm", new StringReader(v.getDatamodel().toLowerCase())));
+        doc.add(new Field("ns", new StringReader(v.getNamespace().toLowerCase())));
         doc.add(new Field("entry", new StringReader(v.getOnEntry().toLowerCase())));
         doc.add(new Field("exit", new StringReader(v.getOnExit().toLowerCase())));
         doc.add(new Field("init", new StringReader(v.getOnInitialEntry().toLowerCase())));
         doc.add(new Field("dd", new StringReader(v.getDoneData().toLowerCase())));
-        doc.add(new Field("all", new StringReader((v.getID()+" "+v.getSRC()+" "+v.getDataModel()+" "+v.getNAMESPACE()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData()).toLowerCase())));
+        doc.add(new Field("all", new StringReader((v.getID()+" "+v.getSRC()+" "+v.getDatamodel()+" "+v.getNamespace()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData()).toLowerCase())));
 		return doc;
 	}
 	

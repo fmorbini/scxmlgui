@@ -1086,6 +1086,13 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 		fireEvent(new mxEventObject(mxEvent.EXECUTE, "change", change));
 		endUpdate();
 	}
+	public void addChangeToCurrentEdit(mxUndoableChange change) throws Exception {
+		if (getUpdateLevel()>0) {
+			currentEdit.add(change);
+		} else {
+			throw new Exception("Error: attempting to add a change outside a model update session.");
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see com.mxgraph.model.mxIGraphModel#beginUpdate()
@@ -2402,12 +2409,4 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 			setStyleCovert(node, style);
 		}
 	}
-
-	@Override
-	public void notUndoableEditHappened() {
-		mxUndoableEdit tmp = new mxUndoableEdit(this);
-		tmp.setUndoable(false);
-		fireEvent(new mxEventObject(mxEvent.UNDO, "edit", tmp));
-	}
-
 }

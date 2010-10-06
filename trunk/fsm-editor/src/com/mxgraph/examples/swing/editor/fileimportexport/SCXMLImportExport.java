@@ -189,7 +189,7 @@ public class SCXMLImportExport implements IImportExport {
 					namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
 				} else if (name.equals("src")) node.setSRC(a.getNodeValue());
 			}
-			if (!StringUtils.isEmptyString(namespace)) node.setNAMESPACE(namespace);
+			if (!StringUtils.isEmptyString(namespace)) node.setNamespace(namespace);
 		} else {
 			node.setAsHistory(historyType);
 		}
@@ -502,7 +502,7 @@ public class SCXMLImportExport implements IImportExport {
 		SCXMLNode value=(SCXMLNode) n.getValue();
 		src=StringUtils.removeLeadingAndTrailingSpaces(value.getSRC());
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
-		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDataModel());
+		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
 		onentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnEntry());
 		onexit=StringUtils.removeLeadingAndTrailingSpaces(value.getOnExit());
@@ -528,7 +528,7 @@ public class SCXMLImportExport implements IImportExport {
 			ret="<state";
 			close="</state>";
 		}
-		String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNAMESPACE().replace("\n", " "));
+		String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNamespace().replace("\n", " "));
 		if (!StringUtils.isEmptyString(namespace))
 			ret+=" "+namespace;
 		if (!StringUtils.isEmptyString(src))

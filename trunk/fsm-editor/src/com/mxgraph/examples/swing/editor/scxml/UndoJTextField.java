@@ -18,7 +18,7 @@ public class UndoJTextField extends JTextField {
 
 	private static final long serialVersionUID = -5128499045192330958L;
 	private Document doc;
-	private UndoManager undo;
+	private MyUndoManager undo;
 	private UndoAction undoAction;
 	private RedoAction redoAction;
 	private static final String newline = "\n";
@@ -34,7 +34,7 @@ public class UndoJTextField extends JTextField {
     {
         return false;
     }
-	public UndoJTextField(String initText,Document d, UndoManager u) {
+	public UndoJTextField(String initText,Document d, MyUndoManager u) {
 		super();
 		doc=d;
 		undo=u;
@@ -48,7 +48,7 @@ public class UndoJTextField extends JTextField {
 			setDocument(doc);
 		}
 		if (undo==null)
-			undo=new UndoManager();
+			undo=new MyUndoManager();
 
 		undoAction=new UndoAction();
 		redoAction=new RedoAction();
@@ -93,8 +93,9 @@ public class UndoJTextField extends JTextField {
 		
 		public void actionPerformed(ActionEvent e) {
 			try {
-				undo.undo();
+				if (undo.canUndo()) undo.undo();
 			} catch (CannotUndoException ex) {
+				ex.printStackTrace();
 			}
 			updateUndoState();
 			redoAction.updateRedoState();
@@ -122,8 +123,9 @@ public class UndoJTextField extends JTextField {
 
 		public void actionPerformed(ActionEvent e) {
 			try {
-				undo.redo();
+				if (undo.canRedo()) undo.redo();
 			} catch (CannotRedoException ex) {
+				ex.printStackTrace();
 			}
 			updateRedoState();
 			undoAction.updateUndoState();
@@ -134,7 +136,7 @@ public class UndoJTextField extends JTextField {
 		}
 	}
 
-	public UndoManager getUndoManager() {
+	public MyUndoManager getUndoManager() {
 		return undo;
 	}
 	public UndoAction getUndoAction() {
