@@ -390,6 +390,11 @@ public class mxGraphSelectionModel extends mxEventSource
 					"removed", removed));
 		}
 
+		@Override
+		public String getInfoString() {
+			return this.getClass().getSimpleName();
+		}
+
 	}
 
 }

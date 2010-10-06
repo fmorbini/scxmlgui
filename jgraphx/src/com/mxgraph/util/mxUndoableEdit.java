@@ -26,6 +26,7 @@ public class mxUndoableEdit
 		 * Undoes or redoes the change depending on its undo state.
 		 */
 		void execute();
+		String getInfoString();
 
 	}
 
@@ -160,6 +161,7 @@ public class mxUndoableEdit
 			for (int i = count - 1; i >= 0; i--)
 			{
 				mxUndoableChange change = (mxUndoableChange) changes.get(i);
+				//System.out.println(change.getInfoString());
 				change.execute();
 			}
 
@@ -182,6 +184,7 @@ public class mxUndoableEdit
 			for (int i = 0; i < count; i++)
 			{
 				mxUndoableChange change = (mxUndoableChange) changes.get(i);
+				//System.out.println(change.getInfoString());
 				change.execute();
 			}
 

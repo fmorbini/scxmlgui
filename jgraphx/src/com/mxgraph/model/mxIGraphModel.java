@@ -62,6 +62,10 @@ public interface mxIGraphModel
 		 */
 		public abstract void execute();
 
+		@Override
+		public String getInfoString() {
+			return this.getClass().getSimpleName();
+		}
 	}
 
 	/**
@@ -311,6 +315,12 @@ public interface mxIGraphModel
 	 */
 	void beginUpdate();
 
+	/**add a change element to the current edit
+	 * @param change the change to be added
+	 * @throws Exception when called not within a beginUpdate session.
+	 */
+	void addChangeToCurrentEdit(mxUndoableChange change) throws Exception;
+	
 	/**
 	 * Decrements the updateLevel by one and fires a notification event if the
 	 * updateLevel reaches 0.
@@ -341,6 +351,4 @@ public interface mxIGraphModel
 	void highlightCell(mxCell node, String strokeColor, String width);
 	void highlightCell(mxCell node, String strokeColor, String width,String fontColor);
 	void highlightCell(mxCell node, String strokeColor, String width,String fontColor,String labelBackground);
-	void notUndoableEditHappened();
-
 }

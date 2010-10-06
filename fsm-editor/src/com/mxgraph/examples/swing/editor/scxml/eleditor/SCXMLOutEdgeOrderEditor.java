@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -37,7 +38,12 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGraphModel;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxResources;
+import com.mxgraph.util.mxUndoableEdit;
+import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
 public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionListener, WindowListener, ActionListener {
 	private JList list;
@@ -279,7 +285,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 		// TODO Auto-generated method stub
 		
 	}
-
+	private final List<mxUndoableChange> changes=new ArrayList<mxUndoableEdit.mxUndoableChange>();
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String cmd=e.getActionCommand();
@@ -315,7 +321,8 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 
 			setModified(true);
 		} else if (cmd.equals("ok")) {			
-			graph.getModel().notUndoableEditHappened();
+			mxGraphModel model=(mxGraphModel) graph.getModel();
+			model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
 			exitTool();
 		} else if (cmd.equals("cancel")) {
 			if (!getModified())
@@ -332,7 +339,8 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 					exitTool();
 					break;
 				case JOptionPane.YES_OPTION:
-					graph.getModel().notUndoableEditHappened();
+					mxGraphModel model=(mxGraphModel) graph.getModel();
+					model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
 					exitTool();
 					break;
 				}

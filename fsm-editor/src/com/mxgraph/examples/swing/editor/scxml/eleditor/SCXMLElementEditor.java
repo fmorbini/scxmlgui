@@ -8,8 +8,11 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -23,15 +26,17 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
 
-import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.queryParser.ParseException;
-
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGraphModel;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxResources;
+import com.mxgraph.util.mxUndoableEdit;
+import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
 public class SCXMLElementEditor extends JDialog {
 
@@ -138,17 +143,21 @@ public class SCXMLElementEditor extends JDialog {
 	// any time a change is made to the document, the scxml editor "modified" flag is set 
     protected class DocumentChangeListener implements DocumentListener {
     	private SCXMLGraphEditor editor;
+    	private final List<mxUndoableChange> changes=new ArrayList<mxUndoableEdit.mxUndoableChange>();
         public DocumentChangeListener(SCXMLGraphEditor e) {
     		this.editor=e;
 		}
 		public void insertUpdate(DocumentEvent e) {
-			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
+			mxGraphModel model = (mxGraphModel) editor.getGraphComponent().getGraph().getModel();
+			model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
         }
         public void removeUpdate(DocumentEvent e) {
-			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
+			mxGraphModel model = (mxGraphModel) editor.getGraphComponent().getGraph().getModel();
+			model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
         }
         public void changedUpdate(DocumentEvent e) {
-			editor.getGraphComponent().getGraph().getModel().notUndoableEditHappened();
+			mxGraphModel model = (mxGraphModel) editor.getGraphComponent().getGraph().getModel();
+			model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
         }
     }
 

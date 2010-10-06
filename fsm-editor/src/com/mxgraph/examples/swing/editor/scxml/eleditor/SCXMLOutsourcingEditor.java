@@ -18,18 +18,17 @@ import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.text.Document;
-import javax.swing.undo.UndoManager;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
+import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
-import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.model.mxCell;
 
 public class SCXMLOutsourcingEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 5819456701848767139L;
 	private UndoJTextField undoTextField;
-	private UndoManager undo;
+	private MyUndoManager undo;
 	private Document doc;
     private SCXMLNode node;
     

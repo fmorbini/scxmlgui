@@ -1748,6 +1748,11 @@ public class mxGraphView extends mxEventSource
 					view.currentRoot, "previous", previous));
 		}
 
+		@Override
+		public String getInfoString() {
+			return this.getClass().getSimpleName();
+		}
+
 	}
 
 }

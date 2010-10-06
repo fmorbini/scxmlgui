@@ -9,74 +9,42 @@
  */
 package com.mxgraph.examples.swing.editor.scxml;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.print.PageFormat;
-import java.awt.print.Paper;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JColorChooser;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 
-import org.w3c.dom.Document;
-
-import com.mxgraph.analysis.mxDistanceCostFunction;
-import com.mxgraph.analysis.mxGraphAnalysis;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.AskToSaveIfRequired;
-import com.mxgraph.examples.swing.editor.EditorRuler;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLDatamodelEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNamespaceEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
-import com.mxgraph.io.mxCodec;
 import com.mxgraph.layout.mxClusterLayout;
-import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.swing.handler.mxConnectionHandler;
-import com.mxgraph.swing.util.mxGraphActions;
-import com.mxgraph.swing.view.mxCellEditor;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxResources;
-import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxUndoManager;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
@@ -138,50 +106,6 @@ public class SCXMLEditorActions
 			mxCell p = (mxCell) graph.insertVertex(parent, value.getInternalID(), value, pos.x-parentX, pos.y-parentY, 100, 100, value.getStyle());
 		}
 	}
-	public static class EditDatamodelAction extends AbstractAction
-	{
-		private Point pos;
-		private mxCell node;
-		
-		public EditDatamodelAction(mxCell c, Point pt) {
-			pos=pt;
-			node=c;
-		}
-		public void actionPerformed(ActionEvent e)
-		{
-			SCXMLGraphEditor editor = getEditor(e);
-			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
-			Object nodeValue = node.getValue();
-			if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
-				try {
-					new SCXMLDatamodelEditor(frame,editor,node,(SCXMLNode) nodeValue,pos);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-	}
-	public static class EditNamespaceAction extends AbstractAction
-	{
-		private Point pos;
-		private mxCell node;
-
-		public EditNamespaceAction(mxCell c, Point pt) {
-			pos=pt;
-			node=c;
-		}
-		public void actionPerformed(ActionEvent e)
-		{
-			SCXMLGraphEditor editor = getEditor(e);
-			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
-			if (node!=null) {
-				Object nodeValue = node.getValue();
-				if ((nodeValue!=null) && (nodeValue instanceof SCXMLNode)) {
-					new SCXMLNamespaceEditor(frame,editor,node,(SCXMLNode) nodeValue,pos);
-				}
-			}
-		}
-	}
 	public static class EditEdgeOrderAction extends AbstractAction
 	{
 		private mxCell source;
@@ -195,7 +119,14 @@ public class SCXMLEditorActions
 		{
 			SCXMLGraphEditor editor = getEditor(e);
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);			
-			new SCXMLOutEdgeOrderEditor(frame,source,editor,pos);
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(source, model);
+				new SCXMLOutEdgeOrderEditor(frame,source,editor,pos);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -213,7 +144,14 @@ public class SCXMLEditorActions
 			assert(cell.isEdge());
 			SCXMLGraphEditor editor = getEditor(e);
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
-			new SCXMLEdgeEditor(frame,cell,(SCXMLEdge)cell.getValue(),editor,pos);
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfEdgeInCurrentEdit(cell, model);
+				new SCXMLEdgeEditor(frame,cell,(SCXMLEdge)cell.getValue(),editor,pos);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -295,9 +233,11 @@ public class SCXMLEditorActions
 	{
 		private Point pos;
 		private mxCell cell;
+		private mxCell rootOfGraph;
 		
-		public EditNodeAction(mxCell c, Point pt) {
+		public EditNodeAction(mxCell c, mxCell root, Point pt) {
 			cell=c;
+			rootOfGraph=root;
 			pos=pt;
 		}
 		public void actionPerformed(ActionEvent e)
@@ -305,7 +245,14 @@ public class SCXMLEditorActions
 			assert(cell.isVertex());
 			SCXMLGraphEditor editor = getEditor(e);
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(editor);
-			new SCXMLNodeEditor(frame,cell,(SCXMLNode)cell.getValue(),editor,pos);
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				new SCXMLNodeEditor(frame,cell,rootOfGraph,(SCXMLNode)cell.getValue(),editor,pos);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 	
@@ -322,8 +269,16 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
-			n.setInitial(!n.isInitial());
-			graph.setCellStyle(n.getStyle(),cell);
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				n.setInitial(!n.isInitial());
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -340,8 +295,16 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isEdge());
 			SCXMLEdge n=(SCXMLEdge) cell.getValue();
-			n.setCycleWithTarget(!n.isCycleWithTarget());
-			graph.setCellStyle(n.getStyle(),cell);
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfEdgeInCurrentEdit(cell, model);
+				n.setCycleWithTarget(!n.isCycleWithTarget());
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -358,8 +321,16 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
-			n.setFinal(!n.isFinal());
-			graph.setCellStyle(n.getStyle(),cell);
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				n.setFinal(!n.isFinal());
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -376,8 +347,16 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
-			n.setCluster(!n.isClusterNode());
-			graph.setCellStyle(n.getStyle(),cell);
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				n.setCluster(!n.isClusterNode());
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -398,18 +377,25 @@ public class SCXMLEditorActions
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
 			
-			//edit outsourcing
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
 			try {
-				new SCXMLOutsourcingEditor(frame,editor,cell,n,pos);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				//edit outsourcing
+				try {
+					new SCXMLOutsourcingEditor(frame,editor,cell,n,pos);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 
-			if (n.isOutsourcedNode()) {
-				graph.addToOutsourced(cell);
+				if (n.isOutsourcedNode()) {
+					graph.addToOutsourced(cell);
+				}
+				else graph.removeFromOutsourced(cell);
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
 			}
-			else graph.removeFromOutsourced(cell);
-			graph.setCellStyle(n.getStyle(),cell);
 		}
 	}
 	
@@ -426,8 +412,16 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
-			n.setParallel(!n.isParallel());
-			graph.setCellStyle(n.getStyle(),cell);
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				n.setParallel(!n.isParallel());
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
+			}
 		}
 	}
 
@@ -446,18 +440,26 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			assert(cell.isVertex());
 			SCXMLNode n=(SCXMLNode) cell.getValue();
-			if (deep) {
-				if (n.isDeepHistory())
-					n.setAsHistory(null);
-				else
-					n.setAsHistory(SCXMLNode.HISTORYTYPE.DEEP);
-			} else {
-				if (n.isShallowHistory())
-					n.setAsHistory(null);
-				else
-					n.setAsHistory(SCXMLNode.HISTORYTYPE.SHALLOW);
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				if (deep) {
+					if (n.isDeepHistory())
+						n.setAsHistory(null);
+					else
+						n.setAsHistory(SCXMLNode.HISTORYTYPE.DEEP);
+				} else {
+					if (n.isShallowHistory())
+						n.setAsHistory(null);
+					else
+						n.setAsHistory(SCXMLNode.HISTORYTYPE.SHALLOW);
+				}
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
 			}
-			graph.setCellStyle(n.getStyle(),cell);
 		}
 	}
 	/**
@@ -579,13 +581,7 @@ public class SCXMLEditorActions
 				{
 					modifiedObjects=editor.getUndoManager().redo();
 				}
-				if (modifiedObjects!=null) {
-					for (Object o:modifiedObjects) {
-						if ((o instanceof mxCell) && ((mxCell)o).isEdge()) {
-							editor.getGraphComponent().getGraph().reOrderOutgoingEdges((mxCell) ((mxCell)o).getSource());
-						}
-					}
-				}
+
 				editor.updateUndoRedoActionState();
 			}
 		}
@@ -618,7 +614,7 @@ public class SCXMLEditorActions
 					SCXMLNode value=(SCXMLNode)editor.getCurrentFileIO().buildNodeValue();
 					((SCXMLImportExport)editor.getCurrentFileIO()).setRoot(value);
 					value.setID(SCXMLNode.ROOTID);
-					value.setNAMESPACE("xmlns=\"http://www.w3.org/2005/07/scxml\"");
+					value.setNamespace("xmlns=\"http://www.w3.org/2005/07/scxml\"");
 					value.setCluster(true);
 					mxCell p = (mxCell) graph.insertVertex(null, value.getInternalID(), value, 0, 0, gc.getSize().width, gc.getSize().height, value.getStyle());
 					p.setValue(value);

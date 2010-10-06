@@ -5,16 +5,14 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.undo.UndoManager;
 
+import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.util.mxPoint;
 
 public class SCXMLEdge implements Serializable {
@@ -175,10 +173,10 @@ public class SCXMLEdge implements Serializable {
 		edge.put(EDGEEXE, e);
 	}
 	// getter and setter for document and undomanager for editing event 
-	public UndoManager getEventUndoManager() {
-		return (UndoManager) edge.get(EVENTUNDO);
+	public MyUndoManager getEventUndoManager() {
+		return (MyUndoManager) edge.get(EVENTUNDO);
 	}
-	public UndoManager setEventUndoManager(UndoManager um) {
+	public MyUndoManager setEventUndoManager(MyUndoManager um) {
 		edge.put(EVENTUNDO,um);
 		return um;
 	}
@@ -190,10 +188,10 @@ public class SCXMLEdge implements Serializable {
 		return doc;
 	}
 	// getter and setter for document and undomanager for editing condition 
-	public UndoManager getConditionUndoManager() {
-		return (UndoManager) edge.get(CONDITIONUNDO);
+	public MyUndoManager getConditionUndoManager() {
+		return (MyUndoManager) edge.get(CONDITIONUNDO);
 	}
-	public UndoManager setConditionUndoManager(UndoManager um) {
+	public MyUndoManager setConditionUndoManager(MyUndoManager um) {
 		edge.put(CONDITIONUNDO,um);
 		return um;
 	}
@@ -205,10 +203,10 @@ public class SCXMLEdge implements Serializable {
 		return doc;
 	}
 	// getter and setter for document and undomanager for editing executable content 
-	public UndoManager getExeUndoManager() {
-		return (UndoManager) edge.get(EXEUNDO);
+	public MyUndoManager getExeUndoManager() {
+		return (MyUndoManager) edge.get(EXEUNDO);
 	}
-	public UndoManager setExeUndoManager(UndoManager um) {
+	public MyUndoManager setExeUndoManager(MyUndoManager um) {
 		edge.put(EXEUNDO,um);
 		return um;
 	}

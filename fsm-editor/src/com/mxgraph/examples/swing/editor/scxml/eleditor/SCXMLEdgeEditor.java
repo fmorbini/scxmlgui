@@ -18,10 +18,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.Document;
-import javax.swing.undo.UndoManager;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
+import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.model.mxCell;
@@ -30,13 +30,10 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
 	private static final long serialVersionUID = 3563719047023065063L;
 	
-	private static final String undoAction="Undo"; 
-	private static final String redoAction="Redo"; 
-	
 	private UndoJTextField eventTextPane;
 	private UndoJTextField conditionTextPane;
 	private UndoJTextPane exeTextPane;
-    private UndoManager undo;
+    private MyUndoManager undo;
     private Document doc;
     private SCXMLEdge edge;
     private JMenu editMenu;
