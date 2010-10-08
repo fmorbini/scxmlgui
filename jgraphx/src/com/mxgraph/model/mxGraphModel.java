@@ -1366,6 +1366,14 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 
 		return result.toArray();
 	}
+	
+	public boolean isLoop(mxIGraphModel model, Object edge) {
+		if (model.isEdge(edge)) {
+			Object source = model.getTerminal(edge, true);
+			Object target = model.getTerminal(edge, false);
+			return source==target;
+		} else return false;
+	}
 
 	/**
 	 * Returns all edges from the given source to the given target.
