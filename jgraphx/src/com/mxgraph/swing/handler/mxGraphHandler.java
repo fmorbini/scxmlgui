@@ -454,7 +454,7 @@ public class mxGraphHandler extends mxMouseControl implements
 		}
 	}
 	private void highlightEdgeUnderMouse(MouseEvent e) {
-		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);		
+		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);
 		mxIGraphModel model = graphComponent.getGraph().getModel();
 		if (cell!=null) {
 			if (cell.isEdge()) {

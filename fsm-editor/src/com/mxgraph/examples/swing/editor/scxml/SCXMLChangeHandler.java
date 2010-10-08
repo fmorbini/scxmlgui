@@ -287,35 +287,39 @@ public class SCXMLChangeHandler {
 		
 	
 	public static void addStateOfNodeInCurrentEdit(mxCell cell,mxIGraphModel model) {
-		SCXMLNode node=(SCXMLNode) cell.getValue();		
-		try {
-			model.addChangeToCurrentEdit(instance.new SCXMLParallelStateProperty(node));
-			model.addChangeToCurrentEdit(instance.new SCXMLClusterStateProperty(node));
-			model.addChangeToCurrentEdit(instance.new SCXMLInitialStateProperty(node));
-			model.addChangeToCurrentEdit(instance.new SCXMLFinalStateProperty(node));
-			model.addChangeToCurrentEdit(instance.new SCXMLOrderOutgoingEdgesStateProperty(cell));
-			model.addChangeToCurrentEdit(instance.new SCXMLHistoryStateProperty(node));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getSRC,getSRCDoc,getSRCUndoManager,setSRC,setSRCDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getID,getIDDoc,getIDUndoManager,setID,setIDDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnEntry,getOnEntryDoc,getOnEntryUndoManager,setOnEntry,setOnEntryDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnExit,getOnExitDoc,getOnExitUndoManager,setOnExit,setOnExitDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnInitialEntry,getOnInitialEntryDoc,getOnInitialEntryUndoManager,setOnInitialEntry,setOnInitialEntryDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getDoneData,getDoneDataDoc,getDoneDataUndoManager,setDoneData,setDoneDataDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getDatamodel,getDatamodelDoc,getDatamodelUndoManager,setDatamodel,setDatamodelDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getNamespace,getNamespaceDoc,getNamespaceUndoManager,setNamespace,setNamespaceDoc));
-		} catch (Exception e) {
-			e.printStackTrace();
+		if ((cell!=null) && (cell.getValue()!=null)) {
+			SCXMLNode node=(SCXMLNode) cell.getValue();	
+			try {
+				model.addChangeToCurrentEdit(instance.new SCXMLParallelStateProperty(node));
+				model.addChangeToCurrentEdit(instance.new SCXMLClusterStateProperty(node));
+				model.addChangeToCurrentEdit(instance.new SCXMLInitialStateProperty(node));
+				model.addChangeToCurrentEdit(instance.new SCXMLFinalStateProperty(node));
+				model.addChangeToCurrentEdit(instance.new SCXMLOrderOutgoingEdgesStateProperty(cell));
+				model.addChangeToCurrentEdit(instance.new SCXMLHistoryStateProperty(node));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getSRC,getSRCDoc,getSRCUndoManager,setSRC,setSRCDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getID,getIDDoc,getIDUndoManager,setID,setIDDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnEntry,getOnEntryDoc,getOnEntryUndoManager,setOnEntry,setOnEntryDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnExit,getOnExitDoc,getOnExitUndoManager,setOnExit,setOnExitDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnInitialEntry,getOnInitialEntryDoc,getOnInitialEntryUndoManager,setOnInitialEntry,setOnInitialEntryDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getDoneData,getDoneDataDoc,getDoneDataUndoManager,setDoneData,setDoneDataDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getDatamodel,getDatamodelDoc,getDatamodelUndoManager,setDatamodel,setDatamodelDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getNamespace,getNamespaceDoc,getNamespaceUndoManager,setNamespace,setNamespaceDoc));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	public static void addStateOfEdgeInCurrentEdit(mxCell cell,mxIGraphModel model) {
-		SCXMLEdge edge=(SCXMLEdge) cell.getValue();
-		try {
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getEvent,getEventDoc,getEventUndoManager,setEvent,setEventDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getCondition,getConditionDoc,getConditionUndoManager,setCondition,setConditionDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getExe,getExeDoc,getExeUndoManager,setExe,setExeDoc));
-			model.addChangeToCurrentEdit(instance.new SCXMLWithTargetEdgeProperty(edge));
-		} catch (Exception e) {
-			e.printStackTrace();
+		if ((cell!=null) && (cell.getValue()!=null)) {
+			SCXMLEdge edge=(SCXMLEdge) cell.getValue();
+			try {
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getEvent,getEventDoc,getEventUndoManager,setEvent,setEventDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getCondition,getConditionDoc,getConditionUndoManager,setCondition,setConditionDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getExe,getExeDoc,getExeUndoManager,setExe,setExeDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLWithTargetEdgeProperty(edge));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

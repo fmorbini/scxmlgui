@@ -36,6 +36,7 @@ import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
+import com.mxgraph.examples.swing.editor.utils.IOUtils;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
@@ -720,6 +721,8 @@ public class SCXMLEditorActions
 								editor.updateUndoRedoActionState();
 								editor.menuBar.updateRecentlyOpenedListWithFile(fc.getSelectedFile());
 								editor.getSCXMLSearchTool().buildIndex();
+								
+								//IOUtils.copyFile(fc.getSelectedFile(), new File(editor.getBackupFileName()));
 							} catch (Exception ex) {
 								ex.printStackTrace();
 								JOptionPane.showMessageDialog(editor.getGraphComponent(),

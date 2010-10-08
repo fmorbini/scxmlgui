@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
@@ -27,6 +29,7 @@ import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
+import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
@@ -431,7 +434,19 @@ public class SCXMLGraph extends mxGraph
 	{
 		model.beginUpdate();
 		try
-		{			
+		{
+			if (source) {
+				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
+				Collection<Object> siblings = gc.getSiblingsOfCell(edge);
+				if (siblings.size()>1) {
+					JOptionPane.showMessageDialog(editor,
+            				"Detaching edge from multitarget edge.",
+            				mxResources.get("warning"),
+            				JOptionPane.WARNING_MESSAGE);
+					Object newValue = ((SCXMLImportExport)getEditor().getCurrentFileIO()).cloneValue(((mxCell)edge).getValue());
+					((mxCell)edge).setValue(newValue);
+				}
+			}
 			Object previous = model.getTerminal(edge, source);			
 			cellConnected(edge, terminal, source);
 			fireEvent(new mxEventObject(mxEvent.CONNECT_CELL, "edge", edge,

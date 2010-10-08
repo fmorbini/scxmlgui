@@ -1849,6 +1849,10 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		return null;
 	}
 
+	/**returns the list of siblings of the given cell including the given cell. By default each cell has no siblings.
+	 * @param c
+	 * @return
+	 */
 	public Collection<Object> getSiblingsOfCell(Object c) {
 		ArrayList<Object> ret = new ArrayList<Object>();
 		ret.add(c);
