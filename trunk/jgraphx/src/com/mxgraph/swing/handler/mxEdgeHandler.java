@@ -709,7 +709,9 @@ public class mxEdgeHandler extends mxCellHandler
 		{
 			if (isClone)
 			{
+				boolean isCloningSingleEdgeMovingTarget=(!isSource && isClone && (terminal!=graph.getModel().getTerminal(edge, isSource)));
 				Object clone = graph.cloneCells(new Object[] { edge })[0];
+				if (isCloningSingleEdgeMovingTarget) graph.askToUseThisEdgeValue(clone,model.getValue(edge));
 
 				Object parent = model.getParent(edge);
 				graph.addCells(new Object[] { clone }, parent);

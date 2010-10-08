@@ -45,5 +45,4 @@ public class HTMLImportExport implements IImportExport {
 	public Object buildEdgeValue() {
 		return null;
 	}
-
 }

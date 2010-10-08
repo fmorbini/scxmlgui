@@ -457,6 +457,7 @@ public class mxGraphHandler extends mxMouseControl implements
 		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);
 		mxIGraphModel model = graphComponent.getGraph().getModel();
 		if (cell!=null) {
+			//System.out.println(cell);
 			if (cell.isEdge()) {
 				Collection<Object> siblings = graphComponent.getSiblingsOfCell(cell);
 				if ((highlightedCells!=null) && (siblings.size()==highlightedCells.size()) && siblings.containsAll(highlightedCells)) return;

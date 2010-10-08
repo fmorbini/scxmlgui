@@ -230,6 +230,7 @@ public class SCXMLEdge implements Serializable {
 		e.setExeDoc(null);
 		e.setExeUndoManager(null);
 		e.setExe(getExe());
+		e.setSCXMLTargets(new ArrayList<String>(getSCXMLTargets()));
 		return e;
 	}
 	public void setOrder(int o) {

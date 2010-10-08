@@ -45,5 +45,4 @@ public class VMLImportExport implements IImportExport {
 	public Object cloneValue(Object value) {
 		return null;
 	}
-
 }
