@@ -45,5 +45,4 @@ public class SVGImportExport implements IImportExport {
 	public Object cloneValue(Object value) {
 		return null;
 	}
-
 }

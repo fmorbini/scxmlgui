@@ -205,6 +205,7 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public Object insertEdge(Object parent, String id, Object value,Object source, Object target)
 	{
+		//System.out.println("insert edge: parent:"+parent+" value:"+value+" source:"+source+" target:"+target);
 		try {
 			int size=getAllOutgoingEdges(source).length;
 			if (value==null) {
@@ -220,6 +221,16 @@ public class SCXMLGraph extends mxGraph
 			e.printStackTrace();
 		}
 		return null;
+	}
+	@Override
+	public void askToUseThisEdgeValue(Object clone, Object otherEdgeValue) {
+		int answer = JOptionPane.showConfirmDialog(editor, "Create new edge as an additional target for cloned edge?");
+		if (answer==JOptionPane.YES_OPTION) {
+			model.setValue(clone, otherEdgeValue);
+		} else {
+			SCXMLEdge value=(SCXMLEdge) model.getValue(clone);
+			value.getSCXMLTargets().clear();
+		}
 	}
 	@Override
 	public Object[] cloneCells(Object[] cells, boolean allowInvalidEdges,Map<Object,Object> mapping)
@@ -398,7 +409,16 @@ public class SCXMLGraph extends mxGraph
 							SCXMLChangeHandler.addStateOfNodeInCurrentEdit(source, model);
 							reOrderOutgoingEdges(source);
 						}
-					}				}
+						// if deleted edge was part of multitarget edge, remove the target pointed by this deleted edge.
+						Collection<Object> siblings = getEditor().getGraphComponent().getSiblingsOfCell(cell);
+						if (siblings.size()>1) {
+							SCXMLEdge edgeValue = (SCXMLEdge) cell.getValue();
+							SCXMLNode targetNode=(SCXMLNode) cell.getTarget().getValue();
+							assert(edgeValue.getSCXMLTargets().contains(targetNode.getID()));
+							edgeValue.getSCXMLTargets().remove(targetNode.getID());
+						}
+					}
+				}
 				fireEvent(new mxEventObject(mxEvent.CELLS_REMOVED, "cells",cells));
 			}
 			finally
@@ -432,30 +452,43 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public Object connectCell(Object edge, Object terminal, boolean source)
 	{
+		//System.out.println("connect cell: edge:"+edge+" terminal:"+terminal+" source:"+source);
 		model.beginUpdate();
 		try
 		{
-			if (source) {
-				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
-				Collection<Object> siblings = gc.getSiblingsOfCell(edge);
-				if (siblings.size()>1) {
+			SCXMLChangeHandler.addStateOfEdgeInCurrentEdit((mxCell) edge, model);
+			SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
+			Collection<Object> siblings = gc.getSiblingsOfCell(edge);
+			if (siblings.size()>1) {
+				if (source) {
 					JOptionPane.showMessageDialog(editor,
-            				"Detaching edge from multitarget edge.",
-            				mxResources.get("warning"),
-            				JOptionPane.WARNING_MESSAGE);
-					Object newValue = ((SCXMLImportExport)getEditor().getCurrentFileIO()).cloneValue(((mxCell)edge).getValue());
+							"Detaching edge from multitarget edge.",
+							mxResources.get("warning"),
+							JOptionPane.WARNING_MESSAGE);
+					SCXMLEdge oldValue=(SCXMLEdge) ((mxCell)edge).getValue();
+					SCXMLEdge newValue = (SCXMLEdge) ((SCXMLImportExport)getEditor().getCurrentFileIO()).cloneValue(oldValue);
 					((mxCell)edge).setValue(newValue);
+					SCXMLNode targetNodeValue=(SCXMLNode) model.getValue(model.getTerminal(edge, false));
+					oldValue.getSCXMLTargets().remove(targetNodeValue.getID());
+					ArrayList<String> targets = newValue.getSCXMLTargets();
+					targets.clear();
+					targets.add(targetNodeValue.getID());
 				}
 			}
+			// connect edge to new terminal (source or target)
 			Object previous = model.getTerminal(edge, source);			
 			cellConnected(edge, terminal, source);
 			fireEvent(new mxEventObject(mxEvent.CONNECT_CELL, "edge", edge,
 					"terminal", terminal, "source", source, "previous",
 					previous));
-			SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) previous, model);
-			reOrderOutgoingEdges((mxCell) previous);
-			SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) terminal, model);
-			reOrderOutgoingEdges((mxCell) terminal);
+			// update the order of edges in case we move the source of an edge from one node to another.
+			if (source) {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) previous, model);
+				reOrderOutgoingEdges((mxCell) previous);
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) terminal, model);
+				reOrderOutgoingEdges((mxCell) terminal);
+			}
+			// Synchronize the source and targets stored in the value of the modified edge with the graphical properties here updated.
 			updateConnectionOfSCXMLEdge((SCXMLEdge) ((mxCell)edge).getValue(),(source)?terminal:null,(source)?null:terminal,previous);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -466,6 +499,7 @@ public class SCXMLGraph extends mxGraph
 		return edge;
 	}
 	private void updateConnectionOfSCXMLEdge(SCXMLEdge value, Object source, Object target, Object previous) throws Exception {
+		//System.out.println("update connectiopn: value:"+value+" source:"+source+" target:"+target+" previous:"+previous);
 		String sourceID=null,targetID=null;
 		if (source!=null) {
 			sourceID=((SCXMLNode)((mxCell)source).getValue()).getID();
@@ -474,20 +508,15 @@ public class SCXMLGraph extends mxGraph
 		if (target!=null) {
 			targetID=((SCXMLNode)((mxCell)target).getValue()).getID();			
 			if (previous==null) {
-				// add a target to an edge
-				if (!value.getSCXMLTargets().contains(targetID))
-					value.getSCXMLTargets().add(targetID);
-			} else if (value.getSCXMLTargets().size()>1) {
-					// edge with multiple targets. Duplicate the adge value, set the targets of the duplicated
-					// edge (newValue) to be a list containing only the new target.
-					// remove previous from the targets list of the original value
-					String previousTargetID=((SCXMLNode)((mxCell)previous).getValue()).getID();
-					SCXMLEdge newValue=value.cloneEdge();
-					newValue.setSCXMLTargets(new ArrayList<String>(Arrays.asList(new String[]{targetID})));
-					if (!value.getSCXMLTargets().contains(previousTargetID)) throw new Exception("updateConnectionOfSCXMLEdge: Error while moving target of edge with multiple targets. Old target not found.");
-					value.getSCXMLTargets().remove(previousTargetID);
+				// add a target to an edge (new edge without any previous target)
+				ArrayList<String> targets = value.getSCXMLTargets();
+				if (!targets.contains(targetID)) value.getSCXMLTargets().add(targetID);
 			} else {
-				value.getSCXMLTargets().set(0, targetID);
+				// update an edge belonging to a multitarget edge 
+				String previousTargetID=((SCXMLNode)((mxCell)previous).getValue()).getID();
+				if (!value.getSCXMLTargets().contains(previousTargetID)) throw new Exception("updateConnectionOfSCXMLEdge: Error while moving target of edge with multiple targets. Old target not found.");
+				value.getSCXMLTargets().remove(previousTargetID);
+				value.getSCXMLTargets().add(targetID);
 			}
 		}
 	}

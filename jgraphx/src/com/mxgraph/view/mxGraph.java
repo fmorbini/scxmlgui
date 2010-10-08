@@ -7638,6 +7638,9 @@ public class mxGraph extends mxEventSource
 		changeSupport.removePropertyChangeListener(propertyName, listener);
 	}
 
+	public void askToUseThisEdgeValue(Object clone, Object otherEdgeValue) {
+	}
+
 	/**
 	 * Prints the version number on the console. 
 	 */
@@ -7645,5 +7648,4 @@ public class mxGraph extends mxEventSource
 	{
 		System.out.println("mxGraph version \"" + VERSION + "\"");
 	}
-
 }

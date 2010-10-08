@@ -52,5 +52,4 @@ public class MXEImportExport implements IImportExport {
 	public Object cloneValue(Object value) {
 		return value;
 	}
-
 }

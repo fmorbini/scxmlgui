@@ -139,11 +139,13 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		if (cell.isEdge() && ((value=(SCXMLEdge)cell.getValue())!=null) && ((targets=value.getSCXMLTargets())!=null) &&
 				(targets.size()>1)) {
 			mxICell source = cell.getSource();
-			int numEdges=source.getEdgeCount();
-			for(int i=0;i<numEdges;i++) {
-				mxICell child = source.getEdgeAt(i);
-				if ((child!=c) && (child.getValue()==value)) {
-					ret.add(child);
+			if (source!=null) {
+				int numEdges=source.getEdgeCount();
+				for(int i=0;i<numEdges;i++) {
+					mxICell child = source.getEdgeAt(i);
+					if ((child!=c) && (child.getValue()==value)) {
+						ret.add(child);
+					}
 				}
 			}
 		}
