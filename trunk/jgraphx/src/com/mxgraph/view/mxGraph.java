@@ -1996,10 +1996,10 @@ public class mxGraph extends mxEventSource
 
 				if (geo != null)
 				{
-					Object[] children = getChildCells(cells[i]);
+					Object[] children = getChildCellsNoCycles(cells[i]);					
 
 					if (children != null && children.length > 0)
-					{
+					{						
 						mxRectangle childBounds = getBoundingBoxFromGeometryConsideringEdgesRelativeToThisState(children,parentState);
 
 						if (childBounds.getWidth() > 0
@@ -6275,7 +6275,7 @@ public class mxGraph extends mxEventSource
 	 */
 	public Object[] getChildVertices(Object parent)
 	{
-		return getChildCells(parent, true, false);
+		return getChildCells(parent, true, false,true);
 	}
 
 	/**
@@ -6285,7 +6285,7 @@ public class mxGraph extends mxEventSource
 	 */
 	public Object[] getChildEdges(Object parent)
 	{
-		return getChildCells(parent, false, true);
+		return getChildCells(parent, false, true,true);
 	}
 
 	/**
@@ -6295,7 +6295,12 @@ public class mxGraph extends mxEventSource
 	 */
 	public Object[] getChildCells(Object parent)
 	{
-		return getChildCells(parent, false, false);
+		return getChildCells(parent, false, false,true);
+	}
+	
+	public Object[] getChildCellsNoCycles(Object parent)
+	{
+		return getChildCells(parent, false, false,false);
 	}
 
 	/**
@@ -6307,7 +6312,7 @@ public class mxGraph extends mxEventSource
 	 * @param edges Specifies if child edges should be returned.
 	 * @return Returns the child vertices and edges.
 	 */
-	public Object[] getChildCells(Object parent, boolean vertices, boolean edges)
+	public Object[] getChildCells(Object parent, boolean vertices, boolean edges,boolean includeCycles)
 	{
 		Object[] cells = mxGraphModel.getChildCells(model, parent, vertices,
 				edges);
@@ -6316,7 +6321,7 @@ public class mxGraph extends mxEventSource
 		// Filters out the non-visible child cells
 		for (int i = 0; i < cells.length; i++)
 		{
-			if (isCellVisible(cells[i]))
+			if (isCellVisible(cells[i]) && (includeCycles || !model.isEdge(cells[i]) || !model.isLoop(model, cells[i])))
 			{
 				result.add(cells[i]);
 			}
