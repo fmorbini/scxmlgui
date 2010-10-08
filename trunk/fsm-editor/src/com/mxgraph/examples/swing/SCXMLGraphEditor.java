@@ -15,6 +15,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,11 +77,11 @@ import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUndoManager;
 import com.mxgraph.util.mxUndoableEdit;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxMultiplicity;
@@ -760,6 +761,14 @@ public class SCXMLGraphEditor extends JPanel
 			updateTitle();
 		}
 		setLastModifiedDate();
+	}
+	public String getBackupFileName() {
+		if (currentFile!=null) {
+			Calendar now=Calendar.getInstance();
+			String dateString=(now.get(Calendar.MONTH)+1)+"-"+now.get(Calendar.DAY_OF_MONTH)+"-"+now.get(Calendar.HOUR)+"."+now.get(Calendar.MINUTE)+"."+now.get(Calendar.SECOND);
+			String parentDir=currentFile.getParent();
+			return (StringUtils.isEmptyString(parentDir)?"":parentDir+File.separatorChar)+"#"+dateString+"#"+currentFile.getName();
+		} else return null;
 	}
 	
 	public void setLastModifiedDate() {

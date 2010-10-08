@@ -126,6 +126,9 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		return (validateGraph(graph.getModel().getRoot(),new Hashtable<Object, Object>(),warnings)==null);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.mxgraph.swing.mxGraphComponent#getSiblingsOfCell(java.lang.Object)
+	 */
 	@Override
 	public Collection<Object> getSiblingsOfCell(Object c) {
 		ArrayList<Object> ret=new ArrayList<Object>();
