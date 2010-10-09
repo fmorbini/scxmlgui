@@ -86,6 +86,7 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 	public Object[] importCells(Object[] cells, double dx, double dy,
 			Object target, Point location)
 	{
+		/*
 		if (target == null && cells.length == 1 && location != null)
 		{
 			target = getCellAt(location.x, location.y);
@@ -106,7 +107,16 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 				}
 			}
 		}
-
+		 */
+		mxIGraphModel model = getGraph().getModel();
+		for (Object cell:cells) {
+			Object value=model.getValue(cell);
+			if (value instanceof SCXMLNode) {
+				model.setStyle(cell, ((SCXMLNode)value).getStyle());
+			} else if (value instanceof SCXMLEdge) {
+				model.setStyle(cell, ((SCXMLEdge)value).getStyle());
+			}
+		}
 		return super.importCells(cells, dx, dy, target, location);
 	}
 

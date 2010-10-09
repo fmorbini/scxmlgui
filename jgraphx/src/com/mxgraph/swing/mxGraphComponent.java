@@ -4230,4 +4230,10 @@ public class mxGraphComponent extends JScrollPane implements Printable
 
 	}
 
+	public Rectangle getScreenArea() {
+		Point origin = getLocationOnScreen();
+		Dimension dimension = getSize();
+		return new Rectangle(origin.x, origin.y, dimension.width, dimension.height);
+	}
+
 }

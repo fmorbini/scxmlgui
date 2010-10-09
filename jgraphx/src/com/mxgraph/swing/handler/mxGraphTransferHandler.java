@@ -6,12 +6,15 @@ package com.mxgraph.swing.handler;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import com.mxgraph.swing.mxGraphComponent;
@@ -329,6 +332,15 @@ public class mxGraphTransferHandler extends TransferHandler
 
 			Object target = null;
 
+			if (location==null) {
+				Point pointer = MouseInfo.getPointerInfo().getLocation();
+				Rectangle graphScreenLocation=graphComponent.getScreenArea();
+				Point mousePoint = new Point(pointer.x-graphScreenLocation.x, pointer.y-graphScreenLocation.y);
+				if (graphScreenLocation.contains(pointer)) {
+					setLocation(graphComponent.mouseCoordToGraphMouseCoord(mousePoint));
+				}
+			}
+			
 			// Finds the target cell at the given location and checks if the
 			// target is not already the parent of the first imported cell
 			if (location != null)
