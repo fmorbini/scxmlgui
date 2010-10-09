@@ -224,7 +224,7 @@ public class SCXMLGraph extends mxGraph
 	}
 	@Override
 	public void askToUseThisEdgeValue(Object clone, Object otherEdgeValue) {
-		int answer = JOptionPane.showConfirmDialog(editor, "Create new edge as an additional target for cloned edge?");
+		int answer = JOptionPane.showConfirmDialog(editor, mxResources.get("createAsNewTargetForMultitarget"),mxResources.get("edgeCreationOption"),JOptionPane.YES_NO_OPTION);
 		if (answer==JOptionPane.YES_OPTION) {
 			model.setValue(clone, otherEdgeValue);
 		} else {
