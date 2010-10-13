@@ -587,10 +587,11 @@ public class SCXMLGraph extends mxGraph
 				tip += "</html>";
 			} else if (((mxCell)cell).isVertex()) {
 				SCXMLNode v=(SCXMLNode) ((mxCell)cell).getValue();
-				String src=v.getSRC();
+				String src=v.getOutsourcedLocation();
 				if (!StringUtils.isEmptyString(src)) {
 					tip="<html>";
 					tip+="src: "+src+"<br>";
+					tip+="type: "+v.getSRC().getType()+"<br>";
 					tip += "</html>";
 				} else {
 					tip="<html>";

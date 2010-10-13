@@ -2027,24 +2027,26 @@ public class mxUtils
 	 * @throws IOException 
 	 * @throws SAXException 
 	 */
-	public static Document parse(String xml) throws ParserConfigurationException, SAXException, IOException
+	public static Document parseXMLString(String xml,boolean xincludeAware,boolean namespaceAware) throws ParserConfigurationException, SAXException, IOException
 	{
-		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-
-		return docBuilder.parse(new InputSource(new StringReader(xml)));
+		return parseXML(new InputSource(new StringReader(xml)),xincludeAware,namespaceAware);
 	}
-	public static Document parseFile(String filename) throws ParserConfigurationException, SAXException, IOException {
-		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-		docBuilderFactory.setXIncludeAware(true);
-		docBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-
-		File file=new File(filename);
+	public static Document parseXMLFile(File file,boolean xincludeAware,boolean namespaceAware) throws ParserConfigurationException, SAXException, IOException {
 		InputSource i = new InputSource(new FileInputStream(file));
 		i.setSystemId(file.toURI().toURL().toExternalForm());
-		
-		return docBuilder.parse(i);
+	
+		return parseXML(i,xincludeAware,namespaceAware);
+	}
+	public static Document parseXMLFile(String filename,boolean xincludeAware,boolean namespaceAware) throws ParserConfigurationException, SAXException, IOException {
+		File file=new File(filename);
+		return parseXMLFile(file, xincludeAware, namespaceAware);
+	}
+	private static Document parseXML(InputSource inp,boolean xincludeAware,boolean namespaceAware) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+		docBuilderFactory.setXIncludeAware(xincludeAware);
+		docBuilderFactory.setNamespaceAware(namespaceAware);
+		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+		return docBuilder.parse(inp);
 	}
 	/**
 	 * Evaluates a Java expression as a class member using mxCodecRegistry.

@@ -60,7 +60,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 	private SCXMLGraphComponent gc;
 	private SCXMLGraph graph;
 	
-	private static final String title="Edge order editor";
+	private static final String title=mxResources.get("titleEdgeOrderEditor");
 	
 	public SCXMLOutEdgeOrderEditor(JFrame parent,mxCell source, SCXMLGraphEditor e, Point pos) {
 		super(parent,true);

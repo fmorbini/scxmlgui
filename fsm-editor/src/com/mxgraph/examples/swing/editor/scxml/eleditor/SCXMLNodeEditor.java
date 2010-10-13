@@ -25,6 +25,7 @@ import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.util.mxResources;
 
 public class SCXMLNodeEditor extends SCXMLElementEditor {
 
@@ -44,7 +45,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 
 	public SCXMLNodeEditor(JFrame parent,mxCell nn,mxCell rootOfGraph, SCXMLNode n, SCXMLGraphEditor editor, Point pos) {
 		super(parent,editor,nn);
-		setTitle("SCXML node editor");
+		setTitle(mxResources.get("titleNodeEditor"));
 		setLocation(pos);
 
 		node=n;
@@ -83,7 +84,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				onentryTextPane.setMargin(new Insets(5,5,5,5));
 				scrollPane = new JScrollPane(onentryTextPane);
 				scrollPane.setPreferredSize(new Dimension(400, 200));
-				tabbedPane.addTab("On entry", scrollPane);
+				tabbedPane.addTab(mxResources.get("onEntryTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 
 				undo=node.getOnExitUndoManager();
@@ -97,7 +98,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				onexitTextPane.setMargin(new Insets(5,5,5,5));
 				scrollPane = new JScrollPane(onexitTextPane);
 				scrollPane.setPreferredSize(new Dimension(400, 200));
-				tabbedPane.addTab("On exit", scrollPane);
+				tabbedPane.addTab(mxResources.get("onExitTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 			}
 
@@ -113,7 +114,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				finalTextPane.setMargin(new Insets(5,5,5,5));
 				scrollPane = new JScrollPane(finalTextPane);
 				scrollPane.setPreferredSize(new Dimension(400, 200));
-				tabbedPane.addTab("Final event data", scrollPane);
+				tabbedPane.addTab(mxResources.get("finalDataTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 			}
 			if (node.isInitial()) {
@@ -128,7 +129,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				initialTextPane.setMargin(new Insets(5,5,5,5));
 				scrollPane = new JScrollPane(initialTextPane);
 				scrollPane.setPreferredSize(new Dimension(400, 200));
-				tabbedPane.addTab("On initial entry", scrollPane);
+				tabbedPane.addTab(mxResources.get("initialEntryTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 			}
 		}
@@ -144,7 +145,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	        datamodelPane.setMargin(new Insets(5,5,5,5));
 	        JScrollPane scrollPane = new JScrollPane(datamodelPane);
 	        scrollPane.setPreferredSize(new Dimension(400, 200));
-	        tabbedPane.addTab("Datamodel", scrollPane);
+	        tabbedPane.addTab(mxResources.get("datamodelTAB"), scrollPane);
 	        doc.addDocumentListener(changeListener);
 	        
 	        undo=node.getNamespaceUndoManager();
@@ -158,7 +159,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	        namespacePane.setMargin(new Insets(5,5,5,5));
 	        scrollPane = new JScrollPane(namespacePane);
 	        scrollPane.setPreferredSize(new Dimension(400, 200));
-	        tabbedPane.addTab("Namespaces", scrollPane);
+	        tabbedPane.addTab(mxResources.get("namespaceTAB"), scrollPane);
 	        doc.addDocumentListener(changeListener);
         }
 

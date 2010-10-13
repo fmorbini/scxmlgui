@@ -97,25 +97,65 @@ public class SCXMLNode implements Serializable {
 	public void setInternalID(String internalID) {
 		node.put(INTERNALID, internalID);
 	}
-	public String getSRC() {
-		String ret=null;
+	public enum OUTSOURCETYPE {SRC,XINC};
+	public class OutSource {
+		private OUTSOURCETYPE type;
+		private String location;
+		public OutSource(OUTSOURCETYPE t,String l) {
+			setLocation(l);
+			setType(t);
+		}
+		public OUTSOURCETYPE getType() {
+			return type;
+		}
+		public String getLocation() {
+			return location;
+		}
+		public void setLocation(String location) {
+			this.location = location;
+		}
+		public void setType(OUTSOURCETYPE type) {
+			this.type = type;
+		}
+	}
+	public OutSource getSRC() {
+		OutSource ret=null;
+		ret=(OutSource)node.get(SRC);
+		if (ret==null) node.put(SRC,ret=new OutSource(OUTSOURCETYPE.SRC, ""));
 		Document dmd = getSRCDoc();
 		if (dmd!=null) {
 			try {
-				ret=dmd.getText(0, dmd.getLength());
-			} catch (BadLocationException e) {
-				ret=(String)node.get(SRC);
-			}
+				String location=dmd.getText(0, dmd.getLength());
+				ret.setLocation(location);
+			} catch (BadLocationException e) {}
 		}
-		else
-			ret=(String)node.get(SRC);
-		return (ret==null)?"":ret;
+		return ret;
 	}
-	public void setSRC(String src) {
+	public void setSRC(String src,OUTSOURCETYPE type) {
+		node.put(SRC, new OutSource(type, src));
+	}
+	public void setSRC(OutSource src) {
 		node.put(SRC, src);
 	}
+	public String getOutsourcedLocation() {
+		return (isOutsourcedNode())?StringUtils.removeLeadingAndTrailingSpaces(getSRC().getLocation()):"";
+	}
+	public void setOutsourcedLocation(String location) {
+		if (isOutsourcedNode())
+			getSRC().setLocation(location);
+		else setSRC(location, OUTSOURCETYPE.SRC);
+	}
 	public boolean isOutsourcedNode() {
-		return !StringUtils.isEmptyString(getSRC());
+		OutSource src = getSRC();
+		return (src!=null) && (!StringUtils.isEmptyString(src.getLocation()));
+	}
+	public boolean isOutsourcedNodeUsingSRC() {
+		OutSource src = getSRC();
+		return (src!=null) && src.getType()==OUTSOURCETYPE.SRC;
+	}
+	public boolean isOutsourcedNodeUsingXInclude() {
+		OutSource src = getSRC();
+		return (src!=null) && src.getType()==OUTSOURCETYPE.XINC;
 	}
 	// getter and setter for document and undomanager for the SRC field of a node
 	public MyUndoManager getSRCUndoManager() {

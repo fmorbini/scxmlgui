@@ -68,7 +68,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		this.model=gc.getGraph().getModel();
 		
 		addWindowListener(this);
-		JPanel contentPane = new JPanel(new BorderLayout());
+		JPanel contentPane = new JPanel();
 		populateGUI(contentPane);
 		contentPane.setOpaque(true); //content panes must be opaque
 		
@@ -126,6 +126,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
         c.fill = GridBagConstraints.HORIZONTAL;
         contentPane.add(searchAndHelp, c);
 
+        c=new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         c.weighty = 1.0;
