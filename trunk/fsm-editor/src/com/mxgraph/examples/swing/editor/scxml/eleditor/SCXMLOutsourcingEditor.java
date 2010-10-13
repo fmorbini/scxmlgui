@@ -26,8 +26,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.text.Document;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
-import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.model.mxCell;

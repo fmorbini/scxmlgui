@@ -36,7 +36,6 @@ import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
-import com.mxgraph.examples.swing.editor.utils.IOUtils;
 import com.mxgraph.layout.mxClusterLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
@@ -45,7 +44,6 @@ import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxResources;
-import com.mxgraph.util.mxUndoManager;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
@@ -499,8 +497,17 @@ public class SCXMLEditorActions
 			{
 				ImportExportPicker fileIO=editor.getIOPicker();
 				JFileChooser fc=null;
+				
+				boolean isSaveAs=showDialog || (editor.getCurrentFile() == null);
 
-				if (showDialog || (editor.getCurrentFile() == null))
+				IImportExport fie = editor.getCurrentFileIO();
+				if (fie instanceof SCXMLImportExport) {
+					SCXMLImportExport scxmlFie=(SCXMLImportExport) fie;
+					if (scxmlFie.hasUnhandledXIncludeUsage() && (scxmlFie.displayWarningAboutUnhandledXIncludeUsage(editor, true)!=JOptionPane.YES_OPTION)) {
+						return;
+					}
+				}
+				if (isSaveAs)
 				{
 					String dirOfLastOpenedFile=editor.menuBar.getLastOpenedDir();
 					String wd=(lastDir!=null)?lastDir:((editor.getCurrentFile()!=null)?editor.getCurrentFile().getParent():((dirOfLastOpenedFile!=null)?dirOfLastOpenedFile:System.getProperty("user.dir")));
@@ -676,65 +683,71 @@ public class SCXMLEditorActions
 		 */
 		protected String lastDir;
 		protected File file;
+		private boolean inNewWindow;
 
-		public OpenAction(File file) {
+		public OpenAction(File file,boolean inNewWindow) {
 			this.file=file;
+			this.inNewWindow=inNewWindow;
 		}
-		
-		public OpenAction() {
-			this.file=null;
-		}
-				
+		public OpenAction() {this(null,false);}
+		public OpenAction(File file) {this(file,false);}
+		public OpenAction(boolean inNewWindow) {this(null,inNewWindow);}
+
 		/**
 		 * 
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
-			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraphEditor editor=null;
+			if (inNewWindow) {
+				editor=SCXMLGraphEditor.startEditor();
+			} else {
+				editor = getEditor(e);
+			}
 			if (editor != null) {
 				editor.setStatus(SCXMLGraphEditor.POPULATING);
 				if (AskToSaveIfRequired.check(editor)) {
-					SCXMLGraph graph = editor.getGraphComponent().getGraph();
-					if (graph != null) {
-						SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);
-
-						ImportExportPicker fileIO=editor.getIOPicker();
-
-						if (fc.getSelectedFile()!=null)
-						{
-							lastDir = fc.getSelectedFile().getParent();
-							try
-							{
-								editor.clearDisplayOutsourcedContentStatus();
-								IImportExport fie=fileIO.read(fc,editor);
-
-								// apply layout to each cluster from the leaves up:
-								if (fc.ignoreStoredLayout()) {
-									mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-									clusterLayout.execute(graph.getDefaultParent());
-								}
-								
-								editor.setModified(false);
-								editor.setCurrentFile(fc.getSelectedFile(),fie);
-								editor.getUndoManager().clear();
-								editor.getUndoManager().resetUnmodifiedState();
-								editor.updateUndoRedoActionState();
-								editor.menuBar.updateRecentlyOpenedListWithFile(fc.getSelectedFile());
-								editor.getSCXMLSearchTool().buildIndex();
-								
-								//IOUtils.copyFile(fc.getSelectedFile(), new File(editor.getBackupFileName()));
-							} catch (Exception ex) {
-								ex.printStackTrace();
-								JOptionPane.showMessageDialog(editor.getGraphComponent(),
-										ex.toString(),
-										mxResources.get("error"),
-										JOptionPane.ERROR_MESSAGE);
-							}
-
-						}
-					}
+					SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);
+					openSelectedFile(fc,editor);
 				}
 				editor.setStatus(SCXMLGraphEditor.EDITING);
+			}
+		}
+
+		private void openSelectedFile(SCXMLFileChoser fc,SCXMLGraphEditor editor) {
+			File selectedFile = fc.getSelectedFile();
+			SCXMLGraph graph = editor.getGraphComponent().getGraph();
+			if ((graph != null) && (selectedFile!=null)) {
+				ImportExportPicker fileIO=editor.getIOPicker();
+				lastDir = selectedFile.getParent();
+				try
+				{
+					editor.clearDisplayOutsourcedContentStatus();
+					IImportExport fie=fileIO.read(fc,editor);
+
+					// apply layout to each cluster from the leaves up:
+					if (fc.ignoreStoredLayout()) {
+						mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+						clusterLayout.execute(graph.getDefaultParent());
+					}
+					
+					editor.setModified(false);
+					editor.setCurrentFile(fc.getSelectedFile(),fie);
+					editor.getUndoManager().clear();
+					editor.getUndoManager().resetUnmodifiedState();
+					editor.updateUndoRedoActionState();
+					editor.menuBar.updateRecentlyOpenedListWithFile(selectedFile);
+					editor.getSCXMLSearchTool().buildIndex();
+					
+					//IOUtils.copyFile(fc.getSelectedFile(), new File(editor.getBackupFileName()));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					JOptionPane.showMessageDialog(editor.getGraphComponent(),
+							ex.toString(),
+							mxResources.get("error"),
+							JOptionPane.ERROR_MESSAGE);
+				}
+
 			}
 		}
 	}
@@ -769,9 +782,14 @@ public class SCXMLEditorActions
 	public static class ToggleDisplayOutsourcedContentInNode extends AbstractAction {
 
 		private mxCell node=null;
+		private boolean refresh;
 		
 		public ToggleDisplayOutsourcedContentInNode(mxCell n) {
+			this(n, false);
+		}
+		public ToggleDisplayOutsourcedContentInNode(mxCell n,boolean refresh) {
 			this.node=n;
+			this.refresh=refresh;
 		}
 		
 		@Override
@@ -780,16 +798,25 @@ public class SCXMLEditorActions
 			SCXMLGraph graph = editor.getGraphComponent().getGraph();
 			try {
 				editor.getUndoManager().setCollectionMode(true);
-				if (node.getChildCount()>0) {
-					// disable
-					editor.displayOutsourcedContentInNode(node,graph,false);
+				if (refresh) {
+					if (node.getChildCount()>0) {
+						editor.displayOutsourcedContentInNode(node,graph,false,false);
+						editor.displayOutsourcedContentInNode(node,graph,true,true);
+					}
 				} else {
-					// enable
-					editor.displayOutsourcedContentInNode(node,graph,true);
+					if (node.getChildCount()>0) {
+						// disable
+						editor.displayOutsourcedContentInNode(node,graph,false,false);
+					} else {
+						// enable
+						editor.displayOutsourcedContentInNode(node,graph,true,false);
+					}
 				}
-				// apply layout to each cluster from the leaves up:
-				mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-				clusterLayout.execute(graph.getDefaultParent());
+				if (editor.preferences.getBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT, true)) {
+					// apply layout to each cluster from the leaves up:
+					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+					clusterLayout.execute(graph.getDefaultParent());
+				}
 				editor.setDisplayOfOutsourcedContentSelected(false);
 			} catch (Exception e1) {
 				e1.printStackTrace();
@@ -813,9 +840,11 @@ public class SCXMLEditorActions
 					// enable
 					editor.displayOutsourcedContent(graph, true,true);
 				}
-				// apply layout to each cluster from the leaves up:
-				mxClusterLayout clusterLayout=new mxClusterLayout(graph);
-				clusterLayout.execute(graph.getDefaultParent());
+				if (editor.preferences.getBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT, true)) {
+					// apply layout to each cluster from the leaves up:
+					mxClusterLayout clusterLayout=new mxClusterLayout(graph);
+					clusterLayout.execute(graph.getDefaultParent());
+				}
 				editor.setDisplayOfOutsourcedContentSelected(!editor.isDisplayOfOutsourcedContentSelected());
 			} catch (Exception e1) {
 				e1.printStackTrace();
