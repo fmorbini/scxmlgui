@@ -10,13 +10,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.OUTSOURCETYPE;
+import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
@@ -28,6 +30,7 @@ import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraphView;
@@ -186,7 +189,7 @@ public class SCXMLImportExport implements IImportExport {
 				String name=a.getNodeName().toLowerCase();
 				if (name.startsWith("xmlns")) {
 					namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
-				} else if (name.equals("src")) node.setSRC(a.getNodeValue(),OUTSOURCETYPE.SRC);
+				} else if (name.equals("src")) node.addToOutsourcingChildren(new OutSource(OUTSOURCETYPE.SRC,a.getNodeValue()));
 			}
 			if (!StringUtils.isEmptyString(namespace)) node.setNamespace(namespace);
 		} else {
@@ -215,6 +218,7 @@ public class SCXMLImportExport implements IImportExport {
 					root = handleSCXMLNode(n,pn,isParallel,isHistory);
 					// continue recursion on the children of this node
 					scanChildrenOf(n, root,pwd);
+					processOutsourcingChildrenForNode(root, pwd);
 				} else if (name.equals("transition")) {
 					addEdge(processEdge(pn,n));
 				} else if (name.equals("final")) {
@@ -258,15 +262,14 @@ public class SCXMLImportExport implements IImportExport {
 				} else if (name.equals("datamodel")) {
 					String content=collectAllChildrenInString(n);
 					pn.addToDataModel(content);
-				} else if (name.equals("include") || name.endsWith(":include")) {
+				} else if (name.equals("xi:include")) {
 					NamedNodeMap att = n.getAttributes();
 					Node nodeLocation = att.getNamedItem("href");
 					String location=(nodeLocation==null)?"":StringUtils.cleanupSpaces(nodeLocation.getNodeValue());
 					location=StringUtils.cleanupSpaces(location);
 					System.out.println(location);
 					if (!StringUtils.isEmptyString(location)) {
-						String fileLocation=new File(pwd, location).getAbsolutePath();
-						root=readSCXMLFileContentAndAttachAsChildrenOf(fileLocation, pn);
+						pn.addToOutsourcingChildren(new OutSource(OUTSOURCETYPE.XINC,location));
 					}
 				}
 				break;
@@ -278,6 +281,27 @@ public class SCXMLImportExport implements IImportExport {
 		return root;
 	}
 
+	private void processOutsourcingChildrenForNode(SCXMLNode node,File pwd) throws Exception {
+		if (node!=null) {
+			HashSet<OutSource> outSources = node.getOutsourcingChildren();
+			if (outSources!=null) {
+				if ((outSources.size()==1) && !node.isClusterNode()) {
+					node.setSRC(outSources.iterator().next());
+				} else {
+					for(OutSource source:outSources) {
+						if (source.getType()==OUTSOURCETYPE.XINC) {
+							saveProblematicNodes.add(node);
+							String fileLocation=new File(pwd, source.getLocation()).getAbsolutePath();
+							readSCXMLFileContentAndAttachAsChildrenOf(fileLocation, node);
+						} else {
+							throw new Exception("Bug: multiple SRC inclusions.");
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	private HashMap<String, Object> processEdge(SCXMLNode pn, Node n) throws Exception {
 		HashMap<String,Object> ret=new HashMap<String, Object>();
 		//event, cond and target attributes
@@ -353,11 +377,26 @@ public class SCXMLImportExport implements IImportExport {
 
 		graph.setDefaultParent(gr);
 	}
+	private ArrayList<SCXMLNode> saveProblematicNodes=new ArrayList<SCXMLNode>();
+	public boolean hasUnhandledXIncludeUsage() { return !saveProblematicNodes.isEmpty(); }
+	public int displayWarningAboutUnhandledXIncludeUsage(SCXMLGraphEditor editor,boolean asQuestion) {
+		String message=mxResources.get("xincludeSaveProblem")+"\n";
+		for (SCXMLNode n:saveProblematicNodes) message+=n.getID()+"\n";
+		if (asQuestion) {
+			String[] options={mxResources.get("continue"),mxResources.get("cancel")};
+			return JOptionPane.showOptionDialog(editor,message,"XInclude problem",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE,null,options,options[1]);
+		}
+		else JOptionPane.showMessageDialog(editor,message,"XInclude problem",JOptionPane.WARNING_MESSAGE);
+		return -1;
+	}
 	@Override
 	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws Exception {
 		SCXMLGraphComponent gc=(SCXMLGraphComponent)graphComponent;
+		SCXMLGraphEditor editor = gc.getGraph().getEditor();
+		saveProblematicNodes.clear();
 		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
 		readInGraph(graph,from,((SCXMLFileChoser)fc).ignoreStoredLayout());
+		if (hasUnhandledXIncludeUsage()) displayWarningAboutUnhandledXIncludeUsage(editor,false);
 	}
 
 	private HashMap<String,mxCell> internalID2cell=new HashMap<String, mxCell>();
@@ -381,16 +420,19 @@ public class SCXMLImportExport implements IImportExport {
 			// then go through all nodes and make sure all have been created
 			for (String internalID:internalID2nodes.keySet()) {
 				SCXMLNode n = internalID2nodes.get(internalID);				
-				mxCell cn=addOrUpdateNode(graph,n,null);
+				mxCell cn=internalID2cell.get(internalID);
+				//mxCell cn=addOrUpdateNode(graph,n,null);
 				//System.out.println(n.getStyle());
                 // set geometry and size
-				cn.setStyle(n.getStyle());
-				mxGeometry g=n.getGeometry();
-				if ((g!=null) && !ignoreStoredLayout) {
-					//graph.setCellAsMovable(cn, false);
-					model.setGeometry(cn, g);
-				} else if (!internalID2clusters.containsKey(internalID)) {
-					graph.updateCellSize(internalID2cell.get(internalID));
+				if (cn!=null) {
+					cn.setStyle(n.getStyle());
+					mxGeometry g=n.getGeometry();
+					if ((g!=null) && !ignoreStoredLayout) {
+						//graph.setCellAsMovable(cn, false);
+						model.setGeometry(cn, g);
+					} else if (!internalID2clusters.containsKey(internalID)) {
+						graph.updateCellSize(internalID2cell.get(internalID));
+					}
 				}
 			}
 			// then add the edges
@@ -513,7 +555,6 @@ public class SCXMLImportExport implements IImportExport {
 	
 	private String mxVertex2SCXMLString(mxGraphView view, mxCell n, boolean isRoot) throws Exception {
 		String ret="";
-		String src=null;
 		String ID=null;
 		String datamodel=null;
 		String onentry=null;
@@ -523,7 +564,6 @@ public class SCXMLImportExport implements IImportExport {
 		String transitions=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
-		src=value.getOutsourcedLocation();
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
 		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
@@ -554,14 +594,21 @@ public class SCXMLImportExport implements IImportExport {
 		String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNamespace().replace("\n", " "));
 		if (!StringUtils.isEmptyString(namespace))
 			ret+=" "+namespace;
-		if (!StringUtils.isEmptyString(src))
+		if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingSRC()) {
+			String src=value.getSRC().getLocation();
 			ret+=" src=\""+src+"\"";
+		}
 		if (!StringUtils.isEmptyString(ID))
 			ret+=" id=\""+ID+"\"";
 		if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null))
 			ret+=" initial=\""+initialChild.getID()+"\"";
 		ret+=">";
 
+		if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingXInclude()) {
+			String src=value.getSRC().getLocation();
+			ret+="<xi:include href=\""+src+"\" parse=\"xml\"/>";
+		}
+		
 		// save the geometric information of this node:
 		String nodeGeometry=getGeometryString(view,n);
 		if (!StringUtils.isEmptyString(nodeGeometry))
@@ -579,7 +626,7 @@ public class SCXMLImportExport implements IImportExport {
 		if (!StringUtils.isEmptyString(transitions))
 			ret+=transitions;
 		// add the children only if the node is not outsourced
-		if (StringUtils.isEmptyString(src)) {
+		if (!value.isOutsourcedNode()) {
 			int nc=n.getChildCount();
 			for(int i=0;i<nc;i++) {
 				mxCell c=(mxCell) n.getChildAt(i);

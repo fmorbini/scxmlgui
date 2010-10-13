@@ -1,12 +1,18 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.io.File;
 
+import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.editor.fileimportexport.OutSource;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
@@ -16,6 +22,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.DoLayoutAction
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditEdgeOrderAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.EditNodeAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.RemoveCornerToEdgeAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsCluster;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsFinal;
@@ -135,6 +142,17 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("toggleViewOutsourcedContent"), new ToggleDisplayOutsourcedContentInNode(c)));
 					menuItem.setSelected(c.getChildCount()>0);
 					add(menuItem);
+					if (c.getChildCount()>0) {
+						JMenuItem itemMenu = new JMenuItem(editor.bind(mxResources.get("refreshViewOutsourcedContent"), new ToggleDisplayOutsourcedContentInNode(c,true)));
+						add(itemMenu);
+					}
+
+					SCXMLNode value=((SCXMLNode)(c.getValue()));
+					OutSource src=value.getSRC();
+					File f=editor.getThisFileInCurrentDirectory(src.getLocation());					
+					Action itemAction = editor.bind(mxResources.get("openInNewWindow")+" "+f.getName(), new OpenAction(f,true));
+					JMenuItem itemMenu= new JMenuItem(itemAction);
+					add(itemMenu);
 				}
 				addSeparator();
 				add(editor.bind(mxResources.get("doLayout"), new DoLayoutAction(graph,c)));

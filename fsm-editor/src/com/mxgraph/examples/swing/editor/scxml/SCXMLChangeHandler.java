@@ -4,14 +4,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import javax.swing.text.Document;
-import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
+import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.HISTORYTYPE;
-import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.OUTSOURCETYPE;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLChangeHandler.SCXMLGenericTextProperty;
 import com.mxgraph.examples.swing.editor.utils.Pair;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
@@ -160,7 +158,7 @@ public class SCXMLChangeHandler {
 	public class SCXMLOutsourcingStateProperty extends SCXMLChange {
 		private SCXMLGenericTextProperty<SCXMLNode> srcLocationState;
 		private SCXMLNode node;
-		private SCXMLNode.OUTSOURCETYPE typeToBeRestored;
+		private OUTSOURCETYPE typeToBeRestored;
 
 		public SCXMLOutsourcingStateProperty(SCXMLNode node) {
 			this.node=node;

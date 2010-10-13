@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxGeometry;
@@ -78,6 +80,7 @@ public class SCXMLNode implements Serializable {
 	public static final String ROOTID="SCXML";
 	
 	private HashMap<String,Object> node;
+	private HashSet<OutSource> outSourcingChildren;
 	public SCXMLNode() {
 		node=new HashMap<String, Object>();
 		node.put(TYPE,NORMAL);
@@ -87,6 +90,7 @@ public class SCXMLNode implements Serializable {
 		this.setInitial(false);
 		this.setFinal(false);
 		this.setParallel(false);
+		outSourcingChildren=new HashSet<OutSource>();
 	}
 	public boolean isRoot() {
 		return getID().equals(ROOTID);
@@ -97,27 +101,10 @@ public class SCXMLNode implements Serializable {
 	public void setInternalID(String internalID) {
 		node.put(INTERNALID, internalID);
 	}
-	public enum OUTSOURCETYPE {SRC,XINC};
-	public class OutSource {
-		private OUTSOURCETYPE type;
-		private String location;
-		public OutSource(OUTSOURCETYPE t,String l) {
-			setLocation(l);
-			setType(t);
-		}
-		public OUTSOURCETYPE getType() {
-			return type;
-		}
-		public String getLocation() {
-			return location;
-		}
-		public void setLocation(String location) {
-			this.location = location;
-		}
-		public void setType(OUTSOURCETYPE type) {
-			this.type = type;
-		}
+	public void addToOutsourcingChildren(OutSource source) {
+		outSourcingChildren.add(source);
 	}
+	public HashSet<OutSource> getOutsourcingChildren() { return outSourcingChildren;}
 	public OutSource getSRC() {
 		OutSource ret=null;
 		ret=(OutSource)node.get(SRC);

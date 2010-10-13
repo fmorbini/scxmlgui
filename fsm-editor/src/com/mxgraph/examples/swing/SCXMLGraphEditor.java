@@ -57,6 +57,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
@@ -212,7 +213,7 @@ public class SCXMLGraphEditor extends JPanel
 		file2graph.clear();
 		file2importer.clear();
 	}
-	public SCXMLGraph attachOutsourcedContentToThisNode(mxCell ond,SCXMLGraph g,boolean display) throws Exception {
+	public SCXMLGraph attachOutsourcedContentToThisNode(mxCell ond,SCXMLGraph g,boolean display, boolean refresh) throws Exception {
 		SCXMLGraph rootg=getGraphComponent().getGraph();
 		SCXMLNode v=(SCXMLNode) ond.getValue();
 		// get the outsourcing url (SRC field)
@@ -221,10 +222,9 @@ public class SCXMLGraphEditor extends JPanel
 		// syntax handled: filename#namespace:nodename
 		// or filename#nodename
 		// or filename
-		String file,namespace,node;
+		String namespace,node;
 		int pos=src.indexOf('#',0);
 		if (pos>=0) {
-			file=src.substring(0, pos);
 			int nmpos=src.indexOf(':',pos);
 			if (nmpos>=0) {
 				namespace=src.substring(pos+1, nmpos);
@@ -234,20 +234,18 @@ public class SCXMLGraphEditor extends JPanel
 				node=src.substring(pos+1);
 			}
 		} else {
-			file=src;
 			namespace=null;
 			node=null;
 		}
 		if ((namespace!=null) && (node==null)) throw new Exception("node name not given but namespace given in: '"+src+"'");
-		String SCXMLnodename=((namespace!=null)?namespace+":":"")+node;
+		String SCXMLnodename=(node!=null)?(((namespace!=null)?namespace+":":"")+node):v.getID();
 		// normalize the file name to the system absolute path of that file
-		File f=new File(file);
-		String fileName=f.getName();
-		// add the base directory information
-		String wd=(getCurrentFile()!=null)?getCurrentFile().getParent():System.getProperty("user.dir");
-		f=new File(wd+f.separator+fileName);
+		
+		File f=getThisFileInCurrentDirectory(src);
+		
+		String fileName=f.getAbsolutePath();
 		while (!f.exists()) {
-			JFileChooser fc = new JFileChooser(wd);
+			JFileChooser fc = new JFileChooser(f.getParent());
 			final String inputFileName=fileName;
 			fc.setFileFilter(new FileFilter() {
 				
@@ -275,9 +273,9 @@ public class SCXMLGraphEditor extends JPanel
 		// check to see if the required file has already been read
 		SCXMLImportExport ie = file2importer.get(fileName);
 		SCXMLGraph ig = file2graph.get(fileName);
-		if (ig==null) {
+		if ((ig==null) || refresh) {
 			// load the required graph
-			assert(!file2importer.containsKey(fileName));
+			assert(!file2importer.containsKey(fileName) || refresh);
 			file2importer.put(fileName, ie=new SCXMLImportExport());								
 			// read the graph, this will throw an exception if something goes wrong
 			System.out.println("reading "+fileName);
@@ -352,8 +350,17 @@ public class SCXMLGraphEditor extends JPanel
 			return ig;
 		}
 	}
-	public void displayOutsourcedContentInNode(mxCell node, SCXMLGraph g, boolean display) throws Exception {
-		attachOutsourcedContentToThisNode(node, g, display);
+	public File getThisFileInCurrentDirectory(String src) {
+		int pos=src.indexOf('#',0);
+		String file;
+		if (pos>=0) file=src.substring(0, pos);
+		else file=src;
+		// add the base directory information
+		String wd=(getCurrentFile()!=null)?getCurrentFile().getParent():System.getProperty("user.dir");
+		return new File(wd+File.separator+file);
+	}
+	public void displayOutsourcedContentInNode(mxCell node, SCXMLGraph g, boolean display, boolean refresh) throws Exception {
+		attachOutsourcedContentToThisNode(node, g, display, refresh);
 	}
 	HashSet<mxCell> alreadyDone=new HashSet<mxCell>();
 	public void displayOutsourcedContent(SCXMLGraph g,boolean display,boolean isRoot) throws Exception {
@@ -367,7 +374,7 @@ public class SCXMLGraphEditor extends JPanel
 			// else: check if there are clones for this original node and use those clones			
 			if (isRoot) {
 				if (!alreadyDone.contains(ond)) {
-					ig=attachOutsourcedContentToThisNode(ond, g, display);
+					ig=attachOutsourcedContentToThisNode(ond, g, display,true);
 					alreadyDone.add(ond);
 				}
 			} else {
@@ -375,7 +382,7 @@ public class SCXMLGraphEditor extends JPanel
 				if (clones4Ond!=null)
 					for (mxCell clonedOnd:clones4Ond) {
 						if (!alreadyDone.contains(clonedOnd)) {
-							ig=attachOutsourcedContentToThisNode(clonedOnd, g, display);
+							ig=attachOutsourcedContentToThisNode(clonedOnd, g, display,true);
 							alreadyDone.add(clonedOnd);
 						}
 					}
@@ -1232,6 +1239,24 @@ public class SCXMLGraphEditor extends JPanel
 
 		return layout;
 	}
+
+	public static SCXMLGraphEditor startEditor() {
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
+			SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
+			editor.createFrame(editor).setVisible(true);
+			editor.getGraphComponent().requestFocusInWindow();
+			
+			return editor;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	/**
 	 * main of the editor application.
@@ -1242,17 +1267,6 @@ public class SCXMLGraphEditor extends JPanel
 	 */
 	public static void main(String[] args)
 	{
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
-			SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
-			editor.createFrame(editor).setVisible(true);
-			editor.getGraphComponent().requestFocusInWindow();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		startEditor();
 	}
 }
