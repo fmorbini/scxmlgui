@@ -1,5 +1,6 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
@@ -133,10 +135,7 @@ public class SCXMLImportExport implements IImportExport {
 		String scxmlID=node.getID();
 		String internalID=getNextInternalID();
 		node.setInternalID(internalID);
-		if (!scxmlID.equals("")) {
-			assert(!scxmlID2nodes.containsKey(scxmlID));
-			scxmlID2nodes.put(scxmlID, node);
-		}
+		if (!StringUtils.isEmptyString(scxmlID)) scxmlID2nodes.put(scxmlID, node);
 		internalID2nodes.put(internalID, node);
 	}
 
@@ -187,7 +186,7 @@ public class SCXMLImportExport implements IImportExport {
 				String name=a.getNodeName().toLowerCase();
 				if (name.startsWith("xmlns")) {
 					namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
-				} else if (name.equals("src")) node.setSRC(a.getNodeValue());
+				} else if (name.equals("src")) node.setSRC(a.getNodeValue(),OUTSOURCETYPE.SRC);
 			}
 			if (!StringUtils.isEmptyString(namespace)) node.setNamespace(namespace);
 		} else {
@@ -197,27 +196,31 @@ public class SCXMLImportExport implements IImportExport {
 		return node;
 	}
 
-	public void getNodeHier(Node el, SCXMLNode pn) throws Exception {
-		//addTransitionsToInitialNodes(el,pid);
+	public void scanChildrenOf(Node el,SCXMLNode pn, File pwd) throws Exception {
 		NodeList states = el.getChildNodes();
 		for (int s = 0; s < states.getLength(); s++) {
 			Node n = states.item(s);
+			getNodeHier(n, pn,pwd);
+		}
+	}
+	public SCXMLNode getNodeHier(Node n, SCXMLNode pn, File pwd) throws Exception {
+		SCXMLNode root=null;
 			switch (n.getNodeType()) {
 			case Node.ELEMENT_NODE:
 				String name=n.getNodeName().toLowerCase();
 				// STATE: normal or parallel
 				Boolean isParallel=false;
 				boolean isHistory=false;
-				if (name.equals("state")||(isParallel=name.equals("parallel"))||(isHistory=name.equals("history"))) {
-					SCXMLNode node = handleSCXMLNode(n,pn,isParallel,isHistory);
+				if (name.equals("scxml")||name.equals("state")||(isParallel=name.equals("parallel"))||(isHistory=name.equals("history"))) {
+					root = handleSCXMLNode(n,pn,isParallel,isHistory);
 					// continue recursion on the children of this node
-					getNodeHier(n, node);
+					scanChildrenOf(n, root,pwd);
 				} else if (name.equals("transition")) {
 					addEdge(processEdge(pn,n));
 				} else if (name.equals("final")) {
 					SCXMLNode node = handleSCXMLNode(n,pn,isParallel,false);
 					node.setFinal(true);
-					getNodeHier(n, node);
+					scanChildrenOf(n, node,pwd);
 				} else if (name.equals("initial")) {
 					//pn.setInitial(true);
 					// only one child that is a transition
@@ -255,6 +258,16 @@ public class SCXMLImportExport implements IImportExport {
 				} else if (name.equals("datamodel")) {
 					String content=collectAllChildrenInString(n);
 					pn.addToDataModel(content);
+				} else if (name.equals("include") || name.endsWith(":include")) {
+					NamedNodeMap att = n.getAttributes();
+					Node nodeLocation = att.getNamedItem("href");
+					String location=(nodeLocation==null)?"":StringUtils.cleanupSpaces(nodeLocation.getNodeValue());
+					location=StringUtils.cleanupSpaces(location);
+					System.out.println(location);
+					if (!StringUtils.isEmptyString(location)) {
+						String fileLocation=new File(pwd, location).getAbsolutePath();
+						root=readSCXMLFileContentAndAttachAsChildrenOf(fileLocation, pn);
+					}
 				}
 				break;
 			case Node.COMMENT_NODE:
@@ -262,7 +275,7 @@ public class SCXMLImportExport implements IImportExport {
 				readNodeGeometry(pn,positionString);
 				break;
 			}
-		}
+		return root;
 	}
 
 	private HashMap<String, Object> processEdge(SCXMLNode pn, Node n) throws Exception {
@@ -297,6 +310,15 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
+	public SCXMLNode readSCXMLFileContentAndAttachAsChildrenOf(String filename,SCXMLNode parent) throws Exception {
+		System.out.println("Parsing file: "+filename);
+		File file=new File(filename);
+		Document doc = mxUtils.parseXMLFile(file,false,false);
+		doc.getDocumentElement().normalize();
+		SCXMLNode rootNode=getNodeHier(doc.getDocumentElement(),parent,file.getParentFile());
+		System.out.println("Done reading file");
+		return rootNode;
+	}
 	public void readInGraph(SCXMLGraph graph, String filename, boolean ignoreStoredLayout) throws Exception {
 		// clean importer data-structures
 		internalID2cell.clear();
@@ -306,13 +328,14 @@ public class SCXMLImportExport implements IImportExport {
 		scxmlID2nodes.clear();
 		internalIDcounter=11;
 
-		System.out.println("Parsing file: "+filename);
-		Document doc = mxUtils.parseFile(filename);
-		doc.getDocumentElement().normalize();
-		root=handleSCXMLNode(doc.getDocumentElement(),null,false,false);
-		root.setID(SCXMLNode.ROOTID);
-		getNodeHier(doc.getDocumentElement(),root);
-		System.out.println("Done reading file");
+		root=readSCXMLFileContentAndAttachAsChildrenOf(filename, null);
+		if (root!=scxmlID2nodes.get(SCXMLNode.ROOTID)) {
+			SCXMLNode firstChild=root;
+			root=new SCXMLNode();
+			root.setID(SCXMLNode.ROOTID);
+			addSCXMLNode(root);
+			setNodeAsChildrenOf(firstChild, root);
+		}
 		
 		// empty the graph
 		mxCell gr = new mxCell();
@@ -500,7 +523,7 @@ public class SCXMLImportExport implements IImportExport {
 		String transitions=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
-		src=StringUtils.removeLeadingAndTrailingSpaces(value.getSRC());
+		src=value.getOutsourcedLocation();
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
 		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());

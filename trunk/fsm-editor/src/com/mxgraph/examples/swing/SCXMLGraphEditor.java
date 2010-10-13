@@ -216,7 +216,7 @@ public class SCXMLGraphEditor extends JPanel
 		SCXMLGraph rootg=getGraphComponent().getGraph();
 		SCXMLNode v=(SCXMLNode) ond.getValue();
 		// get the outsourcing url (SRC field)
-		String src=v.getSRC();
+		String src=v.getOutsourcedLocation();
 		// get the file name, the optional namespace and the optional node name
 		// syntax handled: filename#namespace:nodename
 		// or filename#nodename

@@ -158,7 +158,7 @@ public class XMLUtils {
 		// add surrounding top level node just in case
 		xml="<xml>"+xml+"</xml>";		
 		BI=indent;
-    	Document doc=mxUtils.parse(xml);
+    	Document doc=mxUtils.parseXMLString(xml,false,false);
 		xml=prettyPrintDom(doc,"",true,escapeStrings);
 		//remove added top level node.
 		xml=xml.replaceAll("^[\\s]*<xml>[\\s]*|[\\s]*</xml>[\\s]*$", "");
@@ -172,7 +172,7 @@ public class XMLUtils {
     	String e="<x a=\"a&quot;\"/>";
     	try {
 			System.out.println(prettyPrintXMLString(d," ",true));
-			Document doc=mxUtils.parse(d);
+			Document doc=mxUtils.parseXMLString(d,false,false);
 			String b=prettyPrintDom(doc,"",true,true);
 			System.out.println(b);
 		} catch (Exception e1) {
@@ -183,7 +183,7 @@ public class XMLUtils {
 	public static String isParsableXMLString(String xml) {
 		try {
 			xml="<xml>"+xml+"</xml>";
-			mxUtils.parse(xml);
+			mxUtils.parseXMLString(xml,false,false);
 		} catch (SAXParseException e) {
 			return e.getMessage();
 		} catch (Exception e) {

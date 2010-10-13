@@ -25,6 +25,7 @@ import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.util.mxResources;
 
 public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
@@ -40,7 +41,7 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
     public SCXMLEdgeEditor(JFrame parent,mxCell en,SCXMLEdge e, SCXMLGraphEditor editor, Point pos) {
     	super(parent,editor,en);
-    	setTitle("SCXML edge editor");
+    	setTitle(mxResources.get("titleEdgeEditor"));
     	setLocation(pos);
 
         edge=e;
@@ -88,13 +89,13 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
         JScrollPane scrollPane = new JScrollPane(eventTextPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
-        tabbedPane.addTab("Event", scrollPane);
+        tabbedPane.addTab(mxResources.get("eventTAB"), scrollPane);
         scrollPane = new JScrollPane(conditionTextPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
-        tabbedPane.addTab("Condition", scrollPane);
+        tabbedPane.addTab(mxResources.get("conditionTAB"), scrollPane);
         scrollPane = new JScrollPane(exeTextPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
-        tabbedPane.addTab("Executable content", scrollPane);
+        tabbedPane.addTab(mxResources.get("exeTAB"), scrollPane);
 
         tabbedPane.setSelectedIndex(0);
         updateActionTable(tabbedPane,actions);

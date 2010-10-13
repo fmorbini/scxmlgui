@@ -10,6 +10,8 @@ import javax.swing.undo.UndoableEdit;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.HISTORYTYPE;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.OUTSOURCETYPE;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLChangeHandler.SCXMLGenericTextProperty;
 import com.mxgraph.examples.swing.editor.utils.Pair;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
@@ -110,7 +112,7 @@ public class SCXMLChangeHandler {
 		private UndoableEdit oldUndoPos=null;
 		private UndoableEdit redoPos=null;
 		private boolean undoExcludesTarget=false;
-		private Method docGetter,undoGetter,stringSetter,docSetter;
+		private Method docGetter,undoGetter,stringSetter,stringGetter,docSetter;
 		public SCXMLGenericTextProperty(T thing,Method stringReader, Method docReader, Method undoReader,
 				Method stringSetter,Method docSetter) {
 			this.toBeUndone=true;
@@ -119,10 +121,11 @@ public class SCXMLChangeHandler {
 			this.docGetter=docReader;
 			this.undoGetter=undoReader;
 			this.stringSetter=stringSetter;
+			this.stringGetter=stringReader;
 			this.docSetter=docSetter;
 			
 			try {
-				this.oldString=(String) stringReader.invoke(thing);
+				this.oldString=(String) stringGetter.invoke(thing);
 				this.oldDoc=(Document) docReader.invoke(thing);
 				MyUndoManager um = (MyUndoManager) undoReader.invoke(thing);
 
@@ -148,10 +151,29 @@ public class SCXMLChangeHandler {
 					toBeUndone=true;
 					um.redoTo(redoPos,false);
 				}
-				stringSetter.invoke(thing, oldString);
+				stringSetter.invoke(thing, (String)stringGetter.invoke(thing));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	public class SCXMLOutsourcingStateProperty extends SCXMLChange {
+		private SCXMLGenericTextProperty<SCXMLNode> srcLocationState;
+		private SCXMLNode node;
+		private SCXMLNode.OUTSOURCETYPE typeToBeRestored;
+
+		public SCXMLOutsourcingStateProperty(SCXMLNode node) {
+			this.node=node;
+			srcLocationState=new SCXMLGenericTextProperty<SCXMLNode>(node,getSRC,getSRCDoc,getSRCUndoManager,setSRC,setSRCDoc);
+			this.typeToBeRestored=node.getSRC().getType();
+		}
+		
+		@Override
+		public void execute() {
+			srcLocationState.execute();
+			OUTSOURCETYPE currentType = node.getSRC().getType();
+			node.getSRC().setType(typeToBeRestored);
+			typeToBeRestored=currentType;
 		}
 	}
 	
@@ -213,7 +235,7 @@ public class SCXMLChangeHandler {
 	static {
 		try {
 			//getters
-			getSRC=SCXMLNode.class.getDeclaredMethod("getSRC");
+			getSRC=SCXMLNode.class.getDeclaredMethod("getOutsourcedLocation");
 			getID=SCXMLNode.class.getDeclaredMethod("getID");
 			getOnEntry=SCXMLNode.class.getDeclaredMethod("getOnEntry");
 			getOnExit=SCXMLNode.class.getDeclaredMethod("getOnExit");
@@ -247,7 +269,7 @@ public class SCXMLChangeHandler {
 			getConditionUndoManager=SCXMLEdge.class.getDeclaredMethod("getConditionUndoManager");			
 			getEventUndoManager=SCXMLEdge.class.getDeclaredMethod("getEventUndoManager");			
 			//setters
-			setSRC=SCXMLNode.class.getDeclaredMethod("setSRC",String.class);
+			setSRC=SCXMLNode.class.getDeclaredMethod("setOutsourcedLocation",String.class);
 			setID=SCXMLNode.class.getDeclaredMethod("setID",String.class);
 			setOnEntry=SCXMLNode.class.getDeclaredMethod("setOnEntry",String.class);
 			setOnExit=SCXMLNode.class.getDeclaredMethod("setOnExit",String.class);
@@ -296,7 +318,7 @@ public class SCXMLChangeHandler {
 				model.addChangeToCurrentEdit(instance.new SCXMLFinalStateProperty(node));
 				model.addChangeToCurrentEdit(instance.new SCXMLOrderOutgoingEdgesStateProperty(cell));
 				model.addChangeToCurrentEdit(instance.new SCXMLHistoryStateProperty(node));
-				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getSRC,getSRCDoc,getSRCUndoManager,setSRC,setSRCDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLOutsourcingStateProperty(node));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getID,getIDDoc,getIDUndoManager,setID,setIDDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnEntry,getOnEntryDoc,getOnEntryUndoManager,setOnEntry,setOnEntryDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnExit,getOnExitDoc,getOnExitUndoManager,setOnExit,setOnExitDoc));

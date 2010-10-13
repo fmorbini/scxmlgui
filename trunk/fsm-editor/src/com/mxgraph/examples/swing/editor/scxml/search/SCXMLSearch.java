@@ -148,7 +148,7 @@ public class SCXMLSearch {
         Document doc = new Document();
         doc.add(new Field(INDEXID, cellID,Field.Store.YES,Field.Index.ANALYZED));
         doc.add(new Field("id", new StringReader(v.getID().toLowerCase())));
-        doc.add(new Field("inc", new StringReader(v.getSRC().toLowerCase())));
+        doc.add(new Field("inc", new StringReader(v.getOutsourcedLocation().toLowerCase())));
         doc.add(new Field("dm", new StringReader(v.getDatamodel().toLowerCase())));
         doc.add(new Field("ns", new StringReader(v.getNamespace().toLowerCase())));
         doc.add(new Field("entry", new StringReader(v.getOnEntry().toLowerCase())));
