@@ -50,11 +50,6 @@ public class mxClusterLayout extends mxGraphLayout {
 		for (mxCell cluster:clusters) {
 			handleLayoutInThisCluster(cluster,clusters);
 		}
-		// after run the graph layout (for edges and labels)
-		mxIGraphLayout l = new mxParallelEdgeLayout(graph);
-		l.execute(parent);
-		l=new mxEdgeLabelLayout(graph);
-		l.execute(parent);
 		System.out.println("Done cluster layout");
 	}
 	
@@ -79,6 +74,11 @@ public class mxClusterLayout extends mxGraphLayout {
 			// resize the cluster container
 			if (!cluster.isCollapsed()) {
 				clusterLayout.execute(cluster);
+				// after run the graph layout (for edges and labels)
+				mxIGraphLayout l = new mxParallelEdgeLayout(graph);
+				l.execute(cluster);
+				l=new mxEdgeLabelLayout(graph);
+				l.execute(cluster);
 				graph.updateGroupBounds(new Object[]{cluster},2 * graph.getGridSize(),false);
 			}
 		}
