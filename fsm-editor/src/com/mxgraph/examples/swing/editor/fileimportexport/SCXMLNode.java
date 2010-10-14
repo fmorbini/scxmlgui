@@ -81,6 +81,7 @@ public class SCXMLNode implements Serializable {
 	
 	private HashMap<String,Object> node;
 	private HashSet<OutSource> outSourcingChildren;
+	private boolean saveRoot=true;
 	public SCXMLNode() {
 		node=new HashMap<String, Object>();
 		node.put(TYPE,NORMAL);
@@ -91,6 +92,13 @@ public class SCXMLNode implements Serializable {
 		this.setFinal(false);
 		this.setParallel(false);
 		outSourcingChildren=new HashSet<OutSource>();
+	}
+	public boolean shouldThisRootBeSaved() {
+		return !isRoot() || saveRoot;
+	}
+	public void setSaveThisRoot(boolean save) {
+		if (isRoot()) saveRoot=save;
+		else saveRoot=true;
 	}
 	public boolean isRoot() {
 		return getID().equals(ROOTID);

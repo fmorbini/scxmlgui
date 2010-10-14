@@ -359,6 +359,7 @@ public class SCXMLImportExport implements IImportExport {
 			root.setID(SCXMLNode.ROOTID);
 			addSCXMLNode(root);
 			setNodeAsChildrenOf(firstChild, root);
+			root.setSaveThisRoot(false);
 		}
 		
 		// empty the graph
@@ -574,57 +575,59 @@ public class SCXMLImportExport implements IImportExport {
 
 		SCXMLNode initialChild=getInitialChildOfmxCell(n);
 		if (initialChild!=null) oninitialentry=StringUtils.removeLeadingAndTrailingSpaces(initialChild.getOnInitialEntry());
-		String close;
-		if (isRoot) {
-			ret="<scxml";
-			close="</scxml>";
-		} else if (value.isParallel()) {
-			ret="<parallel";
-			close="</parallel>";
-		} else if (value.isFinal()) {
-			ret="<final";
-			close="</final>";
-		} else if (value.isHistoryNode()) {
-			ret="<history type=\""+((value.isDeepHistory())?"deep":"shallow")+"\"";
-			close="</history>";
-		} else {
-			ret="<state";
-			close="</state>";
+		String close="";
+		if (!isRoot || value.shouldThisRootBeSaved()) {
+			if (isRoot) {
+				ret="<scxml";
+				close="</scxml>";
+			} else if (value.isParallel()) {
+				ret="<parallel";
+				close="</parallel>";
+			} else if (value.isFinal()) {
+				ret="<final";
+				close="</final>";
+			} else if (value.isHistoryNode()) {
+				ret="<history type=\""+((value.isDeepHistory())?"deep":"shallow")+"\"";
+				close="</history>";
+			} else {
+				ret="<state";
+				close="</state>";
+			}
+			String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNamespace().replace("\n", " "));
+			if (!StringUtils.isEmptyString(namespace))
+				ret+=" "+namespace;
+			if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingSRC()) {
+				String src=value.getSRC().getLocation();
+				ret+=" src=\""+src+"\"";
+			}
+			if (!StringUtils.isEmptyString(ID))
+				ret+=" id=\""+ID+"\"";
+			if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null))
+				ret+=" initial=\""+initialChild.getID()+"\"";
+			ret+=">";
+	
+			if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingXInclude()) {
+				String src=value.getSRC().getLocation();
+				ret+="<xi:include href=\""+src+"\" parse=\"xml\"/>";
+			}
+			
+			// save the geometric information of this node:
+			String nodeGeometry=getGeometryString(view,n);
+			if (!StringUtils.isEmptyString(nodeGeometry))
+				ret+="<!-- "+nodeGeometry+" -->";
+			if (!StringUtils.isEmptyString(datamodel))
+				ret+="<datamodel>"+datamodel+"</datamodel>";
+			if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
+				ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
+			if (!StringUtils.isEmptyString(donedata))
+				ret+="<donedata>"+donedata+"</donedata>";
+			if (!StringUtils.isEmptyString(onentry))
+				ret+="<onentry>"+onentry+"</onentry>";
+			if (!StringUtils.isEmptyString(onexit))
+				ret+="<onexit>"+onexit+"</onexit>";
+			if (!StringUtils.isEmptyString(transitions))
+				ret+=transitions;
 		}
-		String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNamespace().replace("\n", " "));
-		if (!StringUtils.isEmptyString(namespace))
-			ret+=" "+namespace;
-		if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingSRC()) {
-			String src=value.getSRC().getLocation();
-			ret+=" src=\""+src+"\"";
-		}
-		if (!StringUtils.isEmptyString(ID))
-			ret+=" id=\""+ID+"\"";
-		if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null))
-			ret+=" initial=\""+initialChild.getID()+"\"";
-		ret+=">";
-
-		if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingXInclude()) {
-			String src=value.getSRC().getLocation();
-			ret+="<xi:include href=\""+src+"\" parse=\"xml\"/>";
-		}
-		
-		// save the geometric information of this node:
-		String nodeGeometry=getGeometryString(view,n);
-		if (!StringUtils.isEmptyString(nodeGeometry))
-			ret+="<!-- "+nodeGeometry+" -->";
-		if (!StringUtils.isEmptyString(datamodel))
-			ret+="<datamodel>"+datamodel+"</datamodel>";
-		if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
-			ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
-		if (!StringUtils.isEmptyString(donedata))
-			ret+="<donedata>"+donedata+"</donedata>";
-		if (!StringUtils.isEmptyString(onentry))
-			ret+="<onentry>"+onentry+"</onentry>";
-		if (!StringUtils.isEmptyString(onexit))
-			ret+="<onexit>"+onexit+"</onexit>";
-		if (!StringUtils.isEmptyString(transitions))
-			ret+=transitions;
 		// add the children only if the node is not outsourced
 		if (!value.isOutsourcedNode()) {
 			int nc=n.getChildCount();
