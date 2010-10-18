@@ -155,7 +155,7 @@ public class SCXMLSearch {
         doc.add(new Field("exit", new StringReader(v.getOnExit().toLowerCase())));
         doc.add(new Field("init", new StringReader(v.getOnInitialEntry().toLowerCase())));
         doc.add(new Field("dd", new StringReader(v.getDoneData().toLowerCase())));
-        doc.add(new Field("all", new StringReader((v.getID()+" "+v.getSRC()+" "+v.getDatamodel()+" "+v.getNamespace()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData()).toLowerCase())));
+        doc.add(new Field("all", new StringReader((v.getID()+" "+v.getSRC().getLocation()+" "+v.getDatamodel()+" "+v.getNamespace()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData()).toLowerCase())));
 		return doc;
 	}
 	
