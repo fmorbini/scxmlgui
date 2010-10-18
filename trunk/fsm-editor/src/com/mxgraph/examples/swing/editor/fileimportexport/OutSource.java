@@ -1,6 +1,10 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
-public class OutSource {
+import java.io.Serializable;
+
+public class OutSource implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	public enum OUTSOURCETYPE {SRC,XINC};
 
 	private OUTSOURCETYPE type;
