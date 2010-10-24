@@ -145,7 +145,7 @@ public class SCXMLImportExport implements IImportExport {
 	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel, Boolean isHistory) throws Exception {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
-		String nodeIDString=(nodeID==null)?"":StringUtils.cleanupSpaces(nodeID.getNodeValue());
+		String nodeIDString=(nodeID==null)?(n.getNodeName().toLowerCase().equals(SCXMLNode.ROOTID.toLowerCase())?SCXMLNode.ROOTID:""):StringUtils.cleanupSpaces(nodeID.getNodeValue());
 		Node nodeHistoryType = att.getNamedItem("type");
 		String nodeHistoryTypeString=(nodeHistoryType==null)?"shallow":StringUtils.cleanupSpaces(nodeHistoryType.getNodeValue());
 		SCXMLNode.HISTORYTYPE historyType=null;
@@ -208,76 +208,76 @@ public class SCXMLImportExport implements IImportExport {
 	}
 	public SCXMLNode getNodeHier(Node n, SCXMLNode pn, File pwd) throws Exception {
 		SCXMLNode root=null;
-			switch (n.getNodeType()) {
-			case Node.ELEMENT_NODE:
-				String name=n.getNodeName().toLowerCase();
-				// STATE: normal or parallel
-				Boolean isParallel=false;
-				boolean isHistory=false;
-				if (name.equals("scxml")||name.equals("state")||(isParallel=name.equals("parallel"))||(isHistory=name.equals("history"))) {
-					root = handleSCXMLNode(n,pn,isParallel,isHistory);
-					// continue recursion on the children of this node
-					scanChildrenOf(n, root,pwd);
-					processOutsourcingChildrenForNode(root, pwd);
-				} else if (name.equals("transition")) {
-					addEdge(processEdge(pn,n));
-				} else if (name.equals("final")) {
-					SCXMLNode node = handleSCXMLNode(n,pn,isParallel,false);
-					node.setFinal(true);
-					scanChildrenOf(n, node,pwd);
-				} else if (name.equals("initial")) {
-					//pn.setInitial(true);
-					// only one child that is a transition
-					NodeList cs = n.getChildNodes();
-					for (int i = 0; i < cs.getLength(); i++) {
-						Node c = cs.item(i);
-						if ((c.getNodeType()==Node.ELEMENT_NODE) &&
-								c.getNodeName().toLowerCase().equals("transition")) {
-							HashMap<String, Object> edgeContent = processEdge(pn,c);
-							//pn.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
-							ArrayList<String> inNames=(ArrayList<String>) edgeContent.get(SCXMLEdge.TARGETS);
-							if (inNames.size()>1) throw new Exception("Unhandled multiple initial states. Report test case.");
-							for(String inName:inNames) {
-								if (inName!=null) {
-									SCXMLNode in =getNodeFromSCXMLID(inName);
-									if (in==null) in=new SCXMLNode();
-									in.setID(inName);
-									in.setInitial(true);
-									addSCXMLNode(in);
-									in.setOnInitialEntry((String) edgeContent.get(SCXMLEdge.EDGEEXE));
-								}
+		switch (n.getNodeType()) {
+		case Node.ELEMENT_NODE:
+			String name=n.getNodeName().toLowerCase();
+			// STATE: normal or parallel
+			Boolean isParallel=false;
+			boolean isHistory=false;
+			if (name.equals(SCXMLNode.ROOTID.toLowerCase())||name.equals("state")||(isParallel=name.equals("parallel"))||(isHistory=name.equals("history"))) {
+				root = handleSCXMLNode(n,pn,isParallel,isHistory);
+				// continue recursion on the children of this node
+				scanChildrenOf(n, root,pwd);
+				processOutsourcingChildrenForNode(root, pwd);
+			} else if (name.equals("transition")) {
+				addEdge(processEdge(pn,n));
+			} else if (name.equals("final")) {
+				SCXMLNode node = handleSCXMLNode(n,pn,isParallel,false);
+				node.setFinal(true);
+				scanChildrenOf(n, node,pwd);
+			} else if (name.equals("initial")) {
+				//pn.setInitial(true);
+				// only one child that is a transition
+				NodeList cs = n.getChildNodes();
+				for (int i = 0; i < cs.getLength(); i++) {
+					Node c = cs.item(i);
+					if ((c.getNodeType()==Node.ELEMENT_NODE) &&
+							c.getNodeName().toLowerCase().equals("transition")) {
+						HashMap<String, Object> edgeContent = processEdge(pn,c);
+						//pn.setOnInitialEntry(edgeContent.get(SCXMLEdge.EDGEEXE));
+						ArrayList<String> inNames=(ArrayList<String>) edgeContent.get(SCXMLEdge.TARGETS);
+						if (inNames.size()>1) throw new Exception("Unhandled multiple initial states. Report test case.");
+						for(String inName:inNames) {
+							if (inName!=null) {
+								SCXMLNode in =getNodeFromSCXMLID(inName);
+								if (in==null) in=new SCXMLNode();
+								in.setID(inName);
+								in.setInitial(true);
+								addSCXMLNode(in);
+								in.setOnInitialEntry((String) edgeContent.get(SCXMLEdge.EDGEEXE));
 							}
-							break;
 						}
-					}
-				} else if (name.equals("onentry")) {
-					String content=collectAllChildrenInString(n);
-					pn.setOnEntry(content);
-				} else if (name.equals("onexit")) {
-					String content=collectAllChildrenInString(n);
-					pn.setOnExit(content);
-				} else if (name.equals("donedata")) {
-					String content=collectAllChildrenInString(n);
-					pn.setDoneData(content);
-				} else if (name.equals("datamodel")) {
-					String content=collectAllChildrenInString(n);
-					pn.addToDataModel(content);
-				} else if (name.equals("xi:include")) {
-					NamedNodeMap att = n.getAttributes();
-					Node nodeLocation = att.getNamedItem("href");
-					String location=(nodeLocation==null)?"":StringUtils.cleanupSpaces(nodeLocation.getNodeValue());
-					location=StringUtils.cleanupSpaces(location);
-					System.out.println(location);
-					if (!StringUtils.isEmptyString(location)) {
-						pn.addToOutsourcingChildren(new OutSource(OUTSOURCETYPE.XINC,location));
+						break;
 					}
 				}
-				break;
-			case Node.COMMENT_NODE:
-				String positionString=n.getNodeValue();
-				readNodeGeometry(pn,positionString);
-				break;
+			} else if (name.equals("onentry")) {
+				String content=collectAllChildrenInString(n);
+				pn.setOnEntry(content);
+			} else if (name.equals("onexit")) {
+				String content=collectAllChildrenInString(n);
+				pn.setOnExit(content);
+			} else if (name.equals("donedata")) {
+				String content=collectAllChildrenInString(n);
+				pn.setDoneData(content);
+			} else if (name.equals("datamodel")) {
+				String content=collectAllChildrenInString(n);
+				pn.addToDataModel(content);
+			} else if (name.equals("xi:include")) {
+				NamedNodeMap att = n.getAttributes();
+				Node nodeLocation = att.getNamedItem("href");
+				String location=(nodeLocation==null)?"":StringUtils.cleanupSpaces(nodeLocation.getNodeValue());
+				location=StringUtils.cleanupSpaces(location);
+				System.out.println(location);
+				if (!StringUtils.isEmptyString(location)) {
+					pn.addToOutsourcingChildren(new OutSource(OUTSOURCETYPE.XINC,location));
+				}
 			}
+			break;
+		case Node.COMMENT_NODE:
+			String positionString=n.getNodeValue();
+			readNodeGeometry(pn,positionString);
+			break;
+		}
 		return root;
 	}
 
