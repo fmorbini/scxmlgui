@@ -55,7 +55,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 		
 		boolean inOutsourcedNode=false;
 		// if the cell is not editable set it back to null so the menu doesn't allow editing.
-		if ((c!=null) && !graph.isCellEditable(c)) inOutsourcedNode=true;
+		inOutsourcedNode=(c!=null) && !graph.isCellEditable(c);
 		
 		Point unscaledGraphPoint=gc.unscaledGraphCoordinates(graphPt);
 
@@ -90,6 +90,8 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					}
 				}
 			} else if (c.isVertex()) {
+				boolean nodeIsOutsourced=((SCXMLNode)(c.getValue())).isOutsourcedNode();
+				boolean nodeIsFake=((SCXMLNode)(c.getValue())).getFake();
 				mxICell parent = c.getParent();
 				boolean isHistoryNode=((SCXMLNode)(c.getValue())).isHistoryNode();
 				boolean isParallelNode=((SCXMLNode)(c.getValue())).isParallel();
@@ -104,41 +106,43 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,root,screenCoord)));
 					if (c!=root) {
 						if (!isHistoryNode) {
-							add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
+							if (!nodeIsFake) add(editor.bind(mxResources.get("editOutgoingEdgeOrder"), new EditEdgeOrderAction(c,screenCoord))).setEnabled(graph.getAllOutgoingEdges(c).length>1);
 							JMenuItem menuItem2 = new JMenuItem(editor.bind(mxResources.get("editOutsourcedNode"), new SetNodeAsOutsourced(c,screenCoord)));
 							menuItem2.setEnabled(!((SCXMLNode)(c.getValue())).isClusterNode() || (c.getChildCount()==0) || ((SCXMLNode)(c.getValue())).isOutsourcedNode());
 							add(menuItem2);
 						}
-						if (!isHistoryNode) addSeparator();
-						JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
-						menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());
-						add(menuItem);
-						if (!isHistoryNode) {
-							menuItem = new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsFinalNode"), new SetNodeAsFinal(c)));
-							menuItem.setSelected(((SCXMLNode)(c.getValue())).isFinal());
+						if (!nodeIsFake) {
+							if (!isHistoryNode) addSeparator();
+							JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsInitialNode"), new SetNodeAsInitial(c)));
+							menuItem.setSelected(((SCXMLNode)(c.getValue())).isInitial());
 							add(menuItem);
-							menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsClusterNode"), new SetNodeAsCluster(c)));
-							menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
-							menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
-							add(menuItem);
-							menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
-							menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
-							add(menuItem);
-						}
-						if ((parent!=root) && ((SCXMLNode)parent.getValue()).isClusterNode()) {
-							if (!isParallelNode && !isClusterNode && !isFinalNode) {
-								addSeparator();
-								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsDeepHistoryNode"), new SetNodeAsHistory(c,true)));
-								menuItem.setSelected(((SCXMLNode)(c.getValue())).isDeepHistory());
+							if (!isHistoryNode) {
+								menuItem = new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsFinalNode"), new SetNodeAsFinal(c)));
+								menuItem.setSelected(((SCXMLNode)(c.getValue())).isFinal());
 								add(menuItem);
-								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsShallowHistoryNode"), new SetNodeAsHistory(c,false)));
-								menuItem.setSelected(((SCXMLNode)(c.getValue())).isShallowHistory());
+								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsClusterNode"), new SetNodeAsCluster(c)));
+								menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
+								menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isOutsourcedNode());
 								add(menuItem);
+								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
+								menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
+								add(menuItem);
+							}
+							if ((parent!=root) && ((SCXMLNode)parent.getValue()).isClusterNode()) {
+								if (!isParallelNode && !isClusterNode && !isFinalNode) {
+									addSeparator();
+									menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsDeepHistoryNode"), new SetNodeAsHistory(c,true)));
+									menuItem.setSelected(((SCXMLNode)(c.getValue())).isDeepHistory());
+									add(menuItem);
+									menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsShallowHistoryNode"), new SetNodeAsHistory(c,false)));
+									menuItem.setSelected(((SCXMLNode)(c.getValue())).isShallowHistory());
+									add(menuItem);
+								}
 							}
 						}
 					}
 				}
-				if (((SCXMLNode)(c.getValue())).isOutsourcedNode()) {
+				if (nodeIsOutsourced) {
 					JCheckBoxMenuItem menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("toggleViewOutsourcedContent"), new ToggleDisplayOutsourcedContentInNode(c)));
 					menuItem.setSelected(c.getChildCount()>0);
 					add(menuItem);

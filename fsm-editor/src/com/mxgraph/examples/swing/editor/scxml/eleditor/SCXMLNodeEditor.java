@@ -72,7 +72,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 			tabbedPane.addTab("SCXML ID", scrollPane);
 			doc.addDocumentListener(changeListener);
 
-			if (!node.isHistoryNode()) {
+			if (!node.isHistoryNode() && !node.getFake()) {
 				undo=node.getOnEntryUndoManager();
 				doc=node.getOnEntryDoc();
 				onentryTextPane=new UndoJTextPane(node.getOnEntry(), doc, undo,keyboardHandler);
@@ -102,7 +102,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				doc.addDocumentListener(changeListener);
 			}
 
-			if (node.isFinal()) {
+			if (node.isFinal() && !node.getFake()) {
 				undo=node.getDoneDataUndoManager();
 				doc=node.getDoneDataDoc();
 				finalTextPane=new UndoJTextPane(node.getDoneData(), doc, undo, keyboardHandler);
@@ -117,7 +117,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				tabbedPane.addTab(mxResources.get("finalDataTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 			}
-			if (node.isInitial()) {
+			if (node.isInitial() && !node.getFake()) {
 				undo=node.getOnInitialEntryUndoManager();
 				doc=node.getOnInitialEntryDoc();
 				initialTextPane=new UndoJTextPane(node.getOnInitialEntry(), doc, undo, keyboardHandler);
@@ -133,7 +133,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				doc.addDocumentListener(changeListener);
 			}
 		}
-        if (!node.isHistoryNode()) {
+        if (!node.isHistoryNode() && !node.getFake()) {
 	        undo=node.getDatamodelUndoManager();
 	        doc=node.getDatamodelDoc();
 	        datamodelPane=new UndoJTextPane(node.getDatamodel(), doc, undo,keyboardHandler);

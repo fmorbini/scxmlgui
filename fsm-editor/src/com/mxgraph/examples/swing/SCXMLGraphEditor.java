@@ -42,6 +42,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.LockObtainFailedException;
 
@@ -57,7 +62,6 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
@@ -155,6 +159,7 @@ public class SCXMLGraphEditor extends JPanel
 	protected File currentFile;
 	protected IImportExport currentFileIOMethod;
 	protected Long lastModifiedDate;
+	private static boolean backupEnabled;
 
 	/**
 	 * 
@@ -286,7 +291,8 @@ public class SCXMLGraphEditor extends JPanel
 		assert((ig!=null) && (ie!=null));
 		System.out.println("attaching node: '"+SCXMLnodename+"' from file '"+fileName+"'");
 		// check that the requested node is there
-		SCXMLNode SCXMLn = ie.getNodeFromSCXMLID(SCXMLnodename);
+		SCXMLNode SCXMLn = ie.getNodeFromSCXMLID(SCXMLnodename);		
+		if (SCXMLn==null) SCXMLn=ie.getRoot();
 		if(SCXMLn==null) {
 			JOptionPane.showMessageDialog(this,mxResources.get("nodeNotFound")+": '"+SCXMLnodename+"'",mxResources.get("error"),JOptionPane.ERROR_MESSAGE);
 			return null;
@@ -772,7 +778,7 @@ public class SCXMLGraphEditor extends JPanel
 	public String getBackupFileName() {
 		if (currentFile!=null) {
 			Calendar now=Calendar.getInstance();
-			String dateString=(now.get(Calendar.MONTH)+1)+"-"+now.get(Calendar.DAY_OF_MONTH)+"-"+now.get(Calendar.HOUR)+"."+now.get(Calendar.MINUTE)+"."+now.get(Calendar.SECOND);
+			String dateString=(now.get(Calendar.MONTH)+1)+"-"+now.get(Calendar.DAY_OF_MONTH)+"_"+now.get(Calendar.HOUR)+"."+now.get(Calendar.MINUTE)+"."+now.get(Calendar.SECOND);
 			String parentDir=currentFile.getParent();
 			return (StringUtils.isEmptyString(parentDir)?"":parentDir+File.separatorChar)+"#"+dateString+"#"+currentFile.getName();
 		} else return null;
@@ -1257,7 +1263,12 @@ public class SCXMLGraphEditor extends JPanel
 		}
 		return null;
 	}
-	
+
+	public boolean isBackupEnabled() {
+		return backupEnabled;
+	}
+	public static void setBackupEnabled(boolean e) { backupEnabled=e; }
+
 	/**
 	 * main of the editor application.
 	 * creates the FSMEditor that is a CustomGraphComponent (JScrollPane)
@@ -1267,6 +1278,19 @@ public class SCXMLGraphEditor extends JPanel
 	 */
 	public static void main(String[] args)
 	{
+		digestCommandLineArguments(args);
 		startEditor();
+	}
+	private static final String BACKUP_OPTION="b";
+	private static void digestCommandLineArguments(String[] args) {
+		Options options = new Options();
+		options.addOption(BACKUP_OPTION, false, "Enable saving a backup of opened files.");
+		CommandLineParser parser = new PosixParser();
+		try {
+			CommandLine cmd = parser.parse( options, args);
+			setBackupEnabled(cmd.hasOption(BACKUP_OPTION));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 }
