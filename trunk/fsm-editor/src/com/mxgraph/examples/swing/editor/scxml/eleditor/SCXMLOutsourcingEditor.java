@@ -132,9 +132,11 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor implements Action
 		if (cmd.equals(mxResources.get("SCXMLsrc"))) {
 			node.getSRC().setType(OUTSOURCETYPE.SRC);
 			selectRadioButtonForType();
+			node.setFake(false);
 		} else if (cmd.equals(mxResources.get("SCXMLxinclude"))) {
 			node.getSRC().setType(OUTSOURCETYPE.XINC);
 			selectRadioButtonForType();
+			node.setFake(true);
 		}
 	}
 }

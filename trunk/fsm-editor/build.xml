@@ -12,6 +12,7 @@
 		<pathelement path="${Lib}/lucene-core-3.0.1.jar"/>
 		<pathelement path="${Lib}/rsyntaxtextarea.jar"/>
 		<pathelement path="${Lib}/dom4j.jar"/>
+		<pathelement path="${Lib}/commons-cli-1.2.jar"/>
 	</path>
 
 		<!-- project paths -->
@@ -51,6 +52,7 @@
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/lucene-core-3.0.1.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/rsyntaxtextarea.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/commons-cli-1.2.jar"/>
             <fileset dir="${FSM.binaries}"/>
 		</jar>
 		<copy file="${FSM.binaries}/${FSM.archive}" todir="${FSM}/../extra/"/>

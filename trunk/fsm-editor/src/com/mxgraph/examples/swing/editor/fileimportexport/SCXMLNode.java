@@ -82,6 +82,7 @@ public class SCXMLNode implements Serializable {
 	private HashMap<String,Object> node;
 	private HashSet<OutSource> outSourcingChildren;
 	private boolean saveRoot=true;
+	private boolean isFake=false;
 	public SCXMLNode() {
 		node=new HashMap<String, Object>();
 		node.put(TYPE,NORMAL);
@@ -93,6 +94,8 @@ public class SCXMLNode implements Serializable {
 		this.setParallel(false);
 		outSourcingChildren=new HashSet<OutSource>();
 	}
+	public boolean getFake() {return isFake;}
+	public void setFake(boolean f) {isFake=f;}
 	public boolean shouldThisRootBeSaved() {
 		return !isRoot() || saveRoot;
 	}
@@ -548,6 +551,7 @@ public class SCXMLNode implements Serializable {
 		n.setNamespaceDoc(null);
 		n.setNamespaceUndoManager(null);
 		n.setID(getID());
+		n.setFake(getFake());
 		return n;
 	}
 	public void setGeometry(double x, double y, double w, double h) {

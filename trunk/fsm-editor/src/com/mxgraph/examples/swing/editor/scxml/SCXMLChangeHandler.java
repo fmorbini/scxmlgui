@@ -171,6 +171,7 @@ public class SCXMLChangeHandler {
 			srcLocationState.execute();
 			OUTSOURCETYPE currentType = node.getSRC().getType();
 			node.getSRC().setType(typeToBeRestored);
+			node.setFake(typeToBeRestored==OUTSOURCETYPE.XINC);
 			typeToBeRestored=currentType;
 		}
 	}

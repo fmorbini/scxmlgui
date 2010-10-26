@@ -91,7 +91,7 @@ public class SCXMLImportExport implements IImportExport {
 			}
 		}
 	}
-	private void setNodeAsChildrenOf(SCXMLNode node,SCXMLNode pn) {
+	private void setNodeAsChildOf(SCXMLNode node,SCXMLNode pn) {
 		if (pn!=null) {
 			// make pn a cluster and add node to its children
 			ArrayList<SCXMLNode> cluster=setThisNodeAsCluster(pn);
@@ -142,6 +142,19 @@ public class SCXMLImportExport implements IImportExport {
 		internalID2nodes.put(internalID, node);
 	}
 
+	private SCXMLNode buildAndAddBasicNodeAsChildOf(String id,SCXMLNode pn,boolean isFake) {
+		SCXMLNode node;
+		if (id.equals("") || ((node=scxmlID2nodes.get(id))==null)) {
+			node=new SCXMLNode();
+			node.setID(id);
+			addSCXMLNode(node);
+		}
+		node.setFake(isFake);
+		// see issue 7 in google code website
+		if (node!=pn) setNodeAsChildOf(node,pn);
+		return node;
+	}
+	
 	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel, Boolean isHistory) throws Exception {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
@@ -154,14 +167,7 @@ public class SCXMLImportExport implements IImportExport {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		SCXMLNode node;
-		if (nodeIDString.equals("") || ((node=scxmlID2nodes.get(nodeIDString))==null)) {
-			node=new SCXMLNode();
-			node.setID(nodeIDString);
-			addSCXMLNode(node);
-		}
-		// see issue 7 in google code website
-		if (node!=pn) setNodeAsChildrenOf(node,pn);
+		SCXMLNode node=buildAndAddBasicNodeAsChildOf(nodeIDString,pn,false);
 		if ((!isHistory) || (historyType==null)) {
 			node.setParallel(isParallel);
 			Node isInitial=null;
@@ -189,7 +195,9 @@ public class SCXMLImportExport implements IImportExport {
 				String name=a.getNodeName().toLowerCase();
 				if (name.startsWith("xmlns")) {
 					namespace+=a.getNodeName()+"=\""+a.getNodeValue()+"\"\n";
-				} else if (name.equals("src")) node.addToOutsourcingChildren(new OutSource(OUTSOURCETYPE.SRC,a.getNodeValue()));
+				} else if (name.equals("src")) {
+					setNodeAsOutsourcing(new OutSource(OUTSOURCETYPE.SRC,a.getNodeValue()), node);
+				}
 			}
 			if (!StringUtils.isEmptyString(namespace)) node.setNamespace(namespace);
 		} else {
@@ -269,7 +277,8 @@ public class SCXMLImportExport implements IImportExport {
 				location=StringUtils.cleanupSpaces(location);
 				System.out.println(location);
 				if (!StringUtils.isEmptyString(location)) {
-					pn.addToOutsourcingChildren(new OutSource(OUTSOURCETYPE.XINC,location));
+					SCXMLNode child = setNodeAsOutsourcing(new OutSource(OUTSOURCETYPE.XINC,location), pn);
+					scanChildrenOf(n,child,pwd);
 				}
 			}
 			break;
@@ -280,11 +289,25 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		return root;
 	}
+	
+	private SCXMLNode setNodeAsOutsourcing(OutSource source,SCXMLNode parent) {
+		SCXMLNode child=buildAndAddBasicNodeAsChildOf(source.getLocation(), parent, source.getType()==OUTSOURCETYPE.XINC);
+		child.setSRC(source);
+		return child;
+	}
 
+	// identifies that the outsourcing is done in a way for which we can support saving to file
+	// preserving the outsourcing to other files.
 	private void processOutsourcingChildrenForNode(SCXMLNode node,File pwd) throws Exception {
 		if (node!=null) {
 			HashSet<OutSource> outSources = node.getOutsourcingChildren();
 			if (outSources!=null) {
+				for(OutSource source:outSources) {
+					SCXMLNode child=buildAndAddBasicNodeAsChildOf(source.getLocation(), node, source.getType()==OUTSOURCETYPE.XINC);
+					child.setSRC(source);
+				}
+			}
+			/*
 				if ((outSources.size()==1) && !node.isClusterNode()) {
 					node.setSRC(outSources.iterator().next());
 				} else {
@@ -299,6 +322,7 @@ public class SCXMLImportExport implements IImportExport {
 					}
 				}
 			}
+			*/
 		}
 	}
 	
@@ -358,7 +382,7 @@ public class SCXMLImportExport implements IImportExport {
 			root=new SCXMLNode();
 			root.setID(SCXMLNode.ROOTID);
 			addSCXMLNode(root);
-			setNodeAsChildrenOf(firstChild, root);
+			setNodeAsChildOf(firstChild, root);
 			root.setSaveThisRoot(false);
 		}
 		
@@ -378,7 +402,7 @@ public class SCXMLImportExport implements IImportExport {
 
 		graph.setDefaultParent(gr);
 	}
-	private ArrayList<SCXMLNode> saveProblematicNodes=new ArrayList<SCXMLNode>();
+	private HashSet<SCXMLNode> saveProblematicNodes=new HashSet<SCXMLNode>();
 	public boolean hasUnhandledXIncludeUsage() { return !saveProblematicNodes.isEmpty(); }
 	public int displayWarningAboutUnhandledXIncludeUsage(SCXMLGraphEditor editor,boolean asQuestion) {
 		String message=mxResources.get("xincludeSaveProblem")+"\n";
@@ -565,6 +589,8 @@ public class SCXMLImportExport implements IImportExport {
 		String transitions=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
+		boolean isFake=value.getFake();
+
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
 		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
@@ -597,6 +623,7 @@ public class SCXMLImportExport implements IImportExport {
 			if (!StringUtils.isEmptyString(namespace))
 				ret+=" "+namespace;
 			if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingSRC()) {
+				assert(!isFake);
 				String src=value.getSRC().getLocation();
 				ret+=" src=\""+src+"\"";
 			}
@@ -606,27 +633,34 @@ public class SCXMLImportExport implements IImportExport {
 				ret+=" initial=\""+initialChild.getID()+"\"";
 			ret+=">";
 	
-			if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingXInclude()) {
-				String src=value.getSRC().getLocation();
-				ret+="<xi:include href=\""+src+"\" parse=\"xml\"/>";
-			}
-			
 			// save the geometric information of this node:
 			String nodeGeometry=getGeometryString(view,n);
-			if (!StringUtils.isEmptyString(nodeGeometry))
+
+			if (value.isOutsourcedNode() && value.isOutsourcedNodeUsingXInclude()) {
+				assert(isFake);
+				String src=value.getSRC().getLocation();
+				ret=((isFake)?"":ret)+"<xi:include href=\""+src+"\" parse=\"xml\">";
+				if (isFake) close="";
+				if (!StringUtils.isEmptyString(nodeGeometry))
+					ret+="<!-- "+nodeGeometry+" -->";
+				ret+="</xi:include>";
+			} else if (!StringUtils.isEmptyString(nodeGeometry))
 				ret+="<!-- "+nodeGeometry+" -->";
-			if (!StringUtils.isEmptyString(datamodel))
-				ret+="<datamodel>"+datamodel+"</datamodel>";
-			if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
-				ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
-			if (!StringUtils.isEmptyString(donedata))
-				ret+="<donedata>"+donedata+"</donedata>";
-			if (!StringUtils.isEmptyString(onentry))
-				ret+="<onentry>"+onentry+"</onentry>";
-			if (!StringUtils.isEmptyString(onexit))
-				ret+="<onexit>"+onexit+"</onexit>";
-			if (!StringUtils.isEmptyString(transitions))
-				ret+=transitions;
+			
+			if (!isFake) {
+				if (!StringUtils.isEmptyString(datamodel))
+					ret+="<datamodel>"+datamodel+"</datamodel>";
+				if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
+					ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
+				if (!StringUtils.isEmptyString(donedata))
+					ret+="<donedata>"+donedata+"</donedata>";
+				if (!StringUtils.isEmptyString(onentry))
+					ret+="<onentry>"+onentry+"</onentry>";
+				if (!StringUtils.isEmptyString(onexit))
+					ret+="<onexit>"+onexit+"</onexit>";
+				if (!StringUtils.isEmptyString(transitions))
+					ret+=transitions;
+			}
 		}
 		// add the children only if the node is not outsourced
 		if (!value.isOutsourcedNode()) {

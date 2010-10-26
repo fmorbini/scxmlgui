@@ -24,6 +24,7 @@ import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
+import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -102,49 +103,57 @@ public class SCXMLGraph extends mxGraph
 		if (model.isVertex(cell)) {
 			mxCell node=(mxCell)cell;
 			if (node.isVertex()) {
-				SCXMLNode nodeValue = (SCXMLNode)node.getValue();				
-				if (nodeValue.getID().matches(".*[\\s]+.*")) return "node name contains spaces.\n";
+				SCXMLNode nodeValue = (SCXMLNode)node.getValue();
+				String nodeValueID=nodeValue.getID();
+				if (nodeValueID.matches(".*[\\s]+.*")) return "node name contains spaces.\n";
 				// check if the executable content is parsable xml
 				String error=XMLUtils.isParsableXMLString(nodeValue.getOnEntry());
-				if (error!=null) return "OnEntry content of node "+nodeValue.getID()+" caused a parser error: "+error;
+				if (error!=null) return "OnEntry content of node "+nodeValueID+" caused a parser error: "+error;
 				error=XMLUtils.isParsableXMLString(nodeValue.getOnExit());
-				if (error!=null) return "OnExit content of node "+nodeValue.getID()+" caused a parser error: "+error;
+				if (error!=null) return "OnExit content of node "+nodeValueID+" caused a parser error: "+error;
 				error=XMLUtils.isParsableXMLString(nodeValue.getOnInitialEntry());
-				if (error!=null) return "On initial content of node "+nodeValue.getID()+" caused a parser error: "+error;
+				if (error!=null) return "On initial content of node "+nodeValueID+" caused a parser error: "+error;
 				error=XMLUtils.isParsableXMLString(nodeValue.getDoneData());
-				if (error!=null) return "Done data of node "+nodeValue.getID()+" caused a parser error: "+error;
+				if (error!=null) return "Done data of node "+nodeValueID+" caused a parser error: "+error;
 				error=XMLUtils.isParsableXMLString(nodeValue.getDatamodel());
-				if (error!=null) return "Data model of node "+nodeValue.getID()+" caused a parser error: "+error;
-				// check if the namespace has been included
-				String SCXMLid=nodeValue.getID();
-				int pos=SCXMLid.indexOf(':');
-				boolean namespaceGood=true;
-				String namespace="";
-				if (pos>0) {
-					namespaceGood=false;
-					namespace=SCXMLid.substring(0,pos);
-					mxIGraphModel model = getModel();
-					mxCell root = SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
-					SCXMLNode rootValue=(SCXMLNode) root.getValue();
-					String[] namespaces=rootValue.getNamespace().split("\n");
-
-					Pattern p = Pattern.compile("^[\\s]*xmlns:([^\\s=:]+)[\\s]*=.*$");
-					for(String ns:namespaces) {
-						Matcher m = p.matcher(ns);
-						if (m.matches() && (m.groupCount()==1)) {
-							ns=m.group(1);
-							if (namespace.equals(ns)) {
-								namespaceGood=true;
-								break;
+				if (error!=null) return "Data model of node "+nodeValueID+" caused a parser error: "+error;
+				if (!nodeValue.isOutsourcedNode()) {
+					// check if the namespace has been included
+					String SCXMLid=nodeValueID;
+					int pos=SCXMLid.indexOf(':');
+					boolean namespaceGood=true;
+					String namespace="";
+					if (pos>0) {
+						namespaceGood=false;
+						namespace=SCXMLid.substring(0,pos);
+						mxIGraphModel model = getModel();
+						mxCell root = SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
+						SCXMLNode rootValue=(SCXMLNode) root.getValue();
+						String[] namespaces=rootValue.getNamespace().split("\n");
+	
+						Pattern p = Pattern.compile("^[\\s]*xmlns:([^\\s=:]+)[\\s]*=.*$");
+						for(String ns:namespaces) {
+							Matcher m = p.matcher(ns);
+							if (m.matches() && (m.groupCount()==1)) {
+								ns=m.group(1);
+								if (namespace.equals(ns)) {
+									namespaceGood=true;
+									break;
+								}
 							}
 						}
 					}
+					if (!namespaceGood) return "Namespace '"+namespace+"' is used but not defined.\n";
 				}
-				if (!namespaceGood) return "Namespace '"+namespace+"' is used but not defined.\n";
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
-				if (!StringUtils.isEmptyString(nodeValue.getID()))
-					if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name: "+nodeValue.getID()+"\n";
-					else gc.addSCXMLNode(nodeValue,node);
+				if (!StringUtils.isEmptyString(nodeValueID)) {
+					mxICell parent=node.getParent();
+					SCXMLNode parentValue=null;
+					if (parent==null || ((parentValue=(SCXMLNode)parent.getValue())==null) || !parentValue.getFake() || !nodeValueID.equals(SCXMLNode.ROOTID)) {
+						if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name: "+nodeValueID+"\n";
+						else gc.addSCXMLNode(nodeValue,node);
+					}
+				}
 				if (nodeValue.isClusterNode()) {
 					int numInitialChildren=0;
 					int numOutGoingTransitions=0;
@@ -156,13 +165,13 @@ public class SCXMLGraph extends mxGraph
 							if (cValue.isInitial()) {
 								numInitialChildren++;
 							}
-							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes ("+nodeValue.getID()+") don't support a child marked as intiial.\n";
-							//if (numInitialChildren>1) return "More than 1 children of "+nodeValue.getID()+" is marked as initial.\n";
+							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes ("+nodeValueID+") don't support a child marked as intiial.\n";
+							//if (numInitialChildren>1) return "More than 1 children of "+nodeValueID+" is marked as initial.\n";
 						} else {
 							if (nodeValue.isHistoryNode()) {
 								if (c.getSource().equals(node)) {
 									numOutGoingTransitions++;
-									if (numOutGoingTransitions>1) return "History node '"+nodeValue.getID()+"' has more than 1 outgoing transition.\n";
+									if (numOutGoingTransitions>1) return "History node '"+nodeValueID+"' has more than 1 outgoing transition.\n";
 									if (!StringUtils.isEmptyString(((SCXMLEdge)c.getValue()).getCondition()) ||
 											!StringUtils.isEmptyString(((SCXMLEdge)c.getValue()).getEvent())) {
 										return "Outgoing transition of history node has non null event or condition.\n";
