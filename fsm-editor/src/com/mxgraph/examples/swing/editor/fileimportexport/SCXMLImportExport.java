@@ -291,7 +291,8 @@ public class SCXMLImportExport implements IImportExport {
 	}
 	
 	private SCXMLNode setNodeAsOutsourcing(OutSource source,SCXMLNode parent) {
-		SCXMLNode child=buildAndAddBasicNodeAsChildOf(source.getLocation(), parent, source.getType()==OUTSOURCETYPE.XINC);
+		String nodeName=(source.getType()==OUTSOURCETYPE.XINC)?source.getLocation():parent.getID();
+		SCXMLNode child=buildAndAddBasicNodeAsChildOf(nodeName, parent, source.getType()==OUTSOURCETYPE.XINC);
 		child.setSRC(source);
 		return child;
 	}
