@@ -497,8 +497,10 @@ public class SCXMLGraph extends mxGraph
 				SCXMLChangeHandler.addStateOfNodeInCurrentEdit((mxCell) terminal, model);
 				reOrderOutgoingEdges((mxCell) terminal);
 			}
+			SCXMLEdge edgeValue=(SCXMLEdge) ((mxCell)edge).getValue();
 			// Synchronize the source and targets stored in the value of the modified edge with the graphical properties here updated.
-			updateConnectionOfSCXMLEdge((SCXMLEdge) ((mxCell)edge).getValue(),(source)?terminal:null,(source)?null:terminal,previous);
+			updateConnectionOfSCXMLEdge(edgeValue,(source)?terminal:null,(source)?null:terminal,previous);
+			setCellStyle(edgeValue.getStyle(),edge);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
