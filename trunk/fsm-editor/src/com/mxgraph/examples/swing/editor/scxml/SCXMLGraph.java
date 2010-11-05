@@ -500,6 +500,7 @@ public class SCXMLGraph extends mxGraph
 			SCXMLEdge edgeValue=(SCXMLEdge) ((mxCell)edge).getValue();
 			// Synchronize the source and targets stored in the value of the modified edge with the graphical properties here updated.
 			updateConnectionOfSCXMLEdge(edgeValue,(source)?terminal:null,(source)?null:terminal,previous);
+			// update edge style
 			setCellStyle(edgeValue.getStyle(),edge);
 		} catch (Exception e) {
 			e.printStackTrace();

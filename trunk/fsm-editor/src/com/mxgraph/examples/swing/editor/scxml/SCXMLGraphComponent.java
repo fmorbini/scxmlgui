@@ -20,6 +20,7 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.handler.mxGraphHandler;
 import com.mxgraph.swing.handler.mxGraphTransferHandler;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
@@ -46,7 +47,7 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 		setWheelScrollingEnabled(false);
 		
 		//addComponentListener(this);
-		setDragEnabled(false);
+		setDragEnabled(true);
 		
 		// Sets switches typically used in an editor
 		setPageVisible(false);
@@ -167,6 +168,12 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 	{
 		return new SCXMLTransferHandler();
 	}
+	
+	@Override
+	protected mxGraphHandler createGraphHandler() {
+		return new SCXMLGraphHandler(this);
+	}
+	
 	/*
 	@Override
 	public void componentHidden(ComponentEvent e) {
