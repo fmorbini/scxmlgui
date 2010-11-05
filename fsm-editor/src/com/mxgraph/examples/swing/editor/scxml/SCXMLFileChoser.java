@@ -61,6 +61,7 @@ public class SCXMLFileChoser extends JFileChooser {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			editor.preferences.putBoolean(PREFERENCE_IGNORE_STORED_LAYOUT, e.getStateChange()==ItemEvent.SELECTED);
+			editor.updateIgnoreStoredLayoutMenuState();
 		}
 	}
 }
