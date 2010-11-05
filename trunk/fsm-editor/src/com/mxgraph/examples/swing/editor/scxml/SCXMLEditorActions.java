@@ -12,6 +12,7 @@ package com.mxgraph.examples.swing.editor.scxml;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -305,6 +306,21 @@ public class SCXMLEditorActions
 			} finally {
 				model.endUpdate();
 			}
+		}
+	}
+
+	public static class ToggleIgnoreStoredLayout extends AbstractAction
+	{
+		public static boolean isSelected(SCXMLGraphEditor editor) {
+			return editor.preferences.getBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT, true);
+		}
+		
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			boolean ignoreStoredLayout=isSelected(editor);
+			editor.preferences.putBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT,!ignoreStoredLayout);
+			editor.updateIgnoreStoredLayoutMenuState();
 		}
 	}
 

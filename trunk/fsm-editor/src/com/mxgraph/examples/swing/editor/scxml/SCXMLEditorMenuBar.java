@@ -21,9 +21,10 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.HistoryAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.NewSCXMLAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLFindTool;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContent;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleIgnoreStoredLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.util.mxResources;
@@ -163,6 +164,13 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		menu.removeAll();
 		menu.add(editor.bind(mxResources.get("newscxml"), new NewSCXMLAction(),"/com/mxgraph/examples/swing/images/new.gif"));
 		menu.add(editor.bind(mxResources.get("openFile"), new OpenAction(),"/com/mxgraph/examples/swing/images/open.gif"));
+		menu.add(editor.bind(mxResources.get("openFileInNewWindow"), new OpenAction(true)));
+		JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(editor.bind(mxResources.get("ignoreStoredLayout"), new ToggleIgnoreStoredLayout()));
+		menuItem.setUI(new StayOpenCheckBoxMenuItemUI());
+		menuItem.setSelected(ToggleIgnoreStoredLayout.isSelected(editor));
+		menu.add(menuItem);
+		editor.setIgnoreStoredLayoutMenu(menuItem);
+
 		menu.addSeparator();
 		menu.add(editor.bind(mxResources.get("save"), new SaveAction(false),"/com/mxgraph/examples/swing/images/save.gif"));
 		menu.add(editor.bind(mxResources.get("saveAs"), new SaveAction(true),"/com/mxgraph/examples/swing/images/saveas.gif"));

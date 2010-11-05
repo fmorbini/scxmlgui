@@ -62,6 +62,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleIgnoreStoredLayout;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
@@ -203,6 +204,14 @@ public class SCXMLGraphEditor extends JPanel
 			redo.setEnabled(undoManager.canRedo());
 		if (undo!=null)
 			undo.setEnabled(undoManager.canUndo());
+	}
+	private JCheckBoxMenuItem ignoreStoredLayout;
+	public void setIgnoreStoredLayoutMenu(JCheckBoxMenuItem menuItem) {
+		this.ignoreStoredLayout=menuItem;
+		updateIgnoreStoredLayoutMenuState();
+	}
+	public void updateIgnoreStoredLayoutMenuState() {
+		if (ignoreStoredLayout!=null) ignoreStoredLayout.setSelected(ToggleIgnoreStoredLayout.isSelected(this));
 	}
 
 	public SCXMLListener getSCXMLListener() {
