@@ -56,7 +56,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 		tabbedPane = new JTabbedPane();
 
 		DocumentChangeListener changeListener = new DocumentChangeListener(editor);
-
+		mxCell nnParent=(mxCell) nn.getParent();
 		if (nn!=rootOfGraph) {
 			undo=node.getIDUndoManager();
 			doc=node.getIDDoc();
@@ -117,7 +117,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				tabbedPane.addTab(mxResources.get("finalDataTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 			}
-			if (node.isInitial() && !node.getFake()) {
+			if (node.isInitial() && !node.getFake() && (nnParent!=rootOfGraph)) {
 				undo=node.getOnInitialEntryUndoManager();
 				doc=node.getOnInitialEntryDoc();
 				initialTextPane=new UndoJTextPane(node.getOnInitialEntry(), doc, undo, keyboardHandler);

@@ -652,7 +652,11 @@ public class SCXMLImportExport implements IImportExport {
 				if (!StringUtils.isEmptyString(datamodel))
 					ret+="<datamodel>"+datamodel+"</datamodel>";
 				if ((!StringUtils.isEmptyString(oninitialentry)) && (initialChild!=null))
-					ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
+					if (isRoot) {
+						System.out.println("Ignoring executable content for initial child of root: "+initialChild);
+					} else {
+						ret+="<initial><transition target=\""+initialChild.getID()+"\">"+oninitialentry+"</transition></initial>";
+					}
 				if (!StringUtils.isEmptyString(donedata))
 					ret+="<donedata>"+donedata+"</donedata>";
 				if (!StringUtils.isEmptyString(onentry))

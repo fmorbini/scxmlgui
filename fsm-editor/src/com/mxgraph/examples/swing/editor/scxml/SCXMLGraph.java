@@ -166,7 +166,7 @@ public class SCXMLGraph extends mxGraph
 								numInitialChildren++;
 							}
 							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes ("+nodeValueID+") don't support a child marked as intiial.\n";
-							//if (numInitialChildren>1) return "More than 1 children of "+nodeValueID+" is marked as initial.\n";
+							if (numInitialChildren>1) return "More than 1 children of "+nodeValueID+" is marked as initial.\n";
 						} else {
 							if (nodeValue.isHistoryNode()) {
 								if (c.getSource().equals(node)) {
