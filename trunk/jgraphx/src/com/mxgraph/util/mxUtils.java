@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -304,6 +305,7 @@ public class mxUtils
 		return new mxRectangle(x, y, width, height);
 	}
 
+	private static final HashMap<Font,Rectangle2D> maxLetterSize=new HashMap<Font, Rectangle2D>();
 	/**
 	 * Returns an <mxRectangle> with the size (width and height in pixels) of
 	 * the given string.
@@ -322,50 +324,32 @@ public class mxUtils
 			Dimension pSize = textArea.getPreferredSize();
 
 			return new mxRectangle(0, 0, pSize.getWidth(), pSize.getHeight());
+		} else {
+			Rectangle2D oneLetterSize=maxLetterSize.get(font);
+			if (oneLetterSize==null) maxLetterSize.put(font, oneLetterSize=getOneLetterSize(font));
+			int[] textSize=getTextSize(text);
+			textSize[0]*=oneLetterSize.getWidth();
+			textSize[1]*=oneLetterSize.getHeight()*1.27;
+			return new mxRectangle(0, 0, textSize[0], textSize[1]);
 		}
-		else
-		{
-			FontRenderContext frc = new FontRenderContext(null, false, false);
-			FontMetrics metrics = null;
-
-			if (fontGraphics != null)
-			{
-				metrics = fontGraphics.getFontMetrics(font);
-			}
-
-			double lineHeight = mxConstants.LINESPACING;
-
-			if (metrics != null)
-			{
-				lineHeight += metrics.getHeight();
-			}
-			else
-			{
-				lineHeight += font.getSize2D() * 1.27;
-			}
-
-			String[] lines = text.split("\n");
-			Rectangle2D boundingBox = null;
-
-			for (int i = 0; i < lines.length; i++)
-			{
-				GlyphVector gv = font.createGlyphVector(frc, lines[i]);
-				Rectangle2D bounds = gv.getVisualBounds();
-
-				if (boundingBox == null)
-				{
-					boundingBox = bounds;
-				}
-				else
-				{
-					boundingBox.setFrame(0, 0, Math.max(boundingBox.getWidth(),
-							bounds.getWidth()), boundingBox.getHeight()
-							+ lineHeight);
-				}
-			}
-			if (boundingBox==null) boundingBox=new Rectangle(0, 0);
-			return new mxRectangle(boundingBox);
+	}
+	
+	public static Rectangle2D getOneLetterSize(Font font) {
+		FontRenderContext frc = new FontRenderContext(null, false, false);
+		GlyphVector gv = font.createGlyphVector(frc, "T");
+		return gv.getVisualBounds();
+	}
+	
+	public static int[] getTextSize(String text) {
+		int[] ret=new int[]{0,0};
+		if ((text!=null) && (text.length()>0)) {
+			String[] lines=text.split("\\r?\\n");
+			int h=0;
+			for (String l:lines) h=Math.max(h, l.length());
+			ret[0]=h;
+			ret[1]=lines.length;
 		}
+		return ret;
 	}
 
 	/**
