@@ -38,6 +38,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	private UndoJTextPane finalTextPane;
 	private UndoJTextPane namespacePane;
 	private UndoJTextPane datamodelPane;
+	private UndoJTextPane commentsPane;
 	private MyUndoManager undo;
 	private Document doc;
 	private SCXMLNode node;
@@ -69,7 +70,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 			scxmlIDTextPane.setMargin(new Insets(5,5,5,5));
 			JScrollPane scrollPane = new JScrollPane(scxmlIDTextPane);
 			scrollPane.setPreferredSize(new Dimension(400, 200));
-			tabbedPane.addTab("SCXML ID", scrollPane);
+			tabbedPane.addTab(mxResources.get("nodeIDTAB"), scrollPane);
 			doc.addDocumentListener(changeListener);
 
 			if (!node.isHistoryNode() && !node.getFake()) {
@@ -162,6 +163,21 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	        tabbedPane.addTab(mxResources.get("namespaceTAB"), scrollPane);
 	        doc.addDocumentListener(changeListener);
         }
+		if (nn!=rootOfGraph) {
+			undo=node.getCommentsUndoManager();
+			doc=node.getCommentsDoc();
+			commentsPane=new UndoJTextPane(node.getComments(), doc, undo, keyboardHandler);
+			if (doc==null) {
+				node.setCommentsDoc(doc=commentsPane.getDocument());
+				node.setCommentsUndoManager(undo=commentsPane.getUndoManager());
+			}
+			commentsPane.setCaretPosition(0);
+			commentsPane.setMargin(new Insets(5,5,5,5));
+			JScrollPane scrollPane = new JScrollPane(commentsPane);
+			scrollPane.setPreferredSize(new Dimension(400, 200));
+			tabbedPane.addTab(mxResources.get("commentsTAB"), scrollPane);
+			doc.addDocumentListener(changeListener);
+		}
 
         tabbedPane.setSelectedIndex(0);
         updateActionTable(tabbedPane,actions);

@@ -51,6 +51,10 @@ public class SCXMLNode implements Serializable {
 	public static final String DEEPHISTORYFILLCOLOR="#bb00a6";
 	public static final String SHALLOWHISTORYFILLCOLOR="#dd6fd1";
 	
+	public static final String COMMENTS="comments";
+	public static final String COMMENTSUNDO="COundo";
+	public static final String COMMENTSDOC="COdoc";
+
 	public static final String DATAMODELUNDO="DMundo";
 	public static final String DATAMODELDOC="DMdoc";
 	
@@ -308,6 +312,37 @@ public class SCXMLNode implements Serializable {
 			ret=(String)node.get(DATAMODEL);
 		return (ret==null)?"":ret;
 	}
+	public MyUndoManager getCommentsUndoManager() {
+		return (MyUndoManager) node.get(COMMENTSUNDO);
+	}
+	public MyUndoManager setCommentsUndoManager(MyUndoManager um) {
+		node.put(COMMENTSUNDO,um);
+		return um;
+	}
+	public Document getCommentsDoc() {
+		return (Document) node.get(COMMENTSDOC);
+	}
+	public Document setCommentsDoc(Document doc) {
+		node.put(COMMENTSDOC,doc);
+		return doc;
+	}
+	public void setComments(String cm) {
+		node.put(COMMENTS,cm);
+	}
+	public String getComments() {
+		String ret=null;
+		Document dmd = getCommentsDoc();
+		if (dmd!=null) {
+			try {
+				ret=dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				ret=(String)node.get(COMMENTS);
+			}
+		}
+		else
+			ret=(String)node.get(COMMENTS);
+		return (ret==null)?"":ret;
+	}
 	public void setParallel(boolean b) {
 		this.setFillColor((isInitial())?INITIALFILLCOLOR:((b)?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
 		this.setStrokeColor((isFinal())?FINALSTROKECOLOR:((b)?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
@@ -530,6 +565,9 @@ public class SCXMLNode implements Serializable {
 		n.setDatamodelDoc(null);
 		n.setDatamodelUndoManager(null);
 		n.setDatamodel(getDatamodel());
+		n.setCommentsDoc(null);
+		n.setCommentsUndoManager(null);
+		n.setComments(getComments());
 		n.setDoneDataDoc(null);
 		n.setDoneDataUndoManager(null);
 		n.setDoneData(getDoneData());

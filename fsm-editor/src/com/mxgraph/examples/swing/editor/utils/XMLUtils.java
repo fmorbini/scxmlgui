@@ -88,9 +88,9 @@ public class XMLUtils {
 		case Node.TEXT_NODE:
 			ret+=(escapeStrings)?escapeStringForXML(node.getNodeValue()):node.getNodeValue();
 			break;
-//		case Node.COMMENT_NODE:
-//			ret+="<!--"+node.getNodeValue()+"-->";
-//			break;
+		case Node.COMMENT_NODE:
+			ret+="<!--"+node.getNodeValue()+"-->";
+			break;
 		}
 		return ret;
 	}

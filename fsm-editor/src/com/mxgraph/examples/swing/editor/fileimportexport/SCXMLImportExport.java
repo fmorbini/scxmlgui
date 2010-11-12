@@ -61,11 +61,11 @@ public class SCXMLImportExport implements IImportExport {
 			return tot;
 		}
 	}
-	private void addEdge(HashMap<String,Object> ec) throws Exception {
+	private SCXMLEdge addEdge(HashMap<String,Object> ec) throws Exception {
 		System.out.println("add edge: "+ec.get(SCXMLEdge.SOURCE)+"->"+ec.get(SCXMLEdge.TARGETS));
-		addEdge((String)ec.get(SCXMLEdge.SOURCE),(ArrayList<String>) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE),(HashMap<String,String>)ec.get(SCXMLEdge.EDGEGEO));
+		return addEdge((String)ec.get(SCXMLEdge.SOURCE),(ArrayList<String>) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE),(HashMap<String,String>)ec.get(SCXMLEdge.EDGEGEO));
 	}
-	private void addEdge(String SCXMLfromID,ArrayList<String> targets,String cond,String event,String content, HashMap<String, String> geometry) throws Exception {
+	private SCXMLEdge addEdge(String SCXMLfromID,ArrayList<String> targets,String cond,String event,String content, HashMap<String, String> geometry) throws Exception {
 		SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,targets,cond, event, content,geometry);
 		edge.setInternalID(getNextInternalID());
 		int oe=getNumEdgesFrom(SCXMLfromID);
@@ -90,6 +90,7 @@ public class SCXMLImportExport implements IImportExport {
 				edges.add(edge);
 			}
 		}
+		return edge;
 	}
 	private void setNodeAsChildOf(SCXMLNode node,SCXMLNode pn) {
 		if (pn!=null) {
@@ -214,6 +215,22 @@ public class SCXMLImportExport implements IImportExport {
 			getNodeHier(n, pn,pwd);
 		}
 	}
+	private static String[] commentsCollector=new String[]{""};
+	private Object addCommentsAndResetCollectorTo(Object thing) throws Exception {
+		if (!StringUtils.isEmptyString(commentsCollector[0])) {
+			if (thing instanceof SCXMLNode) {
+				((SCXMLNode)thing).setComments(commentsCollector[0]);
+			} else if (thing instanceof SCXMLEdge) {
+				((SCXMLEdge)thing).setComments(commentsCollector[0]);
+			} else if (thing instanceof String) {
+				thing=((String)thing).concat("<!--"+commentsCollector[0]+"-->");
+			} else {
+				throw new Exception("Tried to add comments to unexpected thing: "+thing);
+			}
+			commentsCollector[0]="";
+		}
+		return thing;
+	}
 	public SCXMLNode getNodeHier(Node n, SCXMLNode pn, File pwd) throws Exception {
 		SCXMLNode root=null;
 		switch (n.getNodeType()) {
@@ -224,13 +241,16 @@ public class SCXMLImportExport implements IImportExport {
 			boolean isHistory=false;
 			if (name.equals(SCXMLNode.ROOTID.toLowerCase())||name.equals("state")||(isParallel=name.equals("parallel"))||(isHistory=name.equals("history"))) {
 				root = handleSCXMLNode(n,pn,isParallel,isHistory);
+				addCommentsAndResetCollectorTo(root);
 				// continue recursion on the children of this node
 				scanChildrenOf(n, root,pwd);
 				processOutsourcingChildrenForNode(root, pwd);
 			} else if (name.equals("transition")) {
-				addEdge(processEdge(pn,n));
+				SCXMLEdge edge = addEdge(processEdge(pn,n));
+				addCommentsAndResetCollectorTo(edge);
 			} else if (name.equals("final")) {
 				SCXMLNode node = handleSCXMLNode(n,pn,isParallel,false);
+				addCommentsAndResetCollectorTo(node);
 				node.setFinal(true);
 				scanChildrenOf(n, node,pwd);
 			} else if (name.equals("initial")) {
@@ -283,8 +303,10 @@ public class SCXMLImportExport implements IImportExport {
 			}
 			break;
 		case Node.COMMENT_NODE:
-			String positionString=n.getNodeValue();
-			readNodeGeometry(pn,positionString);
+			String nodeValueString=n.getNodeValue();
+			if (!readNodeGeometry(pn,nodeValueString)) {
+				commentsCollector[0]+=nodeValueString;
+			}
 			break;
 		}
 		return root;
@@ -350,7 +372,7 @@ public class SCXMLImportExport implements IImportExport {
 		ret.put(SCXMLEdge.EDGEGEO,edgeGeometry);
 		return ret;
 	}
-	private String collectAllChildrenInString(Node n) {
+	private String collectAllChildrenInString(Node n) throws Exception {
 		String content="";
 		NodeList list = n.getChildNodes();
 		int listLength = list.getLength();
@@ -588,10 +610,12 @@ public class SCXMLImportExport implements IImportExport {
 		String oninitialentry=null;
 		String donedata=null;
 		String transitions=null;
+		String comments=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
 		boolean isFake=value.getFake();
 
+		comments=StringUtils.removeLeadingAndTrailingSpaces(value.getComments());
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
 		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
@@ -619,6 +643,10 @@ public class SCXMLImportExport implements IImportExport {
 			} else {
 				ret="<state";
 				close="</state>";
+			}
+			if (!StringUtils.isEmptyString(comments)) {
+				if (!isRoot) ret="<!--"+comments+"-->\n"+ret;
+				else System.out.println("BUG: Ignoring comment associated to SCXML root.");
 			}
 			String namespace=StringUtils.removeLeadingAndTrailingSpaces(value.getNamespace().replace("\n", " "));
 			if (!StringUtils.isEmptyString(namespace))
@@ -728,7 +756,7 @@ public class SCXMLImportExport implements IImportExport {
 	public static final Pattern offsetPattern=Pattern.compile(offsetPatternString);
 	private static final Pattern nodesizePattern = Pattern.compile("[\\s]*node-size-and-position[\\s]*"+xyPatternString+"[\\s]*w=("+numberPattern+")[\\s]*h=("+numberPattern+")[\\s]*");
 	public static final Pattern edgepathPattern = Pattern.compile("[\\s]*edge-path[\\s]*\\[(.*)\\](("+xyPatternString+")*[\\s]*("+offsetPatternString+")*)[\\s]*");
-	private void readNodeGeometry(SCXMLNode pn, String positionString) {
+	private boolean readNodeGeometry(SCXMLNode pn, String positionString) {
 		Matcher m = nodesizePattern.matcher(positionString);		
 		if (m.matches() && (m.groupCount()==4)) {
 			try {
@@ -737,9 +765,11 @@ public class SCXMLImportExport implements IImportExport {
 				double w=Double.parseDouble(m.group(3));
 				double h=Double.parseDouble(m.group(4));
 				((SCXMLNode) pn).setGeometry(x,y,w,h);
+				return true;
 			} catch (Exception e) {
 			}
 		}
+		return false;
 	}
 	private HashMap<String,String> readEdgeGeometry(Node root) {
 		// this will search for all geometries available (one geometry for each edge target)
@@ -753,6 +783,7 @@ public class SCXMLImportExport implements IImportExport {
 				Matcher m = edgepathPattern.matcher(comment);
 				if (m.matches()) {
 					ret.put(m.group(1),m.group(2));
+					root.removeChild(n); // remove the used comment node
 				}
 				break;
 			}
@@ -790,7 +821,11 @@ public class SCXMLImportExport implements IImportExport {
 					String cond=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getCondition()));
 					String event=XMLUtils.escapeStringForXML(StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getEvent()));
 					String exe=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getExe());
+					String comments=StringUtils.removeLeadingAndTrailingSpaces(edgeValue.getComments());
 					ret="<transition";
+					if (!StringUtils.isEmptyString(comments)) {
+						ret="<!--"+comments+"-->\n"+ret;
+					}
 					if (!StringUtils.isEmptyString(event))
 						ret+=" event=\""+event+"\"";
 					if (!StringUtils.isEmptyString(cond))

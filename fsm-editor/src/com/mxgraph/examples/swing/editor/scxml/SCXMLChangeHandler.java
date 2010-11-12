@@ -225,12 +225,12 @@ public class SCXMLChangeHandler {
 		}
 	}
 	
-	private static Method getSRC,getID,getOnEntry,getOnExit,getOnInitialEntry,getDoneData,getDatamodel,getNamespace,getExe,getCondition,getEvent;
-	private static Method getSRCDoc,getIDDoc,getOnEntryDoc,getOnExitDoc,getOnInitialEntryDoc,getDoneDataDoc,getDatamodelDoc,getNamespaceDoc,getExeDoc,getConditionDoc,getEventDoc;
-	private static Method getSRCUndoManager,getIDUndoManager,getOnEntryUndoManager,getOnExitUndoManager,getOnInitialEntryUndoManager,getDoneDataUndoManager,getDatamodelUndoManager,getNamespaceUndoManager,getExeUndoManager,getConditionUndoManager,getEventUndoManager;
-	private static Method setSRC,setID,setOnEntry,setOnExit,setOnInitialEntry,setDoneData,setDatamodel,setNamespace,setExe,setCondition,setEvent;
-	private static Method setSRCDoc,setIDDoc,setOnEntryDoc,setOnExitDoc,setOnInitialEntryDoc,setDoneDataDoc,setDatamodelDoc,setNamespaceDoc,setExeDoc,setConditionDoc,setEventDoc;
-	private static Method setSRCUndoManager,setIDUndoManager,setOnEntryUndoManager,setOnExitUndoManager,setOnInitialEntryUndoManager,setDoneDataUndoManager,setDatamodelUndoManager,setNamespaceUndoManager,setExeUndoManager,setConditionUndoManager,setEventUndoManager;
+	private static Method getSRC,getID,getOnEntry,getOnExit,getOnInitialEntry,getDoneData,getDatamodel,getNamespace,getExe,getCondition,getEvent,getNodeComments,getEdgeComments;
+	private static Method getSRCDoc,getIDDoc,getOnEntryDoc,getOnExitDoc,getOnInitialEntryDoc,getDoneDataDoc,getDatamodelDoc,getNamespaceDoc,getExeDoc,getConditionDoc,getEventDoc,getNodeCommentsDoc,getEdgeCommentsDoc;
+	private static Method getSRCUndoManager,getIDUndoManager,getOnEntryUndoManager,getOnExitUndoManager,getOnInitialEntryUndoManager,getDoneDataUndoManager,getDatamodelUndoManager,getNamespaceUndoManager,getExeUndoManager,getConditionUndoManager,getEventUndoManager,getNodeCommentsUndoManager,getEdgeCommentsUndoManager;
+	private static Method setSRC,setID,setOnEntry,setOnExit,setOnInitialEntry,setDoneData,setDatamodel,setNamespace,setExe,setCondition,setEvent,setNodeComments,setEdgeComments;
+	private static Method setSRCDoc,setIDDoc,setOnEntryDoc,setOnExitDoc,setOnInitialEntryDoc,setDoneDataDoc,setDatamodelDoc,setNamespaceDoc,setExeDoc,setConditionDoc,setEventDoc,setNodeCommentsDoc,setEdgeCommentsDoc;
+	private static Method setSRCUndoManager,setIDUndoManager,setOnEntryUndoManager,setOnExitUndoManager,setOnInitialEntryUndoManager,setDoneDataUndoManager,setDatamodelUndoManager,setNamespaceUndoManager,setExeUndoManager,setConditionUndoManager,setEventUndoManager,setNodeCommentsUndoManager,setEdgeCommentsUndoManager;
 	static {
 		try {
 			//getters
@@ -245,6 +245,9 @@ public class SCXMLChangeHandler {
 			getExe=SCXMLEdge.class.getDeclaredMethod("getExe");			
 			getCondition=SCXMLEdge.class.getDeclaredMethod("getCondition");			
 			getEvent=SCXMLEdge.class.getDeclaredMethod("getEvent");			
+			getNodeComments=SCXMLNode.class.getDeclaredMethod("getComments");
+			getEdgeComments=SCXMLEdge.class.getDeclaredMethod("getComments");
+
 			getSRCDoc=SCXMLNode.class.getDeclaredMethod("getSRCDoc");
 			getIDDoc=SCXMLNode.class.getDeclaredMethod("getIDDoc");
 			getOnEntryDoc=SCXMLNode.class.getDeclaredMethod("getOnEntryDoc");
@@ -256,6 +259,9 @@ public class SCXMLChangeHandler {
 			getExeDoc=SCXMLEdge.class.getDeclaredMethod("getExeDoc");			
 			getConditionDoc=SCXMLEdge.class.getDeclaredMethod("getConditionDoc");			
 			getEventDoc=SCXMLEdge.class.getDeclaredMethod("getEventDoc");			
+			getNodeCommentsDoc=SCXMLNode.class.getDeclaredMethod("getCommentsDoc");
+			getEdgeCommentsDoc=SCXMLEdge.class.getDeclaredMethod("getCommentsDoc");
+			
 			getSRCUndoManager=SCXMLNode.class.getDeclaredMethod("getSRCUndoManager");
 			getIDUndoManager=SCXMLNode.class.getDeclaredMethod("getIDUndoManager");
 			getOnEntryUndoManager=SCXMLNode.class.getDeclaredMethod("getOnEntryUndoManager");
@@ -267,6 +273,8 @@ public class SCXMLChangeHandler {
 			getExeUndoManager=SCXMLEdge.class.getDeclaredMethod("getExeUndoManager");			
 			getConditionUndoManager=SCXMLEdge.class.getDeclaredMethod("getConditionUndoManager");			
 			getEventUndoManager=SCXMLEdge.class.getDeclaredMethod("getEventUndoManager");			
+			getNodeCommentsUndoManager=SCXMLNode.class.getDeclaredMethod("getCommentsUndoManager");
+			getEdgeCommentsUndoManager=SCXMLEdge.class.getDeclaredMethod("getCommentsUndoManager");
 			//setters
 			setSRC=SCXMLNode.class.getDeclaredMethod("setOutsourcedLocation",String.class);
 			setID=SCXMLNode.class.getDeclaredMethod("setID",String.class);
@@ -279,6 +287,9 @@ public class SCXMLChangeHandler {
 			setExe=SCXMLEdge.class.getDeclaredMethod("setExe",String.class);			
 			setCondition=SCXMLEdge.class.getDeclaredMethod("setCondition",String.class);			
 			setEvent=SCXMLEdge.class.getDeclaredMethod("setEvent",String.class);			
+			setNodeComments=SCXMLNode.class.getDeclaredMethod("setComments",String.class);
+			setEdgeComments=SCXMLEdge.class.getDeclaredMethod("setComments",String.class);
+
 			setSRCDoc=SCXMLNode.class.getDeclaredMethod("setSRCDoc",Document.class);
 			setIDDoc=SCXMLNode.class.getDeclaredMethod("setIDDoc",Document.class);
 			setOnEntryDoc=SCXMLNode.class.getDeclaredMethod("setOnEntryDoc",Document.class);
@@ -290,6 +301,9 @@ public class SCXMLChangeHandler {
 			setExeDoc=SCXMLEdge.class.getDeclaredMethod("setExeDoc",Document.class);			
 			setConditionDoc=SCXMLEdge.class.getDeclaredMethod("setConditionDoc",Document.class);			
 			setEventDoc=SCXMLEdge.class.getDeclaredMethod("setEventDoc",Document.class);			
+			setNodeCommentsDoc=SCXMLNode.class.getDeclaredMethod("setCommentsDoc",Document.class);
+			setEdgeCommentsDoc=SCXMLEdge.class.getDeclaredMethod("setCommentsDoc",Document.class);
+
 			setSRCUndoManager=SCXMLNode.class.getDeclaredMethod("setSRCUndoManager",MyUndoManager.class);
 			setIDUndoManager=SCXMLNode.class.getDeclaredMethod("setIDUndoManager",MyUndoManager.class);
 			setOnEntryUndoManager=SCXMLNode.class.getDeclaredMethod("setOnEntryUndoManager",MyUndoManager.class);
@@ -300,7 +314,9 @@ public class SCXMLChangeHandler {
 			setNamespaceUndoManager=SCXMLNode.class.getDeclaredMethod("setNamespaceUndoManager",MyUndoManager.class);			
 			setExeUndoManager=SCXMLEdge.class.getDeclaredMethod("setExeUndoManager",MyUndoManager.class);			
 			setConditionUndoManager=SCXMLEdge.class.getDeclaredMethod("setConditionUndoManager",MyUndoManager.class);			
-			setEventUndoManager=SCXMLEdge.class.getDeclaredMethod("setEventUndoManager",MyUndoManager.class);			
+			setEventUndoManager=SCXMLEdge.class.getDeclaredMethod("setEventUndoManager",MyUndoManager.class);
+			setNodeCommentsUndoManager=SCXMLNode.class.getDeclaredMethod("setCommentsUndoManager",MyUndoManager.class);
+			setEdgeCommentsUndoManager=SCXMLEdge.class.getDeclaredMethod("setCommentsUndoManager",MyUndoManager.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -325,6 +341,7 @@ public class SCXMLChangeHandler {
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getDoneData,getDoneDataDoc,getDoneDataUndoManager,setDoneData,setDoneDataDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getDatamodel,getDatamodelDoc,getDatamodelUndoManager,setDatamodel,setDatamodelDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getNamespace,getNamespaceDoc,getNamespaceUndoManager,setNamespace,setNamespaceDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getNodeComments,getNodeCommentsDoc,getNodeCommentsUndoManager,setNodeComments,setNodeCommentsDoc));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -337,6 +354,7 @@ public class SCXMLChangeHandler {
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getEvent,getEventDoc,getEventUndoManager,setEvent,setEventDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getCondition,getConditionDoc,getConditionUndoManager,setCondition,setConditionDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getExe,getExeDoc,getExeUndoManager,setExe,setExeDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLEdge>(edge,getEdgeComments,getEdgeCommentsDoc,getEdgeCommentsUndoManager,setEdgeComments,setEdgeCommentsDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLWithTargetEdgeProperty(edge));
 			} catch (Exception e) {
 				e.printStackTrace();
