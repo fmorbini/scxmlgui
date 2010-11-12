@@ -11,8 +11,8 @@ package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,10 +31,9 @@ import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.Type;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.IOUtils;
@@ -124,7 +123,9 @@ public class SCXMLEditorActions
 			model.beginUpdate();
 			try {
 				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(source, model);
-				new SCXMLOutEdgeOrderEditor(frame,source,editor,pos);
+				editor.openElementEditorFor(source, Type.OUTGOING_EDGE_ORDER, pos);
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			} finally {
 				model.endUpdate();
 			}
@@ -149,7 +150,9 @@ public class SCXMLEditorActions
 			model.beginUpdate();
 			try {
 				SCXMLChangeHandler.addStateOfEdgeInCurrentEdit(cell, model);
-				new SCXMLEdgeEditor(frame,cell,(SCXMLEdge)cell.getValue(),editor,pos);
+				editor.openElementEditorFor(cell,SCXMLElementEditor.Type.EDGE,pos);
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			} finally {
 				model.endUpdate();
 			}
@@ -250,7 +253,9 @@ public class SCXMLEditorActions
 			model.beginUpdate();
 			try {
 				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
-				new SCXMLNodeEditor(frame,cell,rootOfGraph,(SCXMLNode)cell.getValue(),editor,pos);
+				editor.openElementEditorFor(cell,Type.NODE, pos);
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			} finally {
 				model.endUpdate();
 			}
@@ -399,7 +404,7 @@ public class SCXMLEditorActions
 				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
 				//edit outsourcing
 				try {
-					new SCXMLOutsourcingEditor(frame,editor,cell,n,pos);
+					editor.openElementEditorFor(cell, Type.OUTSOURCING, pos);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -652,6 +657,8 @@ public class SCXMLEditorActions
 					editor.getUndoManager().resetUnmodifiedState();
 					editor.updateUndoRedoActionState();
 					editor.clearDisplayOutsourcedContentStatus();
+					
+					editor.closeAllEditors();
 				}
 				editor.setStatus(SCXMLGraphEditor.EDITING);
 			}
@@ -725,6 +732,7 @@ public class SCXMLEditorActions
 				editor.setStatus(SCXMLGraphEditor.POPULATING);
 				if (AskToSaveIfRequired.check(editor)) {
 					SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);
+					editor.closeAllEditors();
 					openSelectedFile(fc,editor);
 				}
 				editor.setStatus(SCXMLGraphEditor.EDITING);
