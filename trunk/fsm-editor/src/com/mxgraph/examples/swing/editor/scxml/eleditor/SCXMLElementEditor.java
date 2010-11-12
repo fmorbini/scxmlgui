@@ -57,6 +57,8 @@ public class SCXMLElementEditor extends JDialog {
 
 	private mxCell cell=null;
 	
+	public static enum Type {EDGE,NODE,OUTGOING_EDGE_ORDER, OUTSOURCING};
+	
     public SCXMLElementEditor(JFrame parent, SCXMLGraphEditor e,mxCell cell) {    	
     	super(parent);
     	this.cell=cell;

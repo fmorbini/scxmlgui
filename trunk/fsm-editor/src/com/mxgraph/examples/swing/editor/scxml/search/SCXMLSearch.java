@@ -141,6 +141,7 @@ public class SCXMLSearch {
         doc.add(new Field("eve", new StringReader(v.getEvent().toLowerCase())));
         doc.add(new Field("cnd", new StringReader(v.getCondition().toLowerCase())));
         doc.add(new Field("eexe", new StringReader(v.getExe().toLowerCase())));
+        doc.add(new Field("com", new StringReader(v.getComments().toLowerCase())));
         doc.add(new Field("all", new StringReader((v.getSCXMLSource()+" "+v.getSCXMLTargets().toString()+" "+v.getEvent()+" "+v.getCondition()+" "+v.getExe()).toLowerCase())));
         return doc;
 	}
@@ -155,6 +156,7 @@ public class SCXMLSearch {
         doc.add(new Field("exit", new StringReader(v.getOnExit().toLowerCase())));
         doc.add(new Field("init", new StringReader(v.getOnInitialEntry().toLowerCase())));
         doc.add(new Field("dd", new StringReader(v.getDoneData().toLowerCase())));
+        doc.add(new Field("com", new StringReader(v.getComments().toLowerCase())));
         doc.add(new Field("all", new StringReader((v.getID()+" "+v.getSRC().getLocation()+" "+v.getDatamodel()+" "+v.getNamespace()+" "+v.getOnEntry()+" "+v.getOnExit()+" "+v.getOnInitialEntry()+" "+v.getDoneData()).toLowerCase())));
 		return doc;
 	}

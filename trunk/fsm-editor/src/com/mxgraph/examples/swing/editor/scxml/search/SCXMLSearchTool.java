@@ -261,6 +261,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 					" -eve: search the event string of edges\n"+
 					" -cnd: search the condition string of edges\n"+
 					" -eexe: search the executable content of edges\n"+
+					" -com: search the comments associated with an edge\n"+
 					"-For nodes:\n"+
 					" -id: search the label of nodes\n"+
 					" -inc: search the include string of nodes\n"+
@@ -270,6 +271,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 					" -exit: search the content exectuted whena  node is exited\n"+
 					" -init: search the content executed when the node is entered because it's an intial node\n"+
 					" -dd: search the data attached when the node is exited\n"+
+					" -com: search the comments associated with a node\n"+
 					"\n"+
 					"To search all element with a non empty datamodel field use the following query:\"dm:[* TO*]\"\n");
 		}

@@ -28,6 +28,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -53,16 +54,22 @@ import org.apache.lucene.store.LockObtainFailedException;
 import com.mxgraph.examples.swing.editor.EditorAboutFrame;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleIgnoreStoredLayout;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorMenuBar;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLKeyboardHandler;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleIgnoreStoredLayout;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLEdgeEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.Type;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLNodeEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
@@ -77,6 +84,7 @@ import com.mxgraph.layout.mxPartitionLayout;
 import com.mxgraph.layout.mxStackLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
@@ -1300,6 +1308,55 @@ public class SCXMLGraphEditor extends JPanel
 			setBackupEnabled(cmd.hasOption(BACKUP_OPTION));
 		} catch (ParseException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private final HashMap<mxCell,HashMap<Type,JDialog>> editorForCellAndType=new HashMap<mxCell, HashMap<Type,JDialog>>();
+	public void closeAllEditors() {
+		for(HashMap<Type,JDialog> te:editorForCellAndType.values()) {
+			for(JDialog e:te.values()) {
+				e.dispose();
+			}
+		}
+	}
+	public JDialog getEditorForCellAndType(mxCell cell, Type type) {
+		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
+		if (editorsForCell!=null) {
+			return editorsForCell.get(type);
+		}
+		return null;
+	}
+	public void setEditorForCellAndType(mxCell cell, Type type, JDialog editor) {
+		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
+		if (editorsForCell==null) editorForCellAndType.put(cell,editorsForCell=new HashMap<Type, JDialog>());
+		editorsForCell.put(type,editor);
+	}
+	public void openElementEditorFor(mxCell cell, Type type, Point pos) throws Exception {
+		JDialog ee=getEditorForCellAndType(cell, type);
+		if (ee!=null) ee.setVisible(true);
+		else {
+			JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
+			switch(type) {
+			case EDGE:
+				ee=new SCXMLEdgeEditor(frame, cell, (SCXMLEdge)cell.getValue(),this, pos);
+				break;
+			case NODE:
+				SCXMLGraphComponent gc = getGraphComponent();
+				SCXMLGraph graph = gc.getGraph();
+				mxIGraphModel model = graph.getModel();
+				mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
+				ee=new SCXMLNodeEditor(frame,cell,root,(SCXMLNode)cell.getValue(),this,pos);
+				break;
+			case OUTSOURCING:
+				ee=new SCXMLOutsourcingEditor(frame, this, cell, (SCXMLNode)cell.getValue(), pos);
+				break;
+			case OUTGOING_EDGE_ORDER:
+				ee=new SCXMLOutEdgeOrderEditor(frame, cell, this, pos);
+				break;
+			default:
+				throw new Exception("Unknown element editor type requested: "+type);
+			}
+			setEditorForCellAndType(cell, type, ee);
 		}
 	}
 }
