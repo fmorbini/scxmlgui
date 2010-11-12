@@ -34,6 +34,7 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 	private UndoJTextField eventTextPane;
 	private UndoJTextField conditionTextPane;
 	private UndoJTextPane exeTextPane;
+	private UndoJTextPane commentsPane;
     private MyUndoManager undo;
     private Document doc;
     private SCXMLEdge edge;
@@ -79,14 +80,25 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         	edge.setExeUndoManager(undo=exeTextPane.getUndoManager());
         }
         doc.addDocumentListener(changeListener);
-        
+
+		undo=edge.getCommentsUndoManager();
+		doc=edge.getCommentsDoc();
+		commentsPane=new UndoJTextPane(edge.getComments(), doc, undo, keyboardHandler);
+		if (doc==null) {
+			edge.setCommentsDoc(doc=commentsPane.getDocument());
+			edge.setCommentsUndoManager(undo=commentsPane.getUndoManager());
+		}
+		doc.addDocumentListener(changeListener);
+
         eventTextPane.setCaretPosition(0);
         eventTextPane.setMargin(new Insets(5,5,5,5));
         conditionTextPane.setCaretPosition(0);
         conditionTextPane.setMargin(new Insets(5,5,5,5));
         exeTextPane.setCaretPosition(0);
         exeTextPane.setMargin(new Insets(5,5,5,5));
-
+		commentsPane.setCaretPosition(0);
+		commentsPane.setMargin(new Insets(5,5,5,5));
+		
         JScrollPane scrollPane = new JScrollPane(eventTextPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
         tabbedPane.addTab(mxResources.get("eventTAB"), scrollPane);
@@ -96,7 +108,10 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         scrollPane = new JScrollPane(exeTextPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
         tabbedPane.addTab(mxResources.get("exeTAB"), scrollPane);
-
+		scrollPane = new JScrollPane(commentsPane);
+		scrollPane.setPreferredSize(new Dimension(400, 200));
+		tabbedPane.addTab(mxResources.get("commentsTAB"), scrollPane);
+		
         tabbedPane.setSelectedIndex(0);
         updateActionTable(tabbedPane,actions);
         editMenu=createEditMenu();

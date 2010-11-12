@@ -35,6 +35,10 @@ public class SCXMLEdge implements Serializable {
 	public static final String EXEUNDO="EXEundo";
 	public static final String EXEDOC="EXEdoc";
 
+	public static final String COMMENTS="comments";
+	public static final String COMMENTSUNDO="DMundo";
+	public static final String COMMENTSDOC="DMdoc";
+
 	private HashMap<String,Object> edge;
 	public SCXMLEdge() {
 		edge=new HashMap<String, Object>();
@@ -172,6 +176,37 @@ public class SCXMLEdge implements Serializable {
 	public void setExe(String e) {
 		edge.put(EDGEEXE, e);
 	}
+	public MyUndoManager getCommentsUndoManager() {
+		return (MyUndoManager) edge.get(COMMENTSUNDO);
+	}
+	public MyUndoManager setCommentsUndoManager(MyUndoManager um) {
+		edge.put(COMMENTSUNDO,um);
+		return um;
+	}
+	public Document getCommentsDoc() {
+		return (Document) edge.get(COMMENTSDOC);
+	}
+	public Document setCommentsDoc(Document doc) {
+		edge.put(COMMENTSDOC,doc);
+		return doc;
+	}
+	public void setComments(String cm) {
+		edge.put(COMMENTS,cm);
+	}
+	public String getComments() {
+		String ret=null;
+		Document dmd = getCommentsDoc();
+		if (dmd!=null) {
+			try {
+				ret=dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				ret=(String)edge.get(COMMENTS);
+			}
+		}
+		else
+			ret=(String)edge.get(COMMENTS);
+		return (ret==null)?"":ret;
+	}
 	// getter and setter for document and undomanager for editing event 
 	public MyUndoManager getEventUndoManager() {
 		return (MyUndoManager) edge.get(EVENTUNDO);
@@ -224,6 +259,9 @@ public class SCXMLEdge implements Serializable {
 		e.setConditionDoc(null);
 		e.setConditionUndoManager(null);
 		e.setCondition(getCondition());
+		e.setCommentsDoc(null);
+		e.setCommentsUndoManager(null);
+		e.setComments(getComments());
 		e.setEventDoc(null);
 		e.setEventUndoManager(null);
 		e.setEvent(getEvent());
