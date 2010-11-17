@@ -1,5 +1,10 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
+import java.awt.Dialog;
+import java.awt.Dialog.ModalExclusionType;
+import java.awt.Dialog.ModalityType;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -14,6 +19,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
@@ -149,13 +155,15 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		JMenuItem item = menu.add(new JMenuItem(mxResources.get("aboutGraphEditor")));
 		item.addActionListener(new ActionListener()
 		{
-			/*
-			 * (non-Javadoc)
-			 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-			 */
-			public void actionPerformed(ActionEvent e)
-			{
-				editor.about();
+			public void actionPerformed(ActionEvent e) {
+				Window parent;
+				TextDialog a = new TextDialog(parent=SwingUtilities.windowForComponent(editor),"About","Editor for SCXML networks\n"+
+						"Coded by Fabrizio Morbini starting from the\n"+
+						"Graph Editor example contained in the JGraphX library.\n\n"+
+						"Institute of Creative Technologies\n"+
+						"University of Southern California\n",
+						ModalityType.TOOLKIT_MODAL);
+				a.setResizable(false);
 			}
 		});
 	}

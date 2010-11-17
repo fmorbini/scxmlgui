@@ -189,21 +189,6 @@ public class SCXMLElementEditor extends JDialog {
         return menu;
     }
 
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event dispatch thread.
-     * @param editor 
-     * @param pos 
-     */
-    public void showSCXMLElementEditor(Point pos) {
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocation(pos);
-        //Display the window.
-        pack();
-        setVisible(true);
-    }
-
 	public static void focusOnTextPanel(Component component) {
 		if (component instanceof JScrollPane) {
 			JScrollPane scrollPane=(JScrollPane) component;

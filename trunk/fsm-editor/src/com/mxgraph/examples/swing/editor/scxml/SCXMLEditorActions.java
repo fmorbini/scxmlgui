@@ -786,7 +786,7 @@ public class SCXMLEditorActions
 		{
 			SCXMLGraphEditor editor = getEditor(e);
 			SCXMLSearchTool st=editor.getSCXMLSearchTool();
-			st.showTool();
+			st.showTool((JFrame) SwingUtilities.windowForComponent(editor));
 		}
 	}
 	

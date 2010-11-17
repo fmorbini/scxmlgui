@@ -1,10 +1,9 @@
 package com.mxgraph.examples.swing.editor.scxml.search;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Window;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -166,7 +165,9 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		}
 	}
 	
-	public void showTool() {
+	public void showTool(JFrame parent) {
+		Rectangle pos=parent.getBounds();
+		setLocation((int)pos.getX(), (int)pos.getY());
 		setVisible(true);
 	}
 
@@ -250,7 +251,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	public void actionPerformed(ActionEvent e) {
 		String cmd=e.getActionCommand();
 		if (cmd.equals("help")) {
-			new TextDialog((Window)this,"Search help","The search box accepts Lucene syntax avaialble at:\n" +
+			new TextDialog(this,"Search help","The search box accepts Lucene syntax avaialble at:\n" +
 					"http://lucene.apache.org/java/2_4_0/queryparsersyntax.html\n" +
 					"\n" +
 					"By default, if no fields are specified the entered text is searched in all fields.\n"+
@@ -273,7 +274,8 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 					" -dd: search the data attached when the node is exited\n"+
 					" -com: search the comments associated with a node\n"+
 					"\n"+
-					"To search all element with a non empty datamodel field use the following query:\"dm:[* TO*]\"\n");
+					"To search all element with a non empty datamodel field use the following query:\"dm:[* TO*]\"\n",
+					ModalityType.MODELESS);
 		}
 	}
 
