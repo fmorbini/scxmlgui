@@ -307,7 +307,7 @@ public class SCXMLEditorActions
 			try {
 				SCXMLChangeHandler.addStateOfEdgeInCurrentEdit(cell, model);
 				n.setCycleWithTarget(!n.isCycleWithTarget());
-				graph.setCellStyle(n.getStyle(),cell);
+				graph.setCellStyle(n.getStyle(cell),cell);
 			} finally {
 				model.endUpdate();
 			}

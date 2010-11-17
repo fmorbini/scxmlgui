@@ -77,8 +77,9 @@ public class mxUndoableEdit
 	/**
 	 * Hook to notify any listeners of the changes after an undo or redo
 	 * has been carried out. This implementation is empty.
+	 * @param validate set it to false to skip validation from the root of the graph. 
 	 */
-	public void dispatch()
+	public void dispatch(boolean validate)
 	{
 		// empty
 	}
@@ -169,7 +170,7 @@ public class mxUndoableEdit
 			redone = false;
 		}
 
-		dispatch();
+		dispatch(true);
 	}
 
 	/**
@@ -192,7 +193,7 @@ public class mxUndoableEdit
 			redone = true;
 		}
 
-		dispatch();
+		dispatch(true);
 	}
 
 	public void setTransparent(boolean t) {

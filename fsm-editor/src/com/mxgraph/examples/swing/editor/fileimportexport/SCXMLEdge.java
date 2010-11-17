@@ -12,6 +12,7 @@ import javax.swing.text.Document;
 
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.util.mxPoint;
 
@@ -291,9 +292,10 @@ public class SCXMLEdge implements Serializable {
 		return getSCXMLSource()+"-["+getCondition()+","+getEvent()+"]->"+getSCXMLTargets();
 	}
 	
-	public String getStyle() {
+	public String getStyle(mxCell cell) {
+		boolean cycle=(cell==null)?isCycle():(cell.getTarget()==cell.getSource());
 		String ret="straight;strokeColor=#888888;";
-		if (isCycle() && (!isCycleWithTarget())) ret+="strokeWidth=3;dashed=1;";
+		if (cycle && (!isCycleWithTarget())) ret+="strokeWidth=3;dashed=1;";
 		return ret;
 	}
 }

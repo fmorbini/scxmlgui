@@ -202,6 +202,10 @@ public class mxEvent
 	 */
 	public static final String CHANGE = "change";
 
+	public static final String REQUEST_VALIDATION = "start-validate";
+	public static final String VALIDATION_DONE = "validate-done";
+	public static final String VALIDATION_PRE_START = "validate-pre-start";
+
 	/**
 	 * Holds the name for the execute event. First and only argument in the
 	 * argument array is the mxAtomicGraphChange that has been executed on the 

@@ -490,7 +490,7 @@ public class SCXMLImportExport implements IImportExport {
 					HashSet<SCXMLEdge> es=toEdge.get(toSCXMLID);
 					for (SCXMLEdge e:es) {
 						ArrayList<mxCell> ces = addOrUpdateEdge(graph,e,toSCXMLID,ignoreStoredLayout);
-						for (mxCell ce:ces) ce.setStyle(e.getStyle());
+						for (mxCell ce:ces) ce.setStyle(e.getStyle(ce));
 					}
 				}
 			}

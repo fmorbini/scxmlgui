@@ -981,11 +981,11 @@ public class SCXMLGraphEditor extends JPanel
 		}
 	}
 	
-	public class WindowEventDemo extends JFrame implements WindowListener {
+	public class SCXMLEditorFrame extends JFrame implements WindowListener {
 
 		private SCXMLGraphEditor editor;
 		
-		public WindowEventDemo(SCXMLGraphEditor e){
+		public SCXMLEditorFrame(SCXMLGraphEditor e){
 			super();
 			addWindowListener(this);
 			editor=e;
@@ -993,14 +993,10 @@ public class SCXMLGraphEditor extends JPanel
 		
 		@Override
 		public void windowActivated(WindowEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void windowClosed(WindowEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
@@ -1008,36 +1004,29 @@ public class SCXMLGraphEditor extends JPanel
 			if (AskToSaveIfRequired.check(editor)) {
 				editor.exit();
 			}
+			getGraphComponent().getValidator().kill();
 		}
 
 		@Override
 		public void windowDeactivated(WindowEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void windowDeiconified(WindowEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void windowIconified(WindowEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void windowOpened(WindowEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 	}
 	
 	public JFrame createFrame(SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException
 	{
-		WindowEventDemo frame = new WindowEventDemo(this);
+		SCXMLEditorFrame frame = new SCXMLEditorFrame(this);
 		// the contentPane of the JRootPane is a JPanel (that is the FSMGraphEditor)
 		//frame.setContentPane(this);
 
@@ -1084,19 +1073,26 @@ public class SCXMLGraphEditor extends JPanel
 
 		// Installs automatic validation (use editor.validation = true
 		// if you are using an mxEditor instance)
-		graphComponent.getGraph().getModel().addListener(mxEvent.CHANGE, new mxIEventListener()
+		graphComponent.getGraph().getModel().addListener(mxEvent.VALIDATION_DONE, new mxIEventListener()
 		{
-			private long timeLastEditEvent=0l;
-			private StringBuffer warnings=new StringBuffer();
 			public void invoke(Object sender, mxEventObject evt)
 			{
-				long mostRecentEditEvent=SCXMLGraphEditor.this.getUndoManager().getTimeOfMostRecentUndoEvent();
-				if ((SCXMLGraphEditor.this.status==EDITING) && (timeLastEditEvent!=mostRecentEditEvent)) {
-					timeLastEditEvent=mostRecentEditEvent;
-					warnings.setLength(0);
-					if (graphComponent.validateGraph(warnings)) scxmlErrorsDialog.setText("");
-					else scxmlErrorsDialog.setText(warnings.toString());
-				}
+				String warnings=(String)evt.getProperty("warnings");
+				scxmlErrorsDialog.setText(warnings);
+			}
+		});
+		graphComponent.getGraph().getModel().addListener(mxEvent.VALIDATION_PRE_START, new mxIEventListener()
+		{
+			public void invoke(Object sender, mxEventObject evt)
+			{
+				graphComponent.clearSCXMLNodes();
+			}
+		});
+		graphComponent.getGraph().getModel().addListener(mxEvent.CHANGE, new mxIEventListener()
+		{
+			public void invoke(Object sender, mxEventObject evt)
+			{
+				if (getStatus()==EDITING) graphComponent.validateGraph();
 			}
 		});
 		

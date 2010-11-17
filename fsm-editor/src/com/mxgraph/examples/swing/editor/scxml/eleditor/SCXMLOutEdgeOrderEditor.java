@@ -322,7 +322,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 			setModified(true);
 		} else if (cmd.equals("ok")) {			
 			mxGraphModel model=(mxGraphModel) graph.getModel();
-			model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
+			model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes,"revalidate",false));
 			exitTool();
 		} else if (cmd.equals("cancel")) {
 			if (!getModified())
@@ -340,7 +340,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 					break;
 				case JOptionPane.YES_OPTION:
 					mxGraphModel model=(mxGraphModel) graph.getModel();
-					model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes));
+					model.fireEvent(new mxEventObject(mxEvent.CHANGE,"changes",changes,"revalidate",false));
 					exitTool();
 					break;
 				}

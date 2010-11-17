@@ -445,15 +445,17 @@ public class mxGraphView extends mxEventSource
 	 * First validates all bounds and then validates all points recursively on
 	 * all visible cells.
 	 */
-	public void validate()
+	public void validate() {validate(null,null,true);}
+	public void validate(mxCellState parentState,Object cell,boolean setGraphBounds)
 	{
-		Object cell = (currentRoot != null) ? currentRoot : graph.getModel()
-				.getRoot();
+		if (cell==null)
+			cell = (currentRoot != null) ? currentRoot : graph.getModel().getRoot();
 
 		if (cell != null)
 		{
-			validateBounds(null, cell);
-			setGraphBounds(validatePoints(null, cell));
+			validateBounds(parentState, cell);
+			mxRectangle gb = validatePoints(parentState, cell);
+			if (setGraphBounds) setGraphBounds(gb);
 		}
 	}
 

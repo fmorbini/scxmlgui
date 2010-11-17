@@ -287,10 +287,10 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 	{
 		return new mxUndoableEdit(this)
 		{
-			public void dispatch()
+			public void dispatch(boolean validate)
 			{
 				((mxGraphModel) source).fireEvent(new mxEventObject(
-						mxEvent.CHANGE, "changes", changes));
+						mxEvent.CHANGE, "changes", changes,"revalidate",validate));
 			}
 		};
 	}
@@ -1084,7 +1084,7 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 		beginUpdate();
 		currentEdit.add(change);
 		fireEvent(new mxEventObject(mxEvent.EXECUTE, "change", change));
-		endUpdate();
+		endUpdate(false);
 	}
 	public void addChangeToCurrentEdit(mxUndoableChange change) throws Exception {
 		if (getUpdateLevel()>0) {
@@ -1106,7 +1106,13 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 	/* (non-Javadoc)
 	 * @see com.mxgraph.model.mxIGraphModel#endUpdate()
 	 */
-	public void endUpdate()
+	public void endUpdate() {
+		endUpdate(true);
+	}
+	/* (non-Javadoc)
+	 * @see com.mxgraph.model.mxIGraphModel#endUpdate()
+	 */
+	public void endUpdate(boolean validate)
 	{
 		updateLevel--;
 
@@ -1122,7 +1128,7 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 					fireEvent(new mxEventObject(mxEvent.BEFORE_UNDO, "edit",currentEdit));
 					mxUndoableEdit tmp = currentEdit;
 					currentEdit = createUndoableEdit();
-					tmp.dispatch();
+					tmp.dispatch(validate);
 					fireEvent(new mxEventObject(mxEvent.UNDO, "edit", tmp));
 				}
 			}
