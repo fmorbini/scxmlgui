@@ -225,7 +225,9 @@ public class SCXMLGraph extends mxGraph
 			}
 			updateConnectionOfSCXMLEdge((SCXMLEdge) value,source,target,null);
 			if (((SCXMLEdge)value).getOrder()==null) ((SCXMLEdge)value).setOrder(size);
-			return insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, ((SCXMLEdge)value).getStyle());
+			Object edge = insertEdge(parent, ((SCXMLEdge)value).getInternalID(), value, source, target, "");
+			setCellStyle(((SCXMLEdge) value).getStyle((mxCell) edge),edge);
+			return edge;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -501,7 +503,7 @@ public class SCXMLGraph extends mxGraph
 			// Synchronize the source and targets stored in the value of the modified edge with the graphical properties here updated.
 			updateConnectionOfSCXMLEdge(edgeValue,(source)?terminal:null,(source)?null:terminal,previous);
 			// update edge style
-			setCellStyle(edgeValue.getStyle(),edge);
+			setCellStyle(edgeValue.getStyle((mxCell) edge),edge);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

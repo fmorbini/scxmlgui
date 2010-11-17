@@ -325,6 +325,7 @@ public interface mxIGraphModel
 	 * Decrements the updateLevel by one and fires a notification event if the
 	 * updateLevel reaches 0.
 	 */
+	void endUpdate(boolean validate);
 	void endUpdate();
 
 	/**

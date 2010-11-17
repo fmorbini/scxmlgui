@@ -148,6 +148,8 @@ public class mxEventSource
 	 */
 	public void fireEvent(mxEventObject evt)
 	{
+		//System.out.println("firing event "+evt.name+" "+evt.properties);
+		//System.out.println(Arrays.asList(Thread.currentThread().getStackTrace()));
 		fireEvent(evt, null);
 	}
 

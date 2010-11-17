@@ -6,7 +6,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import javax.swing.TransferHandler;
 
@@ -17,11 +16,13 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxGraphHandler;
-import com.mxgraph.swing.handler.mxGraphTransferHandler;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 
@@ -115,7 +116,7 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 			if (value instanceof SCXMLNode) {
 				model.setStyle(cell, ((SCXMLNode)value).getStyle());
 			} else if (value instanceof SCXMLEdge) {
-				model.setStyle(cell, ((SCXMLEdge)value).getStyle());
+				model.setStyle(cell, ((SCXMLEdge)value).getStyle((mxCell) cell));
 			}
 		}
 		return super.importCells(cells, dx, dy, target, location);
@@ -131,10 +132,13 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 	public mxCell getSCXMLNodeForID(String id) {
 		return scxmlNodes.get(id);
 	}
-	public boolean validateGraph(StringBuffer warnings)
-	{		
+	public void clearSCXMLNodes() {
 		scxmlNodes.clear();
-		return (validateGraph(graph.getModel().getRoot(),new Hashtable<Object, Object>(),warnings)==null);
+	}
+	public void validateGraph()
+	{		
+		mxGraphModel model = (mxGraphModel) graph.getModel();
+		model.fireEvent(new mxEventObject(mxEvent.REQUEST_VALIDATION,"root",model.getRoot()));
 	}
 
 	/* (non-Javadoc)

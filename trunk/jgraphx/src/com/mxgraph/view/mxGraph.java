@@ -31,8 +31,6 @@ import com.mxgraph.canvas.mxImageCanvas;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.model.mxGraphModel.Filter;
 import com.mxgraph.model.mxGraphModel.mxChildChange;
 import com.mxgraph.model.mxGraphModel.mxCollapseChange;
@@ -42,6 +40,8 @@ import com.mxgraph.model.mxGraphModel.mxStyleChange;
 import com.mxgraph.model.mxGraphModel.mxTerminalChange;
 import com.mxgraph.model.mxGraphModel.mxValueChange;
 import com.mxgraph.model.mxGraphModel.mxVisibleChange;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -50,8 +50,8 @@ import com.mxgraph.util.mxImage;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
+import com.mxgraph.util.mxUtils;
 
 /**
  * Implements a graph object that allows to create diagrams from a graph model
@@ -545,8 +545,10 @@ public class mxGraph extends mxEventSource
 		@SuppressWarnings("unchecked")
 		public void invoke(Object sender, mxEventObject evt)
 		{
+			Boolean rv=(Boolean) evt.getProperty("revalidate");
+			rv=(rv==null)?true:rv;
 			mxRectangle dirty = graphModelChanged((mxIGraphModel) sender,
-					(List<mxUndoableChange>) evt.getProperty("changes"));
+					(List<mxUndoableChange>) evt.getProperty("changes"),rv);
 			repaint(dirty);
 		}
 	};
@@ -775,9 +777,10 @@ public class mxGraph extends mxEventSource
 	/**
 	 * Called when the graph model changes. Invokes processChange on each
 	 * item of the given array to update the view accordingly.
+	 * @param rv 
 	 */
 	public mxRectangle graphModelChanged(mxIGraphModel sender,
-			List<mxUndoableChange> changes)
+			List<mxUndoableChange> changes, Boolean rv)
 	{
 		int thresh = getChangesRepaintThreshold();
 		boolean ignoreDirty = thresh > 0 && changes.size() > thresh;
@@ -797,8 +800,17 @@ public class mxGraph extends mxEventSource
 			}
 		}
 
-		mxRectangle dirty = processChanges(changes, true, ignoreDirty);
-		view.validate();
+		ArrayList<Object> changedCells=new ArrayList<Object>();
+		mxRectangle dirty = processChanges(changes, true, ignoreDirty,changedCells);
+		
+		if (!rv) {
+			if (changedCells!=null) { 
+				for (Object changedCell:changedCells) {
+					mxCellState parentState = view.getState(model.getParent(changedCell), true);
+					view.validate(parentState,changedCell,false);
+				}
+			}
+		} else view.validate();
 
 		if (!ignoreDirty)
 		{
@@ -862,16 +874,21 @@ public class mxGraph extends mxEventSource
 	 * Processes the changes and returns the minimal rectangle to be
 	 * repainted in the buffer. A return value of null means no repaint
 	 * is required.
+	 * @param changedCells 
 	 */
 	public mxRectangle processChanges(List<mxUndoableChange> changes,
-			boolean invalidate, boolean ignoreDirty)
+			boolean invalidate, boolean ignoreDirty) {
+		return processChanges(changes, invalidate, ignoreDirty,null);
+	}
+	public mxRectangle processChanges(List<mxUndoableChange> changes,
+			boolean invalidate, boolean ignoreDirty, ArrayList<Object> changedCells)
 	{
 		mxRectangle bounds = null;
 		Iterator<mxUndoableChange> it = changes.iterator();
 
 		while (it.hasNext())
 		{
-			mxRectangle rect = processChange(it.next(), invalidate, ignoreDirty);
+			mxRectangle rect = processChange(it.next(), invalidate, ignoreDirty,changedCells);
 
 			if (bounds == null)
 			{
@@ -890,11 +907,13 @@ public class mxGraph extends mxEventSource
 	 * Processes the given change and invalidates the respective cached data
 	 * in <view>. This fires a <root> event if the root has changed in the
 	 * model.
+	 * @param changedCells 
 	 */
 	public mxRectangle processChange(mxUndoableChange change,
-			boolean invalidate, boolean ignoreDirty)
+			boolean invalidate, boolean ignoreDirty, ArrayList<Object> changedCells)
 	{
 		mxRectangle result = null;
+		Object cell;
 
 		if (change instanceof mxRootChange)
 		{
@@ -903,7 +922,8 @@ public class mxGraph extends mxEventSource
 			if (invalidate)
 			{
 				clearSelection();
-				removeStateForCell(((mxRootChange) change).getPrevious());
+				removeStateForCell(cell=((mxRootChange) change).getPrevious());
+				if (changedCells!=null) changedCells.add(cell);
 
 				if (isResetViewOnRootChange())
 				{
@@ -967,17 +987,18 @@ public class mxGraph extends mxEventSource
 			{
 				if (cc.getParent() != null)
 				{
-					view.clear(cc.getChild(), false, true);
+					view.clear(cell=cc.getChild(), false, true);
 				}
 				else
 				{
-					removeStateForCell(cc.getChild());
+					removeStateForCell(cell=cc.getChild());
 				}
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 		else if (change instanceof mxTerminalChange)
 		{
-			Object cell = ((mxTerminalChange) change).getCell();
+			cell = ((mxTerminalChange) change).getCell();
 
 			if (!ignoreDirty)
 			{
@@ -987,11 +1008,12 @@ public class mxGraph extends mxEventSource
 			if (invalidate)
 			{
 				view.invalidate(cell);
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 		else if (change instanceof mxValueChange)
 		{
-			Object cell = ((mxValueChange) change).getCell();
+			cell = ((mxValueChange) change).getCell();
 
 			if (!ignoreDirty)
 			{
@@ -1001,11 +1023,12 @@ public class mxGraph extends mxEventSource
 			if (invalidate)
 			{
 				view.clear(cell, false, false);
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 		else if (change instanceof mxStyleChange)
 		{
-			Object cell = ((mxStyleChange) change).getCell();
+			cell = ((mxStyleChange) change).getCell();
 
 			if (!ignoreDirty)
 			{
@@ -1020,11 +1043,12 @@ public class mxGraph extends mxEventSource
 				// means the connected edges need to be invalidated)
 				view.clear(cell, false, false);
 				view.invalidate(cell);
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 		else if (change instanceof mxGeometryChange)
 		{
-			Object cell = ((mxGeometryChange) change).getCell();
+			cell = ((mxGeometryChange) change).getCell();
 
 			if (!ignoreDirty)
 			{
@@ -1034,11 +1058,12 @@ public class mxGraph extends mxEventSource
 			if (invalidate)
 			{
 				view.invalidate(cell);
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 		else if (change instanceof mxCollapseChange)
 		{
-			Object cell = ((mxCollapseChange) change).getCell();
+			cell = ((mxCollapseChange) change).getCell();
 
 			if (!ignoreDirty)
 			{
@@ -1049,11 +1074,12 @@ public class mxGraph extends mxEventSource
 			if (invalidate)
 			{
 				removeStateForCell(cell);
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 		else if (change instanceof mxVisibleChange)
 		{
-			Object cell = ((mxVisibleChange) change).getCell();
+			cell = ((mxVisibleChange) change).getCell();
 
 			if (!ignoreDirty)
 			{
@@ -1064,6 +1090,7 @@ public class mxGraph extends mxEventSource
 			if (invalidate)
 			{
 				removeStateForCell(cell);
+				if (changedCells!=null) changedCells.add(cell);
 			}
 		}
 
