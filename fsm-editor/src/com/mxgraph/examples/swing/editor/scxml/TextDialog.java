@@ -1,6 +1,7 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
@@ -25,11 +26,12 @@ import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.util.mxResources;
 
 public class TextDialog extends JDialog implements ActionListener, WindowListener {
-	public TextDialog(Window parent, String title,String content) {
-		super(parent,title);
+	public TextDialog(Window parent, String title,String content,ModalityType modal) {
+		super(parent,modal);
+		setTitle(title);
 		JPanel contentPane = new JPanel(new BorderLayout());
 		populateGUI(contentPane,content);
-		contentPane.setOpaque(true); //content panes must be opaque
+		contentPane.setOpaque(true);
 		
 		addWindowListener(this);
 		
@@ -39,6 +41,7 @@ public class TextDialog extends JDialog implements ActionListener, WindowListene
 
 		//Display the window.
 		pack();
+		setLocationRelativeTo(parent);
 		setVisible(true);
 	}
 	
