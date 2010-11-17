@@ -160,7 +160,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 				TextDialog a = new TextDialog(parent=SwingUtilities.windowForComponent(editor),"About","Editor for SCXML networks\n"+
 						"Coded by Fabrizio Morbini starting from the\n"+
 						"Graph Editor example contained in the JGraphX library.\n\n"+
-						"Institute of Creative Technologies\n"+
+						"Institute for Creative Technologies\n"+
 						"University of Southern California\n",
 						ModalityType.TOOLKIT_MODAL);
 				a.setResizable(false);
