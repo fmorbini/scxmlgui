@@ -216,10 +216,8 @@ public class EditorToolBar extends JToolBar
 
 		// Installs the scale tracker to update the value in the combo box
 		// if the zoom is changed from outside the combo box
-		view.getGraph().getView().addListener(mxEvent.SCALE,
-				scaleTracker);
-		view.getGraph().getView().addListener(
-				mxEvent.SCALE_AND_TRANSLATE, scaleTracker);
+		view.getGraph().getView().addListener(mxEvent.SCALE,scaleTracker);
+		view.getGraph().getView().addListener(mxEvent.SCALE_AND_TRANSLATE, scaleTracker);
 
 		// Invokes once to sync with the actual zoom value
 		scaleTracker.invoke(null, null);

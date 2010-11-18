@@ -560,8 +560,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 				{
 					newView.addListener(mxEvent.SCALE, updateHandler);
 					newView.addListener(mxEvent.TRANSLATE, updateHandler);
-					newView.addListener(mxEvent.SCALE_AND_TRANSLATE,
-							updateHandler);
+					newView.addListener(mxEvent.SCALE_AND_TRANSLATE,updateHandler);
 					newView.addListener(mxEvent.UP, updateHandler);
 					newView.addListener(mxEvent.DOWN, updateHandler);
 				}
@@ -1507,6 +1506,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 			mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
 					: new mxPoint(0,0);
 			graph.getView().scaleAndTranslate(newScale, translate.getX(),translate.getY());
+
 			if (keepSelectionVisibleOnZoom && !graph.isSelectionEmpty())
 			{
 				getGraphControl().scrollRectToVisible(

@@ -10,8 +10,8 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.Component;
+import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +33,6 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor;
 import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.Type;
-import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutEdgeOrderEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.IOUtils;
@@ -44,6 +43,7 @@ import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
@@ -659,6 +659,7 @@ public class SCXMLEditorActions
 					editor.clearDisplayOutsourcedContentStatus();
 					
 					editor.closeAllEditors();
+					editor.setDisplayOfOutsourcedContentSelected(false);
 				}
 				editor.setStatus(SCXMLGraphEditor.EDITING);
 			}
@@ -734,6 +735,7 @@ public class SCXMLEditorActions
 					SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);
 					editor.closeAllEditors();
 					openSelectedFile(fc,editor);
+					editor.setDisplayOfOutsourcedContentSelected(false);
 				}
 				editor.setStatus(SCXMLGraphEditor.EDITING);
 			}
@@ -774,6 +776,47 @@ public class SCXMLEditorActions
 				}
 
 			}
+		}
+	}
+
+	public static class EditSelectedCellAction extends AbstractAction
+	{
+		private mxCell cell;
+
+		public EditSelectedCellAction(mxCell cell) {
+			this.cell=cell;
+		}
+		
+		/**
+		 * 
+		 */
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraphComponent gc = editor.getGraphComponent();
+			SCXMLGraph graph = gc.getGraph();
+			
+			if (cell == null)
+			{
+				cell = (mxCell) graph.getSelectionCell();
+
+				if (cell != null && !graph.isCellEditable(cell))
+				{
+					cell = null;
+				}
+			}
+			if (cell!=null) {
+				Point screenCoord=MouseInfo.getPointerInfo().getLocation();
+				Point mousePoint = SwingUtilities.convertPoint(gc,screenCoord,gc);
+				if (cell.isEdge()) {
+					new EditEdgeAction(cell, mousePoint).actionPerformed(e);
+				} else if (cell.isVertex()) {
+					mxIGraphModel model = graph.getModel();
+					mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
+					new EditNodeAction(cell, root, mousePoint).actionPerformed(e);
+				}
+			}
+			cell=null;
 		}
 	}
 	

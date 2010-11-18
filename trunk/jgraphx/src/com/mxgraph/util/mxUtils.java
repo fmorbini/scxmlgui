@@ -306,6 +306,7 @@ public class mxUtils
 	}
 
 	private static final HashMap<Font,Rectangle2D> maxLetterSize=new HashMap<Font, Rectangle2D>();
+	private static final HashMap<String,mxRectangle> labelSize=new HashMap<String, mxRectangle>();
 	/**
 	 * Returns an <mxRectangle> with the size (width and height in pixels) of
 	 * the given string.
@@ -325,12 +326,17 @@ public class mxUtils
 
 			return new mxRectangle(0, 0, pSize.getWidth(), pSize.getHeight());
 		} else {
-			Rectangle2D oneLetterSize=maxLetterSize.get(font);
-			if (oneLetterSize==null) maxLetterSize.put(font, oneLetterSize=getOneLetterSize(font));
-			int[] textSize=getTextSize(text);
-			textSize[0]*=oneLetterSize.getWidth();
-			textSize[1]*=oneLetterSize.getHeight()*1.27;
-			return new mxRectangle(0, 0, textSize[0], textSize[1]);
+			mxRectangle result=labelSize.get(text);
+			if (result==null) {
+				Rectangle2D oneLetterSize=maxLetterSize.get(font);
+				if (oneLetterSize==null) maxLetterSize.put(font, oneLetterSize=getOneLetterSize(font));
+				int[] textSize=getTextSize(text);
+				textSize[0]*=oneLetterSize.getWidth();
+				textSize[1]*=oneLetterSize.getHeight()*1.27;
+				result=new mxRectangle(0, 0, textSize[0], textSize[1]);
+				labelSize.put(text, result);
+			}
+			return result;
 		}
 	}
 	
