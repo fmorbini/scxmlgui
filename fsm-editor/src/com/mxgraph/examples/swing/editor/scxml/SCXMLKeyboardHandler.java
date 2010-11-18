@@ -76,7 +76,7 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 		map.put("zoomIN", new SCXMLEditorActions.ZoomIN());
 		map.put("zoomOUT", new SCXMLEditorActions.ZoomOUT());
 		map.put("find", new SCXMLEditorActions.ShowSCXMLFindTool());
-
+		map.put("edit", new SCXMLEditorActions.EditSelectedCellAction(null));
 		return map;
 	}
 

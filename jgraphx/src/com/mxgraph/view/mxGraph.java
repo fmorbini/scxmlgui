@@ -6563,8 +6563,8 @@ public class mxGraph extends mxEventSource
 	}
 	
 	public void getAllDescendants(Object cell,Set<Object> set) {
-		set.add(cell);
-		if (isSwimlane(cell)) {
+		if (!set.contains(cell)) {
+			set.add(cell);
 			int nc=model.getChildCount(cell);
 			for (int i=0;i<nc;i++) {
 				Object child=model.getChildAt(cell, i);

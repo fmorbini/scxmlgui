@@ -1329,7 +1329,10 @@ public class SCXMLGraphEditor extends JPanel
 	}
 	public void openElementEditorFor(mxCell cell, Type type, Point pos) throws Exception {
 		JDialog ee=getEditorForCellAndType(cell, type);
-		if (ee!=null) ee.setVisible(true);
+		if (ee!=null) {
+			ee.setLocation(pos);
+			ee.setVisible(true);
+		}
 		else {
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
 			switch(type) {
