@@ -212,6 +212,16 @@ public class SCXMLGraph extends mxGraph
 		return isCellsEditable() && !uneditable.contains(cell);
 	}
 	@Override
+	public RootStrength vertexShouldBeRoot(Object cell, Object parent,boolean invert) {
+		if (cell instanceof mxCell) {
+			mxCell c=(mxCell)cell;
+			Object v=c.getValue();
+			if ((v!=null) && (v instanceof SCXMLNode)) {
+				return new RootStrength((invert)?((SCXMLNode)v).isFinal():((SCXMLNode)v).isInitial(),0);
+			} else return super.vertexShouldBeRoot(cell, parent, invert);
+		} else return super.vertexShouldBeRoot(cell, parent, invert);
+	}
+	@Override
 	public Object insertEdge(Object parent, String id, Object value,Object source, Object target)
 	{
 		//System.out.println("insert edge: parent:"+parent+" value:"+value+" source:"+source+" target:"+target);

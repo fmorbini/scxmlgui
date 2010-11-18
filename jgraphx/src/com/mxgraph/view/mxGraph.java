@@ -6887,6 +6887,46 @@ public class mxGraph extends mxEventSource
 
 		return roots.toArray();
 	}
+	
+	public class RootStrength {
+		private boolean isRoot;
+		private int strength;
+
+		public RootStrength(boolean isRoot,int strength) {
+			this.isRoot=isRoot;
+			this.strength=strength;
+		}
+		public boolean isRoot() {
+			return isRoot;
+		}
+		public int getStrength() {
+			return strength;
+		}
+	}
+	public RootStrength vertexShouldBeRoot(Object cell,Object parent,boolean invert) {
+		HashSet<Object> descendants=new HashSet<Object>();
+		Object[] conns = getEdgesForSwimlane(cell, parent, true, true, false, descendants);
+		int fanOut = 0;
+		int fanIn = 0;
+
+		for (int j = 0; j < conns.length; j++)
+		{
+			Object src = getTerminalOutsideSet(conns[j], descendants);
+
+			if (((mxCell)conns[j]).getSource()==src)
+			{
+				fanIn++;
+			}
+			else
+			{
+				fanOut++;
+			}
+		}
+		int diff = (invert) ? fanIn - fanOut : fanOut - fanIn;
+		
+		return new RootStrength((invert && fanOut == 0) || (!invert && fanIn == 0),diff);
+	}
+	
 	public List<Object> findTreeRootsInSet(Set<Object> objects, Object parent, boolean invert)
 	{
 		List<Object> roots = new ArrayList<Object>();
@@ -6896,39 +6936,14 @@ public class mxGraph extends mxEventSource
 		
 		for (Object cell:objects) {
 			if (model.isVertex(cell) && isCellVisible(cell)) {
-								
-				HashSet<Object> descendants=new HashSet<Object>();
-				Object[] conns = getEdgesForSwimlane(cell, parent, true, true, false, descendants);
-				int fanOut = 0;
-				int fanIn = 0;
+				
+				RootStrength cellRoot=vertexShouldBeRoot(cell,parent,invert);
+				if (cellRoot.isRoot) roots.add(cell);
+				int strength = cellRoot.getStrength();
 
-				for (int j = 0; j < conns.length; j++)
+				if (strength > maxDiff)
 				{
-					Object src = getTerminalOutsideSet(conns[j], descendants);
-
-					if (((mxCell)conns[j]).getSource()==src)
-					{
-						fanIn++;
-					}
-					else
-					{
-						fanOut++;
-					}
-				}
-
-				//if ((invert && fanOut == 0 && fanIn > 0)
-				//	|| (!invert && fanIn == 0 && fanOut > 0))
-				if ((invert && fanOut == 0)
-						|| (!invert && fanIn == 0))
-				{
-					roots.add(cell);
-				}
-
-				int diff = (invert) ? fanIn - fanOut : fanOut - fanIn;
-
-				if (diff > maxDiff)
-				{
-					maxDiff = diff;
+					maxDiff = strength;
 					best = cell;
 				}
 			}
