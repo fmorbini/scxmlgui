@@ -1107,10 +1107,6 @@ public class SCXMLGraphEditor extends JPanel
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			listSelectorHandler.handleSelectEvent(e);
-/*			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e1) {}
-			listSelectorHandler.unselectAll();*/
 		}
 		public void setWarnings(HashMap<Object, String> warnings) {
 			listModel.setSize(Math.max(warnings.size(), listModel.size()));
