@@ -28,32 +28,37 @@ public class mxClusterLayout extends mxGraphLayout {
 		internalClusterID2DoneLayout=new HashSet<String>();
 	}
 
-	public HashSet<mxCell> findAllClustersRootedAt(mxGraph graph,mxCell parent) {
-		return findAllClustersRootedAt(graph,parent,new HashSet<mxCell>());
+	public HashSet<mxCell> findAllClustersRootedAt(mxGraph graph,mxCell parent, int depth) {
+		return findAllClustersRootedAt(graph,parent,new HashSet<mxCell>(),depth);
 	}
-	public HashSet<mxCell> findAllClustersRootedAt(mxGraph graph,mxCell parent,HashSet<mxCell> result) {
+	public HashSet<mxCell> findAllClustersRootedAt(mxGraph graph,mxCell parent,HashSet<mxCell> result, int depth) {
 		if (graph.isSwimlane(parent)) result.add(parent);
-		int numChildren=parent.getChildCount();
-		for(int i=0;i<numChildren;i++) {
-			mxCell c=(mxCell) parent.getChildAt(i);
-			findAllClustersRootedAt(graph, c, result);
+		if (depth!=0) {
+			int numChildren=parent.getChildCount();
+			for(int i=0;i<numChildren;i++) {
+				mxCell c=(mxCell) parent.getChildAt(i);
+				findAllClustersRootedAt(graph, c, result,depth-1);
+			}
 		}
 		return result;
 	}
 	
 	@Override
 	public void execute(Object parent) {
+		execute(parent, -1);
+	}
+	public void execute(Object parent, int depth) {
 		System.out.println("Starting cluster layout");
 		mxCell root=(mxCell) parent;
 		// first run the layout on the clusters
-		HashSet<mxCell> clusters = findAllClustersRootedAt(graph, root);
+		HashSet<mxCell> clusters = findAllClustersRootedAt(graph, root,depth);
 		for (mxCell cluster:clusters) {
-			handleLayoutInThisCluster(cluster,clusters);
+			handleLayoutInThisCluster(cluster,clusters,depth);
 		}
 		System.out.println("Done cluster layout");
 	}
 	
-	private void handleLayoutInThisCluster(mxCell cluster, HashSet<mxCell> clusters) {
+	private void handleLayoutInThisCluster(mxCell cluster, HashSet<mxCell> clusters, int depth) {
 		String id=cluster.getId();
 		//System.out.println("considering cluster: "+cluster.getValue());
 		if (!internalClusterID2DoneLayout.contains(id)) {
@@ -63,7 +68,7 @@ public class mxClusterLayout extends mxGraphLayout {
 				//System.out.println("  "+c.getValue());
 				if (clusters.contains(c)) {
 					System.out.println("internal starting layout for cluster: "+c.getValue());
-					handleLayoutInThisCluster(c,clusters);
+					handleLayoutInThisCluster(c,clusters,depth);
 				}
 			}
 			//System.out.println("doing cluster: "+cluster.getValue());
@@ -75,10 +80,10 @@ public class mxClusterLayout extends mxGraphLayout {
 			if (!cluster.isCollapsed()) {
 				clusterLayout.execute(cluster);
 				// after run the graph layout (for edges and labels)
-				mxIGraphLayout l = new mxParallelEdgeLayout(graph);
-				l.execute(cluster);
-				l=new mxEdgeLabelLayout(graph);
-				l.execute(cluster);
+				mxParallelEdgeLayout l1 = new mxParallelEdgeLayout(graph);
+				l1.execute(cluster,depth);
+				mxEdgeLabelLayout l2 = new mxEdgeLabelLayout(graph);
+				l2.execute(cluster);
 				graph.updateGroupBounds(new Object[]{cluster},2 * graph.getGridSize(),false);
 			}
 		}
