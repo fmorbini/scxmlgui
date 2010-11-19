@@ -2,6 +2,7 @@ package com.mxgraph.examples.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,10 +16,14 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
@@ -26,12 +31,14 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -39,8 +46,12 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.cli.CommandLine;
@@ -73,6 +84,8 @@ import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
+import com.mxgraph.examples.swing.editor.utils.CellSelector;
+import com.mxgraph.examples.swing.editor.utils.Pair;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxCompactTreeLayout;
@@ -104,7 +117,7 @@ import com.mxgraph.view.mxMultiplicity;
 public class SCXMLGraphEditor extends JPanel
 {
 	public Preferences preferences=Preferences.userRoot();
-	private JTextArea scxmlErrorsDialog;
+	private ValidationWarningStatusPane validationStatus;
 	private ImportExportPicker iep;
 	public ImportExportPicker getIOPicker() {return iep;}
 	public SCXMLEditorMenuBar menuBar;
@@ -1024,6 +1037,108 @@ public class SCXMLGraphEditor extends JPanel
 		}
 	}
 	
+	private class ValidationWarningStatusPane extends JPanel implements ListSelectionListener {
+		private JList scxmlErrorsList;
+		private DefaultListModel listModel;
+		private CellSelector listSelectorHandler;
+		
+		public ValidationWarningStatusPane() {
+			scxmlErrorsList=buildValidationWarningGUI();
+			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+			add(new JLabel("Validation errors:"));
+			add(new JScrollPane(scxmlErrorsList));
+			
+			listSelectorHandler=new ValidationCellSelector(scxmlErrorsList, graphComponent);
+		}
+		private JList buildValidationWarningGUI() {
+			//Create the list and put it in a scroll pane.
+			listModel = new DefaultListModel();
+			JList list = new JList(listModel);
+			list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+			list.addListSelectionListener(this);
+			list.setVisibleRowCount(10);
+			list.setCellRenderer((ListCellRenderer) new WarningRenderer());
+			return list;
+		}
+		
+		class ValidationCellSelector extends CellSelector {
+			public ValidationCellSelector(JList list, SCXMLGraphComponent gc) {
+				super(list, gc);
+			}
+			@Override
+			public mxCell getCellFromListElement(int selectedIndex) {
+				Pair<Object,String> element=(Pair<Object, String>) listModel.get(selectedIndex);
+				if (element!=null) {
+					Object cell= element.getFirst();
+					if (cell instanceof mxCell) return (mxCell) cell;
+					else return null;
+				} else return null;
+			}
+		}
+		
+		class WarningRenderer extends JTextArea implements ListCellRenderer {
+			public Component getListCellRendererComponent(
+					JList list,
+					Object value,            // value to display
+					int index,               // cell index
+					boolean isSelected,      // is the cell selected
+					boolean cellHasFocus)    // the list and the cell have the focus
+			{
+				String text="";
+				if (value!=null) {
+					text=((Pair<Object,String>) value).getSecond();
+				}
+				setText(text);
+				if (isSelected) {
+					setBackground(list.getSelectionBackground());
+					setForeground(list.getSelectionForeground());
+				}
+				else {
+					setBackground(list.getBackground());
+					setForeground(list.getForeground());
+				}
+				setEnabled(list.isEnabled());
+				setFont(list.getFont());
+				setOpaque(true);
+				return this;
+			}
+		}
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			listSelectorHandler.handleSelectEvent(e);
+/*			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e1) {}
+			listSelectorHandler.unselectAll();*/
+		}
+		public void setWarnings(HashMap<Object, String> warnings) {
+			listModel.setSize(Math.max(warnings.size(), listModel.size()));
+			ArrayList<Integer> indexToBeRemoved=new ArrayList<Integer>();
+			for (int i=0;i<listModel.size();i++) {
+				Pair<Object,String> el=(Pair<Object, String>) listModel.get(i);
+				if (el!=null) {
+					String warningsForCell=warnings.get(el.getFirst());
+					if (!StringUtils.isEmptyString(warningsForCell)) {
+						warningsForCell=StringUtils.cleanupSpaces(warningsForCell);
+						if (!warningsForCell.equals(el.getSecond()))
+							listModel.set(i, new Pair<Object,String>(el.getFirst(),warningsForCell));
+						warnings.remove(el.getFirst());
+					} else indexToBeRemoved.add(i);
+				} else {
+					indexToBeRemoved.add(i);
+				}
+			}
+			for(int i=indexToBeRemoved.size()-1;i>=0;i--)
+				listModel.remove(indexToBeRemoved.get(i));
+			for(Entry<Object,String> w:warnings.entrySet()) {
+				String warning=StringUtils.cleanupSpaces(w.getValue());
+				if (!StringUtils.isEmptyString(warning))
+					listModel.addElement(new Pair<Object, String>(w.getKey(), warning));
+			}
+		}
+	}
+	
 	public JFrame createFrame(SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException
 	{
 		SCXMLEditorFrame frame = new SCXMLEditorFrame(this);
@@ -1035,17 +1150,11 @@ public class SCXMLGraphEditor extends JPanel
 
 		// Creates the graph outline component
 		graphOutline = new mxGraphOutline(graphComponent,200,200);
-		
-		scxmlErrorsDialog=new JTextArea();
-		scxmlErrorsDialog.setEditable(false);
-		JPanel errorStatus=new JPanel();
-		errorStatus.setLayout(new BoxLayout(errorStatus, BoxLayout.Y_AXIS));
-		errorStatus.add(new JLabel("Validation errors:"));
-		errorStatus.add(new JScrollPane(scxmlErrorsDialog));
-		
+				
 		JPanel inner = new JPanel();
 		inner.setLayout(new BoxLayout(inner,BoxLayout.Y_AXIS));
-		inner.add(errorStatus);
+		validationStatus = new ValidationWarningStatusPane();
+		inner.add(validationStatus);
 		inner.add(graphOutline);
 		
 		JSplitPane outer = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inner,graphComponent);
@@ -1077,8 +1186,8 @@ public class SCXMLGraphEditor extends JPanel
 		{
 			public void invoke(Object sender, mxEventObject evt)
 			{
-				String warnings=(String)evt.getProperty("warnings");
-				scxmlErrorsDialog.setText(warnings);
+				HashMap<Object,String> warnings=(HashMap<Object,String>)evt.getProperty("warnings");
+				validationStatus.setWarnings(warnings);
 			}
 		});
 		graphComponent.getGraph().getModel().addListener(mxEvent.VALIDATION_PRE_START, new mxIEventListener()
