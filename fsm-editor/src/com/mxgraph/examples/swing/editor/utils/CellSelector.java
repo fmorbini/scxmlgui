@@ -35,6 +35,8 @@ public class CellSelector {
 			if ((selectedIndex>=0) && (selectedIndex<=lastIndex)) {
 				mxCell c=getCellFromListElement(selectedIndex);
 				updateSelection(c);
+			} else {
+				unselectAll();
 			}
 		}
 	}
