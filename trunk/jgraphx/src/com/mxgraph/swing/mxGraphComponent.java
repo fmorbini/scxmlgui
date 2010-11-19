@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoundedRangeModel;
@@ -1493,43 +1494,47 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	public void zoom(double factor) {
 		zoom(factor,null);
 	}
+	private Semaphore zoomInProgress=new Semaphore(1);
 	public void zoom(final double factor,final Point centerPoint)
 	{
-		mxGraphView view = graph.getView();
-		double newScale;
-		if (factor>1)
-			newScale = (double) (Math.ceil(view.getScale() * 100 * factor)) / 100;
-		else
-			newScale = (double) (Math.floor(view.getScale() * 100 * factor)) / 100;
-		if (newScale != view.getScale() && newScale > 0.01)
-		{
-			mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
-					: new mxPoint(0,0);
-
-			final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
-			final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
-
-			repaintEnabled=false;
-			graph.getView().scaleAndTranslate(newScale, translate.getX(),translate.getY());
-
-			if (keepSelectionVisibleOnZoom && !graph.isSelectionEmpty())
-			{
-				getGraphControl().scrollRectToVisible(
-						view.getBoundingBox(graph.getSelectionCells())
-								.getRectangle());
-			}
+		if (zoomInProgress.tryAcquire()) {
+			mxGraphView view = graph.getView();
+			double newScale;
+			if (factor>1)
+				newScale = (double) (Math.ceil(view.getScale() * 100 * factor)) / 100;
 			else
+				newScale = (double) (Math.floor(view.getScale() * 100 * factor)) / 100;
+			if (newScale != view.getScale() && newScale > 0.01)
 			{
-				SwingUtilities.invokeLater(new Runnable()
+				mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
+						: new mxPoint(0,0);
+
+				final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
+				final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
+
+				repaintEnabled=false;
+				graph.getView().scaleAndTranslate(newScale, translate.getX(),translate.getY());
+
+				if (keepSelectionVisibleOnZoom && !graph.isSelectionEmpty())
 				{
-					public void run()
+					getGraphControl().scrollRectToVisible(
+							view.getBoundingBox(graph.getSelectionCells())
+							.getRectangle());
+				}
+				else
+				{
+					SwingUtilities.invokeLater(new Runnable()
 					{
-						maintainScrollBar(true, oldHorizontalValue,factor, centerZoom,centerPoint);
-						maintainScrollBar(false, oldVerticalValue,factor, centerZoom,centerPoint);
-						repaintEnabled=true;
-						graphControl.repaint();
-					}
-				});
+						public void run()
+						{
+							maintainScrollBar(true, oldHorizontalValue,factor, centerZoom,centerPoint);
+							maintainScrollBar(false, oldVerticalValue,factor, centerZoom,centerPoint);
+							repaintEnabled=true;
+							graphControl.repaint();
+							zoomInProgress.release();
+						}
+					});
+				}
 			}
 		}
 	}
@@ -1539,36 +1544,39 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	 */
 	public void zoomTo(final double newScale, final boolean center)
 	{
-		mxGraphView view = graph.getView();
-		final double scale = view.getScale();
+		if (zoomInProgress.tryAcquire()) {
+			mxGraphView view = graph.getView();
+			final double scale = view.getScale();
 
-		mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
-				: new mxPoint();
+			mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
+					: new mxPoint();
 
-		final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
-		final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
+			final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
+			final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
 
-		repaintEnabled=false;
-		graph.getView().scaleAndTranslate(newScale, translate.getX(),
-				translate.getY());
+			repaintEnabled=false;
+			graph.getView().scaleAndTranslate(newScale, translate.getX(),
+					translate.getY());
 
-		// Causes two repaints on the scrollpane, namely one for the scale
-		// change with the new preferred size and one for the change of
-		// the scrollbar position. The latter cannot be done immediately
-		// because the scrollbar keeps the value <= max - extent, and if
-		// max is changed the value change will trigger a syncScrollPane
-		// WithViewport in BasicScrollPaneUI, which will update the value
-		// for the previous maximum (ie. it must be invoked later).
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
+			// Causes two repaints on the scrollpane, namely one for the scale
+			// change with the new preferred size and one for the change of
+			// the scrollbar position. The latter cannot be done immediately
+			// because the scrollbar keeps the value <= max - extent, and if
+			// max is changed the value change will trigger a syncScrollPane
+			// WithViewport in BasicScrollPaneUI, which will update the value
+			// for the previous maximum (ie. it must be invoked later).
+			SwingUtilities.invokeLater(new Runnable()
 			{
-				maintainScrollBar(true,oldHorizontalValue, newScale / scale, center);
-				maintainScrollBar(false, oldVerticalValue,newScale / scale, center);
-				repaintEnabled=true;
-				graphControl.repaint();
-			}
-		});
+				public void run()
+				{
+					maintainScrollBar(true,oldHorizontalValue, newScale / scale, center);
+					maintainScrollBar(false, oldVerticalValue,newScale / scale, center);
+					repaintEnabled=true;
+					graphControl.repaint();
+					zoomInProgress.release();
+				}
+			});
+		}
 	}
 
 	/**
