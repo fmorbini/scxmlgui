@@ -1505,6 +1505,11 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		{
 			mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
 					: new mxPoint(0,0);
+
+			final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
+			final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
+
+			repaintEnabled=false;
 			graph.getView().scaleAndTranslate(newScale, translate.getX(),translate.getY());
 
 			if (keepSelectionVisibleOnZoom && !graph.isSelectionEmpty())
@@ -1519,8 +1524,10 @@ public class mxGraphComponent extends JScrollPane implements Printable
 				{
 					public void run()
 					{
-						maintainScrollBar(true, factor, centerZoom,centerPoint);
-						maintainScrollBar(false, factor, centerZoom,centerPoint);
+						maintainScrollBar(true, oldHorizontalValue,factor, centerZoom,centerPoint);
+						maintainScrollBar(false, oldVerticalValue,factor, centerZoom,centerPoint);
+						repaintEnabled=true;
+						graphControl.repaint();
 					}
 				});
 			}
@@ -1537,6 +1544,11 @@ public class mxGraphComponent extends JScrollPane implements Printable
 
 		mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
 				: new mxPoint();
+
+		final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
+		final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
+
+		repaintEnabled=false;
 		graph.getView().scaleAndTranslate(newScale, translate.getX(),
 				translate.getY());
 
@@ -1551,8 +1563,10 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		{
 			public void run()
 			{
-				maintainScrollBar(true, newScale / scale, center);
-				maintainScrollBar(false, newScale / scale, center);
+				maintainScrollBar(true,oldHorizontalValue, newScale / scale, center);
+				maintainScrollBar(false, oldVerticalValue,newScale / scale, center);
+				repaintEnabled=true;
+				graphControl.repaint();
 			}
 		});
 	}
@@ -1644,6 +1658,10 @@ public class mxGraphComponent extends JScrollPane implements Printable
 					final double scale = graphView.getScale();
 					mxPoint translate = (centerPage) ? getPageTranslate(newScale)
 							: new mxPoint();
+										
+					final int oldHorizontalValue=getHorizontalScrollBar().getModel().getValue();
+					final int oldVerticalValue=getVerticalScrollBar().getModel().getValue();
+					
 					graphView.scaleAndTranslate(newScale, translate.getX(),
 							translate.getY());
 
@@ -1664,13 +1682,13 @@ public class mxGraphComponent extends JScrollPane implements Printable
 								else
 								{
 									scrollToCenter(true);
-									maintainScrollBar(false, factor, false);
+									maintainScrollBar(false, oldVerticalValue,factor, false);
 								}
 							}
 							else if (factor != 1)
 							{
-								maintainScrollBar(true, factor, false);
-								maintainScrollBar(false, factor, false);
+								maintainScrollBar(true, oldHorizontalValue,factor, false);
+								maintainScrollBar(false, oldVerticalValue,factor, false);
 							}
 						}
 					});
@@ -1683,18 +1701,14 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		}
 	}
 
-	/**
-	 * @param extentRatio 
-	 *
-	 */
 	protected int computeDeltaForZoomCenterScroolbar(int v, double factor,int centerPos, double extentRatio)
 	{
 		return (int) Math.round((centerPos-v)*(factor-extentRatio));
 	}
-	protected void maintainScrollBar(boolean horizontal, double factor,boolean center) {
-		maintainScrollBar(horizontal, factor, center, null);
+	protected void maintainScrollBar(boolean horizontal, final int oldValue,double factor,boolean center) {
+		maintainScrollBar(horizontal, oldValue,factor, center, null);
 	}
-	protected void maintainScrollBar(boolean horizontal, final double factor,boolean center, Point centerPoint)
+	protected void maintainScrollBar(boolean horizontal,final int oldValue,final double factor,boolean center, Point centerPoint)
 	{
 		JScrollBar scrollBar = (horizontal) ? getHorizontalScrollBar() : getVerticalScrollBar();
 		final int pos;
@@ -1703,19 +1717,18 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		{
 			final BoundedRangeModel model = scrollBar.getModel();
 			final int ex=model.getExtent();
-			final int v=model.getValue();
 			if (centerPoint!=null) {
 				pos =(int)Math.round((horizontal) ? centerPoint.getX():centerPoint.getY());
 			} else {
 				if (center) {
-					pos=model.getValue()+Math.round((model.getExtent()/2));
+					pos=oldValue+Math.round((model.getExtent()/2));
 				} else {
-					pos=model.getValue();
+					pos=oldValue;
 				}
 			}
 
 			//System.out.println("v="+v+" ex="+ex+" pos="+pos+" f="+factor+" nex="+model.getExtent());
-			final int newValue = (int) Math.round((double)v * factor)+computeDeltaForZoomCenterScroolbar(v,factor,pos,(double)model.getExtent()/(double)ex);
+			final int newValue = (int) Math.round((double)oldValue * factor)+computeDeltaForZoomCenterScroolbar(oldValue,factor,pos,(double)model.getExtent()/(double)ex);
 			//System.out.println("nv="+newValue+" delta="+computeDeltaForZoomCenterScroolbar(v,factor,pos,(double)model.getExtent()/(double)ex));
 			model.setValue(newValue);
 
@@ -3751,6 +3764,8 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		eventSource.removeListener(listener, eventName);
 	}
 
+	private boolean repaintEnabled=true;
+
 	/**
 	 * 
 	 * @author gaudenz
@@ -3862,43 +3877,45 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		 */
 		public void paintComponent(Graphics g)
 		{
-			super.paintComponent(g);
+			if (repaintEnabled) {
+				super.paintComponent(g);
 
-			// Draws the background
-			paintBackground(g);
+				// Draws the background
+				paintBackground(g);
 
-			// Creates or destroys the triple buffer as needed
-			if (tripleBuffered)
-			{
-				checkTripleBuffer();
-			}
-			else if (tripleBuffer != null)
-			{
-				destroyTripleBuffer();
-			}
-
-			// Paints the buffer in the canvas onto the dirty region
-			if (tripleBuffer != null)
-			{
-				mxUtils.drawImageClip(g, tripleBuffer, this);
-			}
-
-			// Paints the graph directly onto the graphics
-			else
-			{
-				Graphics2D g2 = (Graphics2D) g;
-				RenderingHints tmp = g2.getRenderingHints();
-
-				// Sets the graphics in the canvas
-				try
+				// Creates or destroys the triple buffer as needed
+				if (tripleBuffered)
 				{
-					mxUtils.setAntiAlias(g2, antiAlias, textAntiAlias);
-					paintGraph(g2, true);
+					checkTripleBuffer();
 				}
-				finally
+				else if (tripleBuffer != null)
 				{
-					// Restores the graphics state
-					g2.setRenderingHints(tmp);
+					destroyTripleBuffer();
+				}
+
+				// Paints the buffer in the canvas onto the dirty region
+				if (tripleBuffer != null)
+				{
+					mxUtils.drawImageClip(g, tripleBuffer, this);
+				}
+
+				// Paints the graph directly onto the graphics
+				else
+				{
+					Graphics2D g2 = (Graphics2D) g;
+					RenderingHints tmp = g2.getRenderingHints();
+
+					// Sets the graphics in the canvas
+					try
+					{
+						mxUtils.setAntiAlias(g2, antiAlias, textAntiAlias);
+						paintGraph(g2, true);
+					}
+					finally
+					{
+						// Restores the graphics state
+						g2.setRenderingHints(tmp);
+					}
 				}
 			}
 		}
