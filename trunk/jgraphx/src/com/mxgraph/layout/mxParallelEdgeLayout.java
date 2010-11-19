@@ -45,13 +45,16 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 		this.spacing = spacing;
 	}
 
+	public void execute(Object parent) {
+		execute(parent, -1);
+	}
 	/*
 	 * (non-Javadoc)
 	 * @see com.mxgraph.layout.mxIGraphLayout#execute(java.lang.Object)
 	 */
-	public void execute(Object parent)
+	public void execute(Object parent,int depth)
 	{
-		Map<String, List<Object>> lookup = findParallels(parent);
+		Map<String, List<Object>> lookup = findParallels(parent,depth);
 
 		graph.getModel().beginUpdate();
 		try
@@ -77,12 +80,12 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 	/**
 	 * 
 	 */
-	protected Map<String, List<Object>> findParallels(Object parent) {
+	protected Map<String, List<Object>> findParallels(Object parent,int depth) {
 		Map<String, List<Object>> lookup = new Hashtable<String, List<Object>>();
-		findParallels(parent, lookup);
+		findParallels(parent,lookup,depth);
 		return lookup;
 	}
-	protected Map<String, List<Object>> findParallels(Object parent,Map<String, List<Object>> lookup)
+	protected Map<String, List<Object>> findParallels(Object parent,Map<String, List<Object>> lookup,int depth)
 	{
 		mxIGraphModel model = graph.getModel();
 		int childCount = model.getChildCount(parent);
@@ -105,7 +108,9 @@ public class mxParallelEdgeLayout extends mxGraphLayout
 					lookup.get(id).add(child);
 				}
 			} else if (model.isVertex(child)) {
-				findParallels(child,lookup);
+				if (depth!=0) {
+					findParallels(child,lookup,depth-1);
+				}
 			}
 		}
 

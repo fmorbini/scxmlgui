@@ -159,7 +159,8 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					add(itemMenu);
 				}
 				addSeparator();
-				add(editor.bind(mxResources.get("doLayout"), new DoLayoutAction(graph,c)));
+				add(editor.bind(mxResources.get("doRecursiveLayout"), new DoLayoutAction(graph,c,-1)));
+				add(editor.bind(mxResources.get("doSimpleLayout"), new DoLayoutAction(graph,c,0)));
 			}
 		} else {
 			add(editor.bind(mxResources.get("editNodeEdge"), null)).setEnabled(false);

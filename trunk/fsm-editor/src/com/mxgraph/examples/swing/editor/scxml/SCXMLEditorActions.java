@@ -675,11 +675,13 @@ public class SCXMLEditorActions
 		mxGraph graph;
 		mxClusterLayout layout;
 		mxCell parentToLayout;
+		private int depth;
 		
-		public DoLayoutAction(mxGraph g, mxCell p) {
+		public DoLayoutAction(mxGraph g, mxCell p,int depth) {
 			graph=g;
 			layout=new mxClusterLayout(g);
 			parentToLayout=p;
+			this.depth=depth;
 		}
 
 		/**
@@ -691,7 +693,7 @@ public class SCXMLEditorActions
 			int oldStatus=editor.getStatus();
 			editor.setStatus(SCXMLGraphEditor.LAYOUT);
 			editor.getUndoManager().setCollectionMode(true);
-			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout);
+			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout,depth);
 			editor.getUndoManager().setCollectionMode(false);
 			editor.setStatus(oldStatus);
 		}
