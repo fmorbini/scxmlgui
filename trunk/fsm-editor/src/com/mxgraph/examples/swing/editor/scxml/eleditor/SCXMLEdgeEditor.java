@@ -101,8 +101,10 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 		
         JScrollPane scrollPane = new JScrollPane(eventTextPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
+        eventTextPane.setScrollPane(scrollPane);
         tabbedPane.addTab(mxResources.get("eventTAB"), scrollPane);
         scrollPane = new JScrollPane(conditionTextPane);
+        conditionTextPane.setScrollPane(scrollPane);
         scrollPane.setPreferredSize(new Dimension(400, 200));
         tabbedPane.addTab(mxResources.get("conditionTAB"), scrollPane);
         scrollPane = new JScrollPane(exeTextPane);

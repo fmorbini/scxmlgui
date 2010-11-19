@@ -68,6 +68,7 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor implements Action
 
         JScrollPane scrollPane = new JScrollPane(undoTextField);
         scrollPane.setPreferredSize(new Dimension(400, 200));
+        undoTextField.setScrollPane(scrollPane);
         
         srcButton = new JRadioButton(mxResources.get("SCXMLsrc"));
         srcButton.setActionCommand(mxResources.get("SCXMLsrc"));

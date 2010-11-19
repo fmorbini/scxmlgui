@@ -69,6 +69,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 			scxmlIDTextPane.setCaretPosition(0);
 			scxmlIDTextPane.setMargin(new Insets(5,5,5,5));
 			JScrollPane scrollPane = new JScrollPane(scxmlIDTextPane);
+			scxmlIDTextPane.setScrollPane(scrollPane);
 			scrollPane.setPreferredSize(new Dimension(400, 200));
 			tabbedPane.addTab(mxResources.get("nodeIDTAB"), scrollPane);
 			doc.addDocumentListener(changeListener);
