@@ -41,6 +41,7 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.TextDialog;
+import com.mxgraph.examples.swing.editor.utils.CellSelector;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxResources;
@@ -55,6 +56,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	private DefaultListModel listModel;
 	private mxIGraphModel model;
 	private SCXMLGraphComponent gc;
+	private CellSelector listSelectorHandler;
 
 	public SCXMLSearchTool(JFrame parent, SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		super(parent,"Find");
@@ -70,6 +72,8 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		JPanel contentPane = new JPanel();
 		populateGUI(contentPane);
 		contentPane.setOpaque(true); //content panes must be opaque
+		
+		listSelectorHandler=new CellSelector(list, gc);
 		
 		//Create and set up the window.
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -171,36 +175,6 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		setVisible(true);
 	}
 
-	private mxCell currentSelectedCell=null;
-	private String currentSelectedCellPrevStyle=null;
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		if (e.getValueIsAdjusting() == false) {
-			int lastIndex = listModel.size()-1;
-			int selectedIndex = list.getSelectedIndex();
-
-			if ((selectedIndex>=0) && (selectedIndex<=lastIndex)) {
-				mxCell c=(mxCell) listModel.get(selectedIndex);
-				updateSelection(c);
-			}
-		}
-	}
-	
-	private void updateSelection(mxCell c) {
-		if ((c!=null) && (c!=currentSelectedCell)) {
-			model.setStyleCovert(currentSelectedCell, currentSelectedCellPrevStyle);
-			currentSelectedCell=c;
-			currentSelectedCellPrevStyle=model.getStyle(c);
-			if (c.isEdge()) {
-				model.highlightCell(c, "#ff9b88","3");
-				gc.scrollCellToVisible(c, true);
-			} else {
-				model.highlightCell(c, "#ff9b88");
-				gc.scrollCellToVisible(c, true);
-			}
-		}
-	}
-
 	@Override
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
@@ -216,11 +190,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		setVisible(false);
-		if (currentSelectedCell!=null) {
-			model.setStyleCovert(currentSelectedCell, currentSelectedCellPrevStyle);
-			currentSelectedCell=null;
-			currentSelectedCellPrevStyle=null;
-		}
+		listSelectorHandler.unselectAll();
 	}
 
 	@Override
@@ -310,5 +280,10 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	public void removeUpdate(DocumentEvent e) {
 		Document doc = e.getDocument();
 		findAndUpdateList(doc);
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		listSelectorHandler.handleSelectEvent(e);
 	}
 }

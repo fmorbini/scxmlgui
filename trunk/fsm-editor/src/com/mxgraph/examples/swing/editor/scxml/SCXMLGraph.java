@@ -100,23 +100,24 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public String validateCell(Object cell, Hashtable<Object, Object> context)
 	{
+		String warnings="";
 		if (model.isVertex(cell)) {
 			mxCell node=(mxCell)cell;
 			if (node.isVertex()) {
 				SCXMLNode nodeValue = (SCXMLNode)node.getValue();
 				String nodeValueID=nodeValue.getID();
-				if (nodeValueID.matches(".*[\\s]+.*")) return "node name contains spaces.\n";
+				if (nodeValueID.matches(".*[\\s]+.*")) warnings+="node name contains spaces.\n";
 				// check if the executable content is parsable xml
 				String error=XMLUtils.isParsableXMLString(nodeValue.getOnEntry());
-				if (error!=null) return "OnEntry content of node "+nodeValueID+" caused a parser error: "+error;
+				if (error!=null) warnings+="OnEntry content of node "+nodeValueID+" caused a parser error: "+error+"\n";
 				error=XMLUtils.isParsableXMLString(nodeValue.getOnExit());
-				if (error!=null) return "OnExit content of node "+nodeValueID+" caused a parser error: "+error;
+				if (error!=null) warnings+="OnExit content of node "+nodeValueID+" caused a parser error: "+error+"\n";
 				error=XMLUtils.isParsableXMLString(nodeValue.getOnInitialEntry());
-				if (error!=null) return "On initial content of node "+nodeValueID+" caused a parser error: "+error;
+				if (error!=null) warnings+="On initial content of node "+nodeValueID+" caused a parser error: "+error+"\n";
 				error=XMLUtils.isParsableXMLString(nodeValue.getDoneData());
-				if (error!=null) return "Done data of node "+nodeValueID+" caused a parser error: "+error;
+				if (error!=null) warnings+="Done data of node "+nodeValueID+" caused a parser error: "+error+"\n";
 				error=XMLUtils.isParsableXMLString(nodeValue.getDatamodel());
-				if (error!=null) return "Data model of node "+nodeValueID+" caused a parser error: "+error;
+				if (error!=null) warnings+="Data model of node "+nodeValueID+" caused a parser error: "+error+"\n";
 				if (!nodeValue.isOutsourcedNode()) {
 					// check if the namespace has been included
 					String SCXMLid=nodeValueID;
@@ -143,14 +144,14 @@ public class SCXMLGraph extends mxGraph
 							}
 						}
 					}
-					if (!namespaceGood) return "Namespace '"+namespace+"' is used but not defined.\n";
+					if (!namespaceGood) warnings+="Namespace '"+namespace+"' is used but not defined.\n";
 				}
 				SCXMLGraphComponent gc = (SCXMLGraphComponent) getEditor().getGraphComponent();
 				if (!StringUtils.isEmptyString(nodeValueID)) {
 					mxICell parent=node.getParent();
 					SCXMLNode parentValue=null;
 					if (parent==null || ((parentValue=(SCXMLNode)parent.getValue())==null) || !parentValue.getFake() || !nodeValueID.equals(SCXMLNode.ROOTID)) {
-						if (gc.isSCXMLNodeAlreadyThere(nodeValue)) return "duplicated node name: "+nodeValueID+"\n";
+						if (gc.isSCXMLNodeAlreadyThere(nodeValue)) warnings+="duplicated node name: "+nodeValueID+"\n";
 						else gc.addSCXMLNode(nodeValue,node);
 					}
 				}
@@ -165,16 +166,16 @@ public class SCXMLGraph extends mxGraph
 							if (cValue.isInitial()) {
 								numInitialChildren++;
 							}
-							if ((numInitialChildren>0) && nodeValue.isParallel()) return "Parallel nodes ("+nodeValueID+") don't support a child marked as intiial.\n";
-							if (numInitialChildren>1) return "More than 1 children of "+nodeValueID+" is marked as initial.\n";
+							if ((numInitialChildren>0) && nodeValue.isParallel()) warnings+="Parallel nodes ("+nodeValueID+") don't support a child marked as intiial.\n";
+							if (numInitialChildren>1) warnings+="More than 1 children of "+nodeValueID+" is marked as initial.\n";
 						} else {
 							if (nodeValue.isHistoryNode()) {
 								if (c.getSource().equals(node)) {
 									numOutGoingTransitions++;
-									if (numOutGoingTransitions>1) return "History node '"+nodeValueID+"' has more than 1 outgoing transition.\n";
+									if (numOutGoingTransitions>1) warnings+="History node '"+nodeValueID+"' has more than 1 outgoing transition.\n";
 									if (!StringUtils.isEmptyString(((SCXMLEdge)c.getValue()).getCondition()) ||
 											!StringUtils.isEmptyString(((SCXMLEdge)c.getValue()).getEvent())) {
-										return "Outgoing transition of history node has non null event or condition.\n";
+										warnings+="Outgoing transition of history node has non null event or condition.\n";
 									}
 								}
 							}
@@ -186,16 +187,17 @@ public class SCXMLGraph extends mxGraph
 			// check that source and target have non null SCXML ids.
 			mxCell edge=(mxCell)cell;
 			SCXMLEdge edgeValue=(SCXMLEdge) edge.getValue();
-			if ((edge.getSource()==null) || (edge.getTarget()==null)) return "unconnected edge.";
+			if ((edge.getSource()==null) || (edge.getTarget()==null)) warnings+="unconnected edge.\n";
 			String error=XMLUtils.isParsableXMLString(edgeValue.getExe());
 			SCXMLNode source=(SCXMLNode)edge.getSource().getValue();
 			SCXMLNode target=(SCXMLNode)edge.getTarget().getValue();
-			if (error!=null) return "Executable content of one edge from "+source.getID()+" to "+target.getID()+" caused a parser error: "+error;
+			if (error!=null) warnings+="Executable content of one edge from "+source.getID()+" to "+target.getID()+" caused a parser error: "+error+"\n";
 			if (StringUtils.isEmptyString(source.getID()) || StringUtils.isEmptyString(target.getID())) {
-				return "target and source of a transition must have not empty name.";
+				warnings+="target and source of a transition must have not empty name.\n";
 			}
 		}
-		return null;
+		if (StringUtils.isEmptyString(warnings)) return null;
+		else return warnings;
 	}
 	@Override
 	public boolean isCellMovable(Object cell)

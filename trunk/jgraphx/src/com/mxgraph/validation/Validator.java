@@ -1,7 +1,6 @@
 package com.mxgraph.validation;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
 
@@ -24,7 +23,7 @@ public class Validator extends Thread {
 
 	private LinkedHashSet<mxCell> requests=null;
 	Hashtable<Object, Object> context=null;
-	StringBuffer warnings=null;
+	HashMap<Object,String> warnings=null;
 
 	boolean keepGoing=true;
 	
@@ -34,7 +33,7 @@ public class Validator extends Thread {
 		model = (mxGraphModel) graph.getModel();
 		requests=new LinkedHashSet<mxCell>();
 		context=new Hashtable<Object, Object>();
-		warnings=new StringBuffer();
+		warnings=new HashMap<Object, String>();
 		
 		graph.getModel().addListener(mxEvent.REQUEST_VALIDATION, new mxIEventListener()
 		{
@@ -61,13 +60,13 @@ public class Validator extends Thread {
 					mxCell cell = requests.iterator().next();
 					requests.remove(cell);
 					context.clear();
-					warnings.delete(0, warnings.length());
+					warnings.clear();
 
 					model.fireEvent(new mxEventObject(mxEvent.VALIDATION_PRE_START));
 
 					validateGraph(cell, context, warnings);
 
-					model.fireEvent(new mxEventObject(mxEvent.VALIDATION_DONE,"warnings",warnings.toString()));
+					model.fireEvent(new mxEventObject(mxEvent.VALIDATION_DONE,"warnings",warnings));
 				}
 			} catch (InterruptedException e) {}
 		}
@@ -83,7 +82,7 @@ public class Validator extends Thread {
 	 * @param cell Cell to start the validation recursion.
 	 * @param context Object that represents the global validation state.
 	 */
-	public String validateGraph(Object cell, Hashtable<Object, Object> context,StringBuffer totalWarnings)
+	public boolean validateGraph(Object cell, Hashtable<Object, Object> context,HashMap<Object,String> totalWarnings)
 	{
 		mxIGraphModel model = graph.getModel();
 		mxGraphView view = graph.getView();
@@ -100,8 +99,10 @@ public class Validator extends Thread {
 				ctx = new Hashtable<Object, Object>();
 			}
 
-			String warn = validateGraph(tmp, ctx,totalWarnings);
+			boolean isThisCellValid=validateGraph(tmp, ctx,totalWarnings);
+			isValid = isValid && isThisCellValid;
 
+			String warn=totalWarnings.get(tmp);
 			if (warn != null)
 			{
 				String html = warn.replaceAll("\n", "<br>");
@@ -112,58 +113,32 @@ public class Validator extends Thread {
 			{
 				graphComponent.setCellWarning(tmp, null);
 			}
-
-			isValid = isValid && warn == null;
 		}
 
-		StringBuffer warning = new StringBuffer();
-
+		String warningsForCell=totalWarnings.get(cell);
+		if (warningsForCell==null) warningsForCell="";
+		
 		// Adds error for invalid children if collapsed (children invisible)
 		if (graph.isCellCollapsed(cell) && !isValid)
-		{
-			warning.append(mxResources.get("containsValidationErrors",
-					"Contains Validation Errors")
-					+ "\n");
-		}
+			warningsForCell+=mxResources.get("containsValidationErrors","Contains Validation Errors")+"\n";
 
 		// Checks edges and cells using the defined multiplicities
-		if (model.isEdge(cell))
-		{
-			String tmp = graph.getEdgeValidationError(cell, model.getTerminal(
-					cell, true), model.getTerminal(cell, false));
-
-			if (tmp != null)
-			{
-				warning.append(tmp);
-			}
-		}
-		else
-		{
-			String tmp = graph.getCellValidationError(cell);
-
-			if (tmp != null)
-			{
-				warning.append(tmp);
-			}
-		}
+		String tmp=null;
+		if (model.isEdge(cell)) tmp = graph.getEdgeValidationError(cell, model.getTerminal(cell, true), model.getTerminal(cell, false));
+		else tmp = graph.getCellValidationError(cell);
+		if (tmp != null) warningsForCell+=tmp+"\n";
 
 		// Checks custom validation rules
-		String err = graph.validateCell(cell, context);
+		tmp = graph.validateCell(cell, context);
+		if (tmp != null) warningsForCell+=tmp+"\n";
 
-		if (err != null)
-		{
-			warning.append(err);
-		}
-
+		if (warningsForCell.length() > 0) totalWarnings.put(cell, warningsForCell);
+		
 		// Updates the display with the warning icons before any potential
 		// alerts are displayed
-		if (model.getParent(cell) == null)
-		{
-			view.validate();
-		}
-		if ((totalWarnings!=null) && (warning.length() > 0))
-			totalWarnings.append(warning);
-		return (warning.length() > 0 || !isValid) ? warning.toString() : null;
+		if (model.getParent(cell) == null) view.validate();
+		
+		return (warningsForCell.isEmpty() && isValid);
 	}
 
 }
