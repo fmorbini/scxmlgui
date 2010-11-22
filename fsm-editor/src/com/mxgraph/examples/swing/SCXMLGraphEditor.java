@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -85,6 +83,7 @@ import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
 import com.mxgraph.examples.swing.editor.utils.CellSelector;
+import com.mxgraph.examples.swing.editor.utils.ListCellSelector;
 import com.mxgraph.examples.swing.editor.utils.Pair;
 import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
@@ -1040,7 +1039,7 @@ public class SCXMLGraphEditor extends JPanel
 	private class ValidationWarningStatusPane extends JPanel implements ListSelectionListener {
 		private JList scxmlErrorsList;
 		private DefaultListModel listModel;
-		private CellSelector listSelectorHandler;
+		private ListCellSelector listSelectorHandler;
 		
 		public ValidationWarningStatusPane() {
 			scxmlErrorsList=buildValidationWarningGUI();
@@ -1061,7 +1060,7 @@ public class SCXMLGraphEditor extends JPanel
 			return list;
 		}
 		
-		class ValidationCellSelector extends CellSelector {
+		class ValidationCellSelector extends ListCellSelector {
 			public ValidationCellSelector(JList list, SCXMLGraphComponent gc) {
 				super(list, gc);
 			}

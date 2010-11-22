@@ -9,39 +9,17 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 
 public class CellSelector {
-	private mxCell currentSelectedCell=null;
-	private String currentSelectedCellPrevStyle=null;
-	private JList list;
-	protected DefaultListModel listModel;
-	private SCXMLGraphComponent gc;
-	private mxIGraphModel model;
+	protected mxCell currentSelectedCell=null;
+	protected String currentSelectedCellPrevStyle=null;
+	protected SCXMLGraphComponent gc;
+	protected mxIGraphModel model;
 	
-	public CellSelector(JList list,SCXMLGraphComponent gc) {
-		this.list=list;
-		listModel=(DefaultListModel) list.getModel();
+	public CellSelector(SCXMLGraphComponent gc) {
 		this.gc=gc;
 		this.model=gc.getGraph().getModel();
 	}
 	
-	public mxCell getCellFromListElement(int selectedIndex) {
-		return (mxCell) listModel.get(selectedIndex);
-	}
-	
-	public void handleSelectEvent(ListSelectionEvent e) {
-		if (e.getValueIsAdjusting() == false) {
-			int lastIndex = listModel.size()-1;
-			int selectedIndex = list.getSelectedIndex();
-
-			if ((selectedIndex>=0) && (selectedIndex<=lastIndex)) {
-				mxCell c=getCellFromListElement(selectedIndex);
-				updateSelection(c);
-			} else {
-				unselectAll();
-			}
-		}
-	}
-	
-	private void updateSelection(mxCell c) {
+	public void updateSelection(mxCell c) {
 		if ((c!=null) && (c!=currentSelectedCell)) {
 			model.setStyleCovert(currentSelectedCell, currentSelectedCellPrevStyle);
 			currentSelectedCell=c;

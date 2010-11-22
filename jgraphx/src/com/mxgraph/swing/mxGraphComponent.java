@@ -1520,6 +1520,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 					getGraphControl().scrollRectToVisible(
 							view.getBoundingBox(graph.getSelectionCells())
 							.getRectangle());
+					zoomInProgress.release();
 				}
 				else
 				{
@@ -1535,6 +1536,8 @@ public class mxGraphComponent extends JScrollPane implements Printable
 						}
 					});
 				}
+			} else {
+				zoomInProgress.release();
 			}
 		}
 	}

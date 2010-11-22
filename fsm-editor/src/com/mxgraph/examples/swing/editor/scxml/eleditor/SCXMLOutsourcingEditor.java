@@ -43,6 +43,7 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor implements Action
     
     public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, mxCell nn,SCXMLNode n, Point pos) throws Exception {
     	super(parent,editor,nn);
+    	super.remove(idButton);
     	setModal(true);
         setTitle(mxResources.get("titleOutsourceEditor"));
         setLocation(pos);
