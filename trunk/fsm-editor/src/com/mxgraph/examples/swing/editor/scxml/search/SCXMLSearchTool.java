@@ -41,7 +41,7 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.examples.swing.editor.scxml.TextDialog;
-import com.mxgraph.examples.swing.editor.utils.CellSelector;
+import com.mxgraph.examples.swing.editor.utils.ListCellSelector;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxResources;
@@ -56,7 +56,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	private DefaultListModel listModel;
 	private mxIGraphModel model;
 	private SCXMLGraphComponent gc;
-	private CellSelector listSelectorHandler;
+	private ListCellSelector listSelectorHandler;
 
 	public SCXMLSearchTool(JFrame parent, SCXMLGraphEditor editor) throws CorruptIndexException, LockObtainFailedException, IOException, SecurityException, IllegalArgumentException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		super(parent,"Find");
@@ -73,7 +73,7 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 		populateGUI(contentPane);
 		contentPane.setOpaque(true); //content panes must be opaque
 		
-		listSelectorHandler=new CellSelector(list, gc);
+		listSelectorHandler=new ListCellSelector(list, gc);
 		
 		//Create and set up the window.
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

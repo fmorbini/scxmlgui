@@ -5,8 +5,10 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
  *   DocumentSizeFilter.java
  */
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -27,6 +30,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
+import com.mxgraph.examples.swing.editor.utils.CellSelector;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.util.mxEvent;
@@ -35,7 +39,7 @@ import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUndoableEdit;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
-public class SCXMLElementEditor extends JDialog {
+public class SCXMLElementEditor extends JDialog implements ActionListener {
 
 	private static final long serialVersionUID = 3563719047023065063L;
 	
@@ -53,6 +57,9 @@ public class SCXMLElementEditor extends JDialog {
 	private AbstractActionWrapper externalUndoAction=null,externalRedoAction=null;
 
 	private mxCell cell=null;
+
+	protected JButton idButton;
+	private CellSelector cellSelector;
 	
 	public static enum Type {EDGE,NODE,OUTGOING_EDGE_ORDER, OUTSOURCING};
 	
@@ -64,7 +71,16 @@ public class SCXMLElementEditor extends JDialog {
     	externalUndoAction = editor.bind(mxResources.get("undo"), null,"/com/mxgraph/examples/swing/images/undo.gif");
     	externalRedoAction = editor.bind(mxResources.get("redo"), null,"/com/mxgraph/examples/swing/images/redo.gif");
     	keyboardHandler=new EditorKeyboardHandler(this);
-	}
+    	
+    	cellSelector=new CellSelector(editor.getGraphComponent());
+    	
+		idButton = new JButton(mxResources.get("showCell"));
+		idButton.setActionCommand("id");
+		idButton.addActionListener(this);
+		idButton.setEnabled(true);
+		
+		getContentPane().add(idButton, BorderLayout.SOUTH);
+    }
 
     protected HashMap<Object, Action> updateActionTable(JTabbedPane tabbedPane,HashMap<Object, Action> actions) {
     	Component o=tabbedPane.getSelectedComponent();
@@ -130,6 +146,7 @@ public class SCXMLElementEditor extends JDialog {
     
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
+			cellSelector.unselectAll();
 			dispose();
 			try {
 				editor.getSCXMLSearchTool().updateCellInIndex(cell,true);
@@ -191,6 +208,14 @@ public class SCXMLElementEditor extends JDialog {
 			JScrollPane scrollPane=(JScrollPane) component;
 			component=scrollPane.getViewport().getComponent(0);
 			component.requestFocus();
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String cmd=e.getActionCommand();
+		if (cmd.equals("id")) {
+			cellSelector.updateSelection(cell);
 		}
 	}
 }
