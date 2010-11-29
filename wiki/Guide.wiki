@@ -1,0 +1,49 @@
+== Terminology ==
+  * State/node are used interchangeably to indicate SCXML states (parallel or not, cluster or not)
+  * Edge/transition are used interchangeably to indicate SCXML transitions.
+
+== Display Legend ==
+  * Nodes are filled rectangles with smoothed corners.
+  * Cluster and parallel nodes are rectangles with sharp corners and empty body.
+  * Transitions without targets (event handlers) are dotted.
+  * Final states have a red border.
+  * Initial states have a green fill.
+
+== Opening a file ==
+
+If you plan to open an already existing file, first select whether you want to use the layout information eventually contained in the scxml file or of you want the graph layout to be automatically done. This selection is done with the voice *"Ignore stored layout"* in the *File* menu.
+
+== Creating a new file ==
+
+Click on the graph area (the largest portion of the interface) and press Control-N or click on *File*->*New*
+
+== Adding a Node ==
+
+A node (i.e. a SCXML state) can be added only as child (i.e. contained) in a cluster node. Every file has a default cluster node that contains the entire graph and that is called SCXML. To add a node, right click on the location in which you want to add the node and select *"Add node"* from the context menu.
+
+== Adding an Edge ==
+
+The filled part of each node is divided into two regions:
+  * the central region in which the mouse cursor becomes a hand is used to create edges.
+  * the surrounding region in which the cursor becomes the standard move "four arrows" is used to move nodes.
+To connect two nodes, move the mouse in the edge region of the starting node, when the cursor becomes a hand start the drag gesture (left-click and hold) and finish it in the edge region of the destination node (the destination node will become highlighted in green if the edge is possible).
+
+If you want to make a cycle (source and destination are the same), just terminate the drag gesture in the same node it was started.
+
+== Deleting Nodes and Edges ==
+
+Select them with the mouse (either by selecting a region or clicking on each element you want to delete (pressing Control if you plan to click on more than one element)) and use the Delete key to remove them.
+
+== Editing the properties of a Node/Edge ==
+
+Right click on the element you want to edit and select *"Edit ..."* from the context menu.
+Comments should be preserved. If not, please submit a bug report.
+
+== Undo/Redo ==
+
+Control-Z/Control-Y. There are multiple undo managers. One is a global manager that keeps track of changes to the entire graph. Then there are individual undo managers in each panel of each editing window associated to the states/edges that have been edited. In those panels you can undo/redo small changes to selected properties. (just practice by editing the ID of a node, if you undo when the focus is on the graph, you will undo the complete change, while if you undo when the focus is on the ID editing pane, you will undo one character at a time).
+
+== Save ==
+
+To save in the same file just use Control-S. to save in a different file use Control-Shift-S. Exporting in different formats is available in the *"Save as"* dialog.
+When saving a file, the layout is also saved suing comments and can be retrieved next time you open the file by unselecting the *"Ignore stored layout"* option in the *File* menu.
