@@ -31,6 +31,8 @@ To connect two nodes, move the mouse in the edge region of the starting node; wh
 
 If you want to make a cycle (source and destination are the same), just terminate the drag gesture in the same node it was started.
 
+You can also add corners to existing edges by right clicking on the point along an edge in which you want to add the corner and select the appropriate voice in the context menu. To remove a corner from an edge, just repeat the same procedure (this time the context menu will show a remove corner voice instead of an add corner voice).
+
 == Deleting Nodes and Edges ==
 
 Select them with the mouse (either by selecting a region or clicking on each element you want to delete (pressing Control if you plan to click on more than one element)) and use the Delete key to remove them.
@@ -38,7 +40,9 @@ Select them with the mouse (either by selecting a region or clicking on each ele
 == Editing the properties of a Node/Edge ==
 
 Right click on the element you want to edit and select *"Edit ..."* from the context menu.
-Comments should be preserved. If not, please submit a bug report.
+Comments should be preserved. If not, please submit a bug report. Anther way to open the editor window is by selecting the element and pressing F2.
+
+All editing functions are available through the context menu. Either directly as voices of the menu or in the editor that appears when selecting the *"Edit ..."* voice.
 
 == Undo/Redo ==
 
