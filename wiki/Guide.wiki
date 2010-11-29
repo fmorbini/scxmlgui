@@ -1,5 +1,3 @@
-# A short guide to the main functions of the SCXML editor.
-
 == Terminology ==
   * State/node are used interchangeably to indicate SCXML states (parallel or not, cluster or not)
   * Edge/transition are used interchangeably to indicate SCXML transitions.
