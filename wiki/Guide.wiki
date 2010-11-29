@@ -24,9 +24,10 @@ A node (i.e. a SCXML state) can be added only as child (i.e. contained) in a clu
 == Adding an Edge ==
 
 The filled part of each node is divided into two regions:
-  * the central region in which the mouse cursor becomes a hand is used to create edges.
-  * the surrounding region in which the cursor becomes the standard move "four arrows" is used to move nodes.
-To connect two nodes, move the mouse in the edge region of the starting node, when the cursor becomes a hand start the drag gesture (left-click and hold) and finish it in the edge region of the destination node (the destination node will become highlighted in green if the edge is possible).
+  * *edge region*: the central region in which the mouse cursor becomes a hand is used to create edges.
+  * *move region*: the surrounding region in which the cursor becomes the standard move "four arrows" is used to move nodes.
+
+To connect two nodes, move the mouse in the edge region of the starting node; when the cursor becomes a hand, start the drag gesture (left-click and hold) and finish it in the edge region of the destination node (the destination node will become highlighted in green if the edge is possible).
 
 If you want to make a cycle (source and destination are the same), just terminate the drag gesture in the same node it was started.
 
