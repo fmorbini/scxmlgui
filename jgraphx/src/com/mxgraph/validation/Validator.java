@@ -28,6 +28,7 @@ public class Validator extends Thread {
 	boolean keepGoing=true;
 	
 	public Validator(mxGraphComponent gc) {
+		setName("Validator");
 		graphComponent=gc;
 		graph=gc.getGraph();
 		model = (mxGraphModel) graph.getModel();
@@ -68,7 +69,7 @@ public class Validator extends Thread {
 
 					model.fireEvent(new mxEventObject(mxEvent.VALIDATION_DONE,"warnings",warnings));
 				}
-			} catch (InterruptedException e) {}
+			} catch (Exception e) {}
 		}
 	}
 	
