@@ -17,7 +17,7 @@ A *backup* functionality is available that saves each opened file with a time-st
 
 == Creating a new file ==
 
-Click on the graph area (the largest portion of the interface) and press Control-N or click on *File*->*New*
+Click on the graph area (the largest portion of the interface) and press *Control-N* or click on *File*->*New*
 
 == Adding a Node ==
 
@@ -50,11 +50,11 @@ All editing functions are available through the context menu. Either directly as
 
 == Undo/Redo ==
 
-Control-Z/Control-Y. There are multiple undo managers. One is a global manager that keeps track of changes to the entire graph. Then there are individual undo managers in each panel of each editing window associated to the states/edges that have been edited. In those panels you can undo/redo small changes to selected properties. (just practice by editing the ID of a node, if you undo when the focus is on the graph, you will undo the complete change, while if you undo when the focus is on the ID editing pane, you will undo one character at a time).
+*Control-Z*/*Control-Y*. There are multiple undo managers. One is a global manager that keeps track of changes to the entire graph. Then there are individual undo managers in each panel of each editing window associated to the states/edges that have been edited. In those panels you can undo/redo small changes to selected properties. (just practice by editing the ID of a node, if you undo when the focus is on the graph, you will undo the complete change, while if you undo when the focus is on the ID editing pane, you will undo one character at a time).
 
 == Save ==
 
-To save in the same file just use Control-S. to save in a different file use Control-Shift-S. Exporting in different formats is available in the *"Save as"* dialog.
+To save in the same file just use *Control-S*. to save in a different file use *Control-Shift-S*. Exporting in different formats is available in the *"Save as"* dialog.
 When saving a file, the layout is also saved suing comments and can be retrieved next time you open the file by unselecting the *"Ignore stored layout"* option in the *File* menu.
 
 == Search ==
