@@ -31,7 +31,9 @@ The filled part of each node is divided into two regions:
 
 To connect two nodes, move the mouse in the edge region of the starting node; when the cursor becomes a hand, start the drag gesture (left-click and hold) and finish it in the edge region of the destination node (the destination node will become highlighted in green if the edge is possible).
 
-If you want to make a cycle (source and destination are the same), just terminate the drag gesture in the same node it was started.
+If you want to add a target to an existing edge (i.e. create a multi-target edge): create an edge as described above. Then start a drag gesture on the terminal node of the edge while pressing *Control*, terminate the drag gesture on the edge region of the node you want to add as additional target for that edge. A dialog will open asking whether you want to create a separate edge or add a target to that edge.
+
+If you want to make a cycle (source and destination are the same): just terminate the drag gesture in the same node it was started.
 
 You can also add corners to existing edges by right clicking on the point along an edge in which you want to add the corner and select the appropriate voice in the context menu. To remove a corner from an edge, just repeat the same procedure (this time the context menu will show a remove corner voice instead of an add corner voice).
 
