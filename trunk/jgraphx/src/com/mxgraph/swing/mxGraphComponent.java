@@ -1824,6 +1824,9 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		return getCellAt(x, y, hitSwimlaneContent, null);
 	}
 
+	public Object getCellAt(int x, int y, boolean hitSwimlaneContent,Object parent) {
+		return getCellAt(x, y, hitSwimlaneContent, parent, null,false);
+	}
 	/**
 	 * Returns the bottom-most cell that intersects the given point (x, y) in
 	 * the cell hierarchy starting at the given parent.
@@ -1834,15 +1837,16 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	 * Default is <defaultParent>.
 	 * @return Returns the child at the given location.
 	 */
-	public Object getCellAt(int x, int y, boolean hitSwimlaneContent,
-			Object parent)
+	public Object getCellAt(int x, int y, boolean hitSwimlaneContent,Object parent,Object avoidThis,boolean onlyNodes)
 	{
 		if (parent == null)
 		{
 			parent = graph.getDefaultParent();
 		}
 
-		if (parent != null)
+		mxIGraphModel model = graph.getModel();
+
+		if (parent != null && (parent!=avoidThis) && (!onlyNodes || model.isVertex(parent)))
 		{
 			Point previousTranslate = canvas.getTranslate();
 			double previousScale = canvas.getScale();
@@ -1852,23 +1856,24 @@ public class mxGraphComponent extends JScrollPane implements Printable
 				canvas.setScale(graph.getView().getScale());
 				canvas.setTranslate(0, 0);
 
-				mxIGraphModel model = graph.getModel();
 				mxGraphView view = graph.getView();
 
-				Rectangle hit = new Rectangle(x, y, 1, 1);
+				Rectangle hit = new Rectangle(x, y, 1, 1);				
 				int childCount = model.getChildCount(parent);
 
 				for (int i = childCount - 1; i >= 0; i--)
 				{
 					Object cell = model.getChildAt(parent, i);
-					Object result = getCellAt(x, y, hitSwimlaneContent, cell);
+					if (!onlyNodes || model.isVertex(cell)) {
+						Object result = getCellAt(x, y, hitSwimlaneContent, cell,avoidThis,onlyNodes);
 
-					if (result != null)
-					{
-						return result;
-					}
-					else if (doesThisRectangleIntersectThisCell(hit, cell, hitSwimlaneContent, view)) {
-						return cell;
+						if ((result != null) && (avoidThis!=result))
+						{
+							return result;
+						}
+						else if ((avoidThis!=cell) && doesThisRectangleIntersectThisCell(hit, cell, hitSwimlaneContent, view)) {
+							return cell;
+						}
 					}
 				}
 				if (doesThisRectangleIntersectThisCell(hit, parent, hitSwimlaneContent, view)) {
