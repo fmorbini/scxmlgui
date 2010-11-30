@@ -56,3 +56,7 @@ Control-Z/Control-Y. There are multiple undo managers. One is a global manager t
 
 To save in the same file just use Control-S. to save in a different file use Control-Shift-S. Exporting in different formats is available in the *"Save as"* dialog.
 When saving a file, the layout is also saved suing comments and can be retrieved next time you open the file by unselecting the *"Ignore stored layout"* option in the *File* menu.
+
+== Search ==
+
+Press *Control-F* to open the search dialog box. Click on the help button of the search dialog to get further help on how to use that tool.
