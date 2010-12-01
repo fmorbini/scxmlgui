@@ -60,6 +60,7 @@ public class SCXMLGraphHandler extends mxGraphHandler {
 						else targetCell=(mxCell) targetCell.getParent();
 					}
 				}
+				System.out.println("1111");
 				return true;
 			}
 			

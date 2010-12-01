@@ -82,10 +82,8 @@ import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLOutsourcingEditor;
 import com.mxgraph.examples.swing.editor.scxml.listener.SCXMLListener;
 import com.mxgraph.examples.swing.editor.scxml.search.SCXMLSearchTool;
 import com.mxgraph.examples.swing.editor.utils.AbstractActionWrapper;
-import com.mxgraph.examples.swing.editor.utils.CellSelector;
 import com.mxgraph.examples.swing.editor.utils.ListCellSelector;
 import com.mxgraph.examples.swing.editor.utils.Pair;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxEdgeLabelLayout;
@@ -100,6 +98,7 @@ import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
+import com.mxgraph.util.StringUtils;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -373,9 +372,11 @@ public class SCXMLGraphEditor extends JPanel
 				//  block all editing for ocCopy and all its children
 				Set<Object> descendants=new HashSet<Object>();
 				rootg.getAllDescendants(ocCopy, descendants);
+				rootg.setConnectableEdges(false);
 				for(Object d:descendants) {
 					rootg.setCellAsDeletable(d, false);
 					rootg.setCellAsEditable(d, false);
+					rootg.setCellAsConnectable(d, false);
 					//rootg.setCellAsMovable(d, false);
 				}
 			} else {
@@ -1052,6 +1053,7 @@ public class SCXMLGraphEditor extends JPanel
 		private JList buildValidationWarningGUI() {
 			//Create the list and put it in a scroll pane.
 			listModel = new DefaultListModel();
+			listModel.setSize(1); // to avoid problems with accessing an empty list caused by the awt painter.
 			JList list = new JList(listModel);
 			list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			list.addListSelectionListener(this);
@@ -1066,6 +1068,7 @@ public class SCXMLGraphEditor extends JPanel
 			}
 			@Override
 			public mxCell getCellFromListElement(int selectedIndex) {
+				if (listModel.size()<selectedIndex) return null; 
 				Pair<Object,String> element=(Pair<Object, String>) listModel.get(selectedIndex);
 				if (element!=null) {
 					Object cell= element.getFirst();
@@ -1108,7 +1111,6 @@ public class SCXMLGraphEditor extends JPanel
 			listSelectorHandler.handleSelectEvent(e);
 		}
 		public void setWarnings(HashMap<Object, String> warnings) {
-			listModel.setSize(Math.max(warnings.size(), listModel.size()));
 			ArrayList<Integer> indexToBeRemoved=new ArrayList<Integer>();
 			for (int i=0;i<listModel.size();i++) {
 				Pair<Object,String> el=(Pair<Object, String>) listModel.get(i);
@@ -1126,6 +1128,7 @@ public class SCXMLGraphEditor extends JPanel
 			}
 			for(int i=indexToBeRemoved.size()-1;i>=0;i--)
 				listModel.remove(indexToBeRemoved.get(i));
+			listModel.setSize(warnings.size()+listModel.size());
 			for(Entry<Object,String> w:warnings.entrySet()) {
 				String warning=StringUtils.cleanupSpaces(w.getValue());
 				if (!StringUtils.isEmptyString(warning))

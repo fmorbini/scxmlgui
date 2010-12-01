@@ -8,6 +8,7 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.StringUtils;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
@@ -133,7 +134,8 @@ public class Validator extends Thread {
 		tmp = graph.validateCell(cell, context);
 		if (tmp != null) warningsForCell+=tmp+"\n";
 
-		if (warningsForCell.length() > 0) totalWarnings.put(cell, warningsForCell);
+		warningsForCell=StringUtils.cleanupSpaces(warningsForCell);
+		if (!StringUtils.isEmptyString(warningsForCell)) totalWarnings.put(cell, warningsForCell);
 		
 		// Updates the display with the warning icons before any potential
 		// alerts are displayed
