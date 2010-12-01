@@ -22,13 +22,13 @@ import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYP
 import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.examples.swing.editor.utils.XMLUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.StringUtils;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUtils;

@@ -11,8 +11,8 @@ import javax.swing.text.Document;
 
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxGeometry;
+import com.mxgraph.util.StringUtils;
 
 public class SCXMLNode implements Serializable {
 	private static final long serialVersionUID = -2136349535452806563L;

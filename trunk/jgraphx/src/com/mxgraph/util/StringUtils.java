@@ -1,4 +1,4 @@
-package com.mxgraph.examples.swing.editor.utils;
+package com.mxgraph.util;
 
 
 public class StringUtils {

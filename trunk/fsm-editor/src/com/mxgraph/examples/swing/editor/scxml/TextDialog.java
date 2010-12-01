@@ -1,7 +1,6 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
@@ -9,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.StringReader;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -18,11 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-
-import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
+import com.mxgraph.util.StringUtils;
 import com.mxgraph.util.mxResources;
 
 public class TextDialog extends JDialog implements ActionListener, WindowListener {

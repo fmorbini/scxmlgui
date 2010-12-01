@@ -14,8 +14,8 @@ import javax.swing.filechooser.FileFilter;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.DefaultFileFilter;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.StringUtils;
 import com.mxgraph.util.mxResources;
 
 // defines the file filters used in the open file dialog box.

@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import javax.swing.BorderFactory;
@@ -459,7 +460,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	/**
 	 * Maps from cells to lists of heavyweights. 
 	 */
-	protected Hashtable<Object, Component[]> components = new Hashtable<Object, Component[]>();
+	protected ConcurrentHashMap<Object, Component[]> components = new ConcurrentHashMap<Object, Component[]>();
 
 	/**
 	 * Maps from cells to lists of overlays. 
@@ -2834,7 +2835,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	public void updateComponents()
 	{
 		Object root = graph.getModel().getRoot();
-		Hashtable<Object, Component[]> result = updateComponents(root);
+		ConcurrentHashMap<Object, Component[]> result = updateComponents(root);
 
 		// Components now contains the mappings which are no
 		// longer used, the result contains the new mappings
@@ -2857,9 +2858,9 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	/**
 	 * 
 	 */
-	public void removeAllComponents(Hashtable<Object, Component[]> map)
+	public void removeAllComponents(ConcurrentHashMap<Object, Component[]> components2)
 	{
-		Iterator<Map.Entry<Object, Component[]>> it = map.entrySet().iterator();
+		Iterator<Map.Entry<Object, Component[]>> it = components2.entrySet().iterator();
 
 		while (it.hasNext())
 		{
@@ -2896,9 +2897,9 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	/**
 	 * 
 	 */
-	public Hashtable<Object, Component[]> updateComponents(Object cell)
+	public ConcurrentHashMap<Object, Component[]> updateComponents(Object cell)
 	{
-		Hashtable<Object, Component[]> result = new Hashtable<Object, Component[]>();
+		ConcurrentHashMap<Object, Component[]> result = new ConcurrentHashMap<Object, Component[]>();
 		Component[] c = (Component[]) components.remove(cell);
 		mxCellState state = getGraph().getView().getState(cell);
 

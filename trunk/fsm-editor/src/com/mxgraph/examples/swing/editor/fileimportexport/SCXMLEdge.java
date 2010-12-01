@@ -11,9 +11,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
-import com.mxgraph.examples.swing.editor.utils.StringUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
+import com.mxgraph.util.StringUtils;
 import com.mxgraph.util.mxPoint;
 
 public class SCXMLEdge implements Serializable {
