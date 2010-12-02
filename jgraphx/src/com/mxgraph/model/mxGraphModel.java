@@ -2359,7 +2359,7 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 		}
 
 	}
-
+/*
 	@Override
 	public void highlightCell(mxCell node, String color) {
 		if (node!=null) {
@@ -2422,5 +2422,5 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 			}
 			setStyleCovert(node, style);
 		}
-	}
+	}*/
 }

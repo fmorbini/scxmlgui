@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.AskToSaveIfRequired;
+import com.mxgraph.examples.swing.SCXMLGraphEditor.EditorStatus;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
@@ -43,7 +44,6 @@ import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxPoint;
-import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
@@ -661,7 +661,7 @@ public class SCXMLEditorActions
 					editor.closeAllEditors();
 					editor.setDisplayOfOutsourcedContentSelected(false);
 				}
-				editor.setStatus(SCXMLGraphEditor.EDITING);
+				editor.setStatus(EditorStatus.EDITING);
 			}
 		}
 	}
@@ -690,8 +690,8 @@ public class SCXMLEditorActions
 		public void actionPerformed(ActionEvent e)
 		{
 			SCXMLGraphEditor editor = getEditor(e);
-			int oldStatus=editor.getStatus();
-			editor.setStatus(SCXMLGraphEditor.LAYOUT);
+			EditorStatus oldStatus=editor.getStatus();
+			editor.setStatus(EditorStatus.LAYOUT);
 			editor.getUndoManager().setCollectionMode(true);
 			layout.execute((parentToLayout==null)?graph.getDefaultParent():parentToLayout,depth);
 			editor.getUndoManager().setCollectionMode(false);
@@ -725,21 +725,31 @@ public class SCXMLEditorActions
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
-			SCXMLGraphEditor editor=null;
 			if (inNewWindow) {
-				editor=SCXMLGraphEditor.startEditor();
+				Thread openingThread = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						openInEditor(SCXMLGraphEditor.startEditor());
+					}
+				});
+				openingThread.setName("threadFor"+file);
+				openingThread.start();
 			} else {
-				editor = getEditor(e);
+				openInEditor(getEditor(e));
 			}
+		}
+		
+		private void openInEditor(SCXMLGraphEditor editor) {
 			if (editor != null) {
-				editor.setStatus(SCXMLGraphEditor.POPULATING);
+				System.out.println(editor);
+				editor.setStatus(EditorStatus.POPULATING);
 				if (AskToSaveIfRequired.check(editor)) {
 					SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);
 					editor.closeAllEditors();
 					openSelectedFile(fc,editor);
 					editor.setDisplayOfOutsourcedContentSelected(false);
 				}
-				editor.setStatus(SCXMLGraphEditor.EDITING);
+				editor.setStatus(EditorStatus.EDITING);
 			}
 		}
 

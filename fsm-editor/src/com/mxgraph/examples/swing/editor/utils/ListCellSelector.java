@@ -6,7 +6,7 @@ import javax.swing.event.ListSelectionEvent;
 
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.swing.util.CellSelector;
 
 public class ListCellSelector extends CellSelector {
 	private JList list;

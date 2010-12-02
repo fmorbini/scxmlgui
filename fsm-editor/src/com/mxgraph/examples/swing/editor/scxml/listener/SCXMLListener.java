@@ -50,6 +50,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.swing.util.CellSelector;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUtils;
 
@@ -76,6 +77,8 @@ public class SCXMLListener extends JDialog implements ListSelectionListener, Win
 	private SCXMLGraphComponent graphComponent;
 	private mxIGraphModel model;
 	private SCXMLGraphEditor editor;
+	
+	private CellSelector cellHighlighter;
 
 	public SCXMLListener(JFrame parent, SCXMLGraphEditor editor) {
 		super(parent,"SCXML Listener");
@@ -84,7 +87,9 @@ public class SCXMLListener extends JDialog implements ListSelectionListener, Win
 		graphComponent=editor.getGraphComponent();
 		model=graphComponent.getGraph().getModel();
 		this.editor=editor;
-		
+
+		cellHighlighter=new CellSelector(graphComponent);
+
 		addWindowListener(this);
 		JPanel contentPane = new JPanel(new BorderLayout());
 		populateGUI(contentPane);
@@ -595,19 +600,19 @@ public class SCXMLListener extends JDialog implements ListSelectionListener, Win
 	}
 
 	private void doNodeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
-		if (show) model.highlightCell(n, "#ff9b88");
+		if (show) cellHighlighter.selectCell(n);
 		if (highlightedCells!=null) highlightedCells.add(n);
 	}
 	private void doEdgeShow(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
-		if (show) model.highlightCell(n, "#ff9b88","3");
+		if (show) cellHighlighter.selectCell(n);
 		if (highlightedCells!=null) highlightedCells.add(n);
 	}
 	private void doNodeHide(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
-		if (show) model.highlightCell(n,null);
+		if (show) cellHighlighter.unselectCell(n);
 		if (highlightedCells!=null) highlightedCells.remove(n);
 	}
 	private void doEdgeHide(mxIGraphModel model,mxCell n,boolean show,HashSet<mxCell> highlightedCells) {
-		if (show) model.highlightCell(n,null,null);
+		if (show) cellHighlighter.unselectCell(n);
 		if (highlightedCells!=null) highlightedCells.remove(n);
 	}
 

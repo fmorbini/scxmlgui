@@ -41,6 +41,7 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphComponent.mxMouseRedirector;
+import com.mxgraph.swing.util.CellSelector;
 import com.mxgraph.swing.util.mxGraphTransferable;
 import com.mxgraph.swing.util.mxMouseControl;
 import com.mxgraph.util.mxCellRenderer;
@@ -173,6 +174,8 @@ public class mxGraphHandler extends mxMouseControl implements
 	 */
 	protected transient boolean constrainedEvent = false;
 
+	private CellSelector highlighter=null;
+	
 	/**
 	 * 
 	 * @param graphComponent
@@ -180,6 +183,7 @@ public class mxGraphHandler extends mxMouseControl implements
 	public mxGraphHandler(final mxGraphComponent graphComponent)
 	{
 		this.graphComponent = graphComponent;
+		highlighter=new CellSelector(graphComponent,false);
 		marker = createMarker();
 
 		// Adds component for rendering the handles (preview is separate)
@@ -445,13 +449,8 @@ public class mxGraphHandler extends mxMouseControl implements
 	}
 
 	private Collection<Object> highlightedCells=null;
-	private void cancelHighlight(Collection<Object> highlightedCells) {
-		if (highlightedCells!=null) {
-			mxIGraphModel model = graphComponent.getGraph().getModel();
-			for(Object hc:highlightedCells) {
-				model.highlightCell((mxCell)hc, null,null,null,null);
-			}
-		}
+	private void cancelHighlight() {
+		highlighter.unselectAll();
 	}
 	private void highlightEdgeUnderMouse(MouseEvent e) {
 		mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY(), false);
@@ -462,18 +461,19 @@ public class mxGraphHandler extends mxMouseControl implements
 				Collection<Object> siblings = graphComponent.getSiblingsOfCell(cell);
 				if ((highlightedCells!=null) && (siblings.size()==highlightedCells.size()) && siblings.containsAll(highlightedCells)) return;
 				else {
+					cancelHighlight();
 					for(Object s:siblings) {
-						Object parent = model.getParent(s);
-						model.add(parent,s,model.getChildCount(parent) - 1,true);
+						//Object parent = model.getParent(s);
+						//model.add(parent,s,model.getChildCount(parent) - 1,true);
+						//model.highlightCell((mxCell) s, "#ff9b88","3","#ff0000","#ffffff");
 
-						model.highlightCell((mxCell) s, "#ff9b88","3","#ff0000","#ffffff");
-						cancelHighlight(highlightedCells);
+						highlighter.selectCell((mxCell) s);
 					}
 					highlightedCells=siblings;
 				}
 			}
 		} else if (highlightedCells!=null) {
-			cancelHighlight(highlightedCells);
+			cancelHighlight();
 			highlightedCells=null;
 		}
 	}
