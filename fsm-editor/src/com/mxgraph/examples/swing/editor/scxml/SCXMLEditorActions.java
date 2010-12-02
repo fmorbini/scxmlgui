@@ -741,7 +741,6 @@ public class SCXMLEditorActions
 		
 		private void openInEditor(SCXMLGraphEditor editor) {
 			if (editor != null) {
-				System.out.println(editor);
 				editor.setStatus(EditorStatus.POPULATING);
 				if (AskToSaveIfRequired.check(editor)) {
 					SCXMLFileChoser fc = new SCXMLFileChoser(editor, lastDir, file);

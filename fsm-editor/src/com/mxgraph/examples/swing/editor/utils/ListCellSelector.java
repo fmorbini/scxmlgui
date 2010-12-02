@@ -24,12 +24,12 @@ public class ListCellSelector extends CellSelector {
 	
 	public void handleSelectEvent(ListSelectionEvent e) {
 		if (e.getValueIsAdjusting() == false) {
-			int lastIndex = listModel.size()-1;
 			int selectedIndex = list.getSelectedIndex();
 
-			if ((selectedIndex>=0) && (selectedIndex<=lastIndex)) {
+			if ((selectedIndex>=0) && (selectedIndex<listModel.size())) {
 				mxCell c=getCellFromListElement(selectedIndex);
-				updateSelection(c);
+				unselectAll();
+				selectCell(c);
 			} else {
 				unselectAll();
 			}

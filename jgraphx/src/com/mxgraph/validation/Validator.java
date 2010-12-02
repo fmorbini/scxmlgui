@@ -58,22 +58,26 @@ public class Validator extends Thread {
 		while(keepGoing) {
 			try {
 				Thread.sleep(1000);
-				if (!requests.isEmpty()) {
-					mxCell cell = requests.iterator().next();
-					requests.remove(cell);
-					context.clear();
-					warnings.clear();
-
-					model.fireEvent(new mxEventObject(mxEvent.VALIDATION_PRE_START));
-
-					validateGraph(cell, context, warnings);
-
-					model.fireEvent(new mxEventObject(mxEvent.VALIDATION_DONE,"warnings",warnings));
-				}
+				processOldestRequest();
 			} catch (Exception e) {}
 		}
 	}
 	
+	private void processOldestRequest() {
+		if (!requests.isEmpty()) {
+			mxCell cell = requests.iterator().next();
+			requests.remove(cell);
+			context.clear();
+			warnings.clear();
+
+			model.fireEvent(new mxEventObject(mxEvent.VALIDATION_PRE_START));
+
+			validateGraph(cell, context, warnings);
+
+			model.fireEvent(new mxEventObject(mxEvent.VALIDATION_DONE,"warnings",warnings));
+		}
+	}
+
 	/**
 	 * Validates the graph by validating each descendant of the given cell or
 	 * the root of the model. Context is an object that contains the validation
