@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxCellMarker;
 import com.mxgraph.util.mxEvent;
@@ -18,16 +19,19 @@ public class CellSelector {
 	protected mxGraphComponent gc;
 	private mxGraph graph;
 	private mxGraphView view;
+	private mxIGraphModel model;
 	private boolean withScroll;
 	
 	public CellSelector(mxGraphComponent gc,boolean withScroll) {
 		this.gc=gc;
 		this.graph=gc.getGraph();
 		this.view=graph.getView();
+		this.model=graph.getModel();
 		this.withScroll=withScroll;
 		mxIEventListener updateListener=new mxIEventListener() {
 			@Override
 			public void invoke(Object sender, mxEventObject evt) {
+				//System.out.println("Updating marker because of event: "+evt.getName());
 				for(Entry<mxCell,mxCellMarker> el:currentSelectedCells.entrySet()) {
 					el.getValue().unmark();
 					el.getValue().mark();
@@ -38,7 +42,7 @@ public class CellSelector {
 		view.addListener(mxEvent.SCALE_AND_TRANSLATE, updateListener);
 		view.addListener(mxEvent.SCALE, updateListener);
 		view.addListener(mxEvent.TRANSLATE, updateListener);
-		view.addListener(mxEvent.MOVE_CELLS, updateListener);
+		model.addListener(mxEvent.CHANGE, updateListener);
 	}
 	
 	public CellSelector(mxGraphComponent gc) {
