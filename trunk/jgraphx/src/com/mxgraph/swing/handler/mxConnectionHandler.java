@@ -230,7 +230,8 @@ public class mxConnectionHandler extends mxMouseControl
 
 			// Overrides to use marker color only in highlight mode or for
 			// target selection
-			protected Color getMarkerColor(MouseEvent e, mxCellState state,
+			@Override
+			public Color getMarkerColor(MouseEvent e, mxCellState state,
 					boolean isValid)
 			{
 				return (isHighlighting() || isConnecting()) ? super

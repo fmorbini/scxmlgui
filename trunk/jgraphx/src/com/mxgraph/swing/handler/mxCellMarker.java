@@ -258,7 +258,34 @@ public class mxCellMarker extends JComponent
 	 * true, then the state is stored in validState regardless of the marker
 	 * color. The state is returned regardless of the marker color and
 	 * valid state. 
+	 * @param isValid 
 	 */
+	public void process(mxCellState state,Color color, boolean isValid) {
+		if (isValid)
+		{
+			validState = state;
+		}
+		else
+		{
+			validState = null;
+		}
+
+		if (state != markedState || color != currentColor)
+		{
+			currentColor = color;
+
+			if (state != null && currentColor != null)
+			{
+				markedState = state;
+				mark();
+			}
+			else if (markedState != null)
+			{
+				markedState = null;
+				unmark();
+			}
+		}
+	}
 	public mxCellState process(MouseEvent e)
 	{
 		mxCellState state = null;
@@ -268,31 +295,7 @@ public class mxCellMarker extends JComponent
 			state = getState(e);
 			boolean isValid = (state != null) ? isValidState(state) : false;
 			Color color = getMarkerColor(e, state, isValid);
-
-			if (isValid)
-			{
-				validState = state;
-			}
-			else
-			{
-				validState = null;
-			}
-
-			if (state != markedState || color != currentColor)
-			{
-				currentColor = color;
-
-				if (state != null && currentColor != null)
-				{
-					markedState = state;
-					mark();
-				}
-				else if (markedState != null)
-				{
-					markedState = null;
-					unmark();
-				}
-			}
+			process(state,color,isValid);
 		}
 
 		return state;
@@ -301,7 +304,7 @@ public class mxCellMarker extends JComponent
 	/**
 	 * Marks the markedState and fires a mxEvent.MARK event.
 	 */
-	protected void mark()
+	public void mark()
 	{
 		if (markedState != null)
 		{
@@ -334,7 +337,7 @@ public class mxCellMarker extends JComponent
 	/**
 	 * Hides the marker and fires a mxEvent.MARK event.
 	 */
-	protected void unmark()
+	public void unmark()
 	{
 		if (getParent() != null)
 		{
@@ -358,7 +361,7 @@ public class mxCellMarker extends JComponent
 	 * Returns the valid- or invalidColor depending on the value of isValid.
 	 * The given state is ignored by this implementation.
 	 */
-	protected Color getMarkerColor(MouseEvent e, mxCellState state,
+	public Color getMarkerColor(MouseEvent e, mxCellState state,
 			boolean isValid)
 	{
 		return (isValid) ? validColor : invalidColor;

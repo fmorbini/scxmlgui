@@ -348,10 +348,10 @@ public interface mxIGraphModel
 	 */
 	void removeListener(mxIEventListener listener, String eventName);
 
-	void highlightCell(mxCell node, String strokeColor);
+/*	void highlightCell(mxCell node, String strokeColor);
 	void highlightCell(mxCell node, String strokeColor, String width);
 	void highlightCell(mxCell node, String strokeColor, String width,String fontColor);
-	void highlightCell(mxCell node, String strokeColor, String width,String fontColor,String labelBackground);
+	void highlightCell(mxCell node, String strokeColor, String width,String fontColor,String labelBackground);*/
 	
 	public boolean isLoop(mxIGraphModel model, Object edge);
 }

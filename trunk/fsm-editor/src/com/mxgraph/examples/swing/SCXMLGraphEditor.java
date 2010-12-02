@@ -120,15 +120,12 @@ public class SCXMLGraphEditor extends JPanel
 	public ImportExportPicker getIOPicker() {return iep;}
 	public SCXMLEditorMenuBar menuBar;
 
-	public static final int STARTUP=0;
-	public static final int EDITING=1;	
-	public static final int LAYOUT=2;	
-	public static final int POPULATING=3;	
-	protected int status=STARTUP;
-	public void setStatus(int status) {
+	public enum EditorStatus {STARTUP,EDITING,LAYOUT,POPULATING};
+	private EditorStatus status=EditorStatus.STARTUP;
+	public void setStatus(EditorStatus status) {
 		this.status=status;
 	}
-	public int getStatus() {
+	public EditorStatus getStatus() {
 		return status;
 	}
 
@@ -1199,7 +1196,7 @@ public class SCXMLGraphEditor extends JPanel
 		{
 			public void invoke(Object sender, mxEventObject evt)
 			{
-				if (getStatus()==EDITING) graphComponent.validateGraph();
+				if (getStatus()==EditorStatus.EDITING) graphComponent.validateGraph();
 			}
 		});
 		

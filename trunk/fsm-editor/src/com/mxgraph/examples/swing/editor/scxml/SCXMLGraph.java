@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
+import com.mxgraph.examples.swing.SCXMLGraphEditor.EditorStatus;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
@@ -103,9 +104,10 @@ public class SCXMLGraph extends mxGraph
 	@Override
 	public String validateCell(Object cell, Hashtable<Object, Object> context)
 	{
-		SCXMLGraphComponent gc = getEditor().getGraphComponent();
+		EditorStatus status=getEditor().getStatus();
+		SCXMLGraphComponent gc = getEditor().getGraphComponent();		
 		String warnings="";
-		if (isCellEditable(cell)) {
+		if (isCellEditable(cell) && (status==EditorStatus.EDITING)) {
 			if (model.isVertex(cell)) {			
 				mxCell node=(mxCell)cell;
 
