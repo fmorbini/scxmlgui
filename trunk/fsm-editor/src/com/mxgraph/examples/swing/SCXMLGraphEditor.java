@@ -1036,10 +1036,11 @@ public class SCXMLGraphEditor extends JPanel
 	
 	private class ValidationWarningStatusPane extends JPanel implements ListSelectionListener {
 		private JList scxmlErrorsList;
-		private DefaultListModel listModel;
+		private final DefaultListModel listModel=new DefaultListModel();
 		private ListCellSelector listSelectorHandler;
 		
 		public ValidationWarningStatusPane() {
+			//Create the list and put it in a scroll pane.
 			scxmlErrorsList=buildValidationWarningGUI();
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 			add(new JLabel("Validation errors:"));
@@ -1048,9 +1049,6 @@ public class SCXMLGraphEditor extends JPanel
 			listSelectorHandler=new ValidationCellSelector(scxmlErrorsList, graphComponent);
 		}
 		private JList buildValidationWarningGUI() {
-			//Create the list and put it in a scroll pane.
-			listModel = new DefaultListModel();
-			listModel.setSize(1); // to avoid problems with accessing an empty list caused by the awt painter.
 			JList list = new JList(listModel);
 			list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			list.addListSelectionListener(this);
@@ -1107,30 +1105,36 @@ public class SCXMLGraphEditor extends JPanel
 		public void valueChanged(ListSelectionEvent e) {
 			listSelectorHandler.handleSelectEvent(e);
 		}
-		public void setWarnings(HashMap<Object, String> warnings) {
-			ArrayList<Integer> indexToBeRemoved=new ArrayList<Integer>();
-			for (int i=0;i<listModel.size();i++) {
-				Pair<Object,String> el=(Pair<Object, String>) listModel.get(i);
-				if (el!=null) {
-					String warningsForCell=warnings.get(el.getFirst());
-					if (!StringUtils.isEmptyString(warningsForCell)) {
-						warningsForCell=StringUtils.cleanupSpaces(warningsForCell);
-						if (!warningsForCell.equals(el.getSecond()))
-							listModel.set(i, new Pair<Object,String>(el.getFirst(),warningsForCell));
-						warnings.remove(el.getFirst());
-					} else indexToBeRemoved.add(i);
-				} else {
-					indexToBeRemoved.add(i);
+		public void setWarnings(final HashMap<Object, String> warnings) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					ArrayList<Integer> indexToBeRemoved=new ArrayList<Integer>();
+					for (int i=0;i<listModel.size();i++) {
+						Pair<Object,String> el=(Pair<Object, String>) listModel.get(i);
+						if (el!=null) {
+							String warningsForCell=warnings.get(el.getFirst());
+							if (!StringUtils.isEmptyString(warningsForCell)) {
+								warningsForCell=StringUtils.cleanupSpaces(warningsForCell);
+								if (!warningsForCell.equals(el.getSecond()))
+									listModel.set(i, new Pair<Object,String>(el.getFirst(),warningsForCell));
+								warnings.remove(el.getFirst());
+							} else indexToBeRemoved.add(i);
+						} else {
+							indexToBeRemoved.add(i);
+						}
+					}
+					for(int i=indexToBeRemoved.size()-1;i>=0;i--)
+						listModel.removeElementAt(indexToBeRemoved.get(i));
+					for(Entry<Object,String> w:warnings.entrySet()) {
+						String warning=StringUtils.cleanupSpaces(w.getValue());
+						if (!StringUtils.isEmptyString(warning)) {
+							System.out.println(warning);
+							listModel.addElement(new Pair<Object, String>(w.getKey(), warning));
+						}
+					}
 				}
-			}
-			for(int i=indexToBeRemoved.size()-1;i>=0;i--)
-				listModel.remove(indexToBeRemoved.get(i));
-			listModel.setSize(warnings.size()+listModel.size());
-			for(Entry<Object,String> w:warnings.entrySet()) {
-				String warning=StringUtils.cleanupSpaces(w.getValue());
-				if (!StringUtils.isEmptyString(warning))
-					listModel.addElement(new Pair<Object, String>(w.getKey(), warning));
-			}
+			});
 		}
 	}
 	

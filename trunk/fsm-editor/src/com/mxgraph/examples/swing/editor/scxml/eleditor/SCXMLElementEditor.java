@@ -215,7 +215,7 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String cmd=e.getActionCommand();
 		if (cmd.equals("id")) {
-			cellSelector.updateSelection(cell);
+			cellSelector.toggleSelection(cell);
 		}
 	}
 }
