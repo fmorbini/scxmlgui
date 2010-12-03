@@ -15,7 +15,7 @@
 
 If you plan to open an already existing file, first select whether you want to use the layout information possibly contained in the scxml file (e.g. in case this file was saved by this editor, and would like to maintain the saved layout) or if you want the graph layout to be automatically done (e.g. in case the file was not saved by this editor, and therefore does not contain layout information). This selection is done with the voice *"Ignore stored layout"* in the *File* menu.
 
-A *backup* functionality is available that saves each opened file with a time-stamp by starting the editor with the *"-b"* option.
+A *backup* functionality is available by starting the editor with the *"-b"* option. This function saves each opened file with a time-stamp in its file name.
 
 == Creating a new file ==
 
