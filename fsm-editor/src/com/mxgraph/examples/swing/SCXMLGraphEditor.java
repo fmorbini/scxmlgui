@@ -60,7 +60,6 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.LockObtainFailedException;
 
-import com.mxgraph.examples.swing.editor.EditorAboutFrame;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
@@ -932,28 +931,6 @@ public class SCXMLGraphEditor extends JPanel
 			}
 
 			frame.setTitle(title + " - " + appTitle);
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void about()
-	{
-		JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
-
-		if (frame != null)
-		{
-			EditorAboutFrame about = new EditorAboutFrame(frame);
-			about.setModal(true);
-
-			// Centers inside the application frame
-			int x = frame.getX() + (frame.getWidth() - about.getWidth()) / 2;
-			int y = frame.getY() + (frame.getHeight() - about.getHeight()) / 2;
-			about.setLocation(x, y);
-
-			// Shows the modal dialog and waits
-			about.setVisible(true);
 		}
 	}
 
