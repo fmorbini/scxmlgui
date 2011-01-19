@@ -122,7 +122,7 @@ public class SCXMLImportExport implements IImportExport {
 	}
 	
 	public SCXMLNode getNodeFromSCXMLID(String scxmlID) {
-		assert(!scxmlID.equals(""));
+		assert(!StringUtils.isEmptyString(scxmlID));
 		return scxmlID2nodes.get(scxmlID);
 	}
 	public mxCell getCellFromInternalID(String internalID) {
@@ -448,7 +448,7 @@ public class SCXMLImportExport implements IImportExport {
 	}
 
 	private HashMap<String,mxCell> internalID2cell=new HashMap<String, mxCell>();
-	private void populateGraph(SCXMLGraph graph,boolean ignoreStoredLayout) {
+	private void populateGraph(SCXMLGraph graph,boolean ignoreStoredLayout) throws Exception {
 		mxIGraphModel model=graph.getModel();
 		model.beginUpdate();
 		try{
@@ -499,12 +499,16 @@ public class SCXMLImportExport implements IImportExport {
 		}
 	}
 	
-	private ArrayList<mxCell> addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge, String toSCXMLID, boolean ignoreStoredLayout) {
+	private ArrayList<mxCell> addOrUpdateEdge(SCXMLGraph graph, SCXMLEdge edge, String toSCXMLID, boolean ignoreStoredLayout) throws Exception {
 		ArrayList<mxCell> ret=new ArrayList<mxCell>();
-		mxCell source=internalID2cell.get(scxmlID2nodes.get(edge.getSCXMLSource()).getInternalID());
+		SCXMLNode sourceNode = scxmlID2nodes.get(edge.getSCXMLSource());
+		if (sourceNode==null) throw new Exception("Source node for edge: "+edge+" not found.");
+		mxCell source=internalID2cell.get(sourceNode.getInternalID());
 		for(String targetSCXMLID:edge.getSCXMLTargets()) {
 			if (targetSCXMLID.equals(toSCXMLID)) {
-				mxCell target=internalID2cell.get(scxmlID2nodes.get(targetSCXMLID).getInternalID());
+				SCXMLNode targetNode = scxmlID2nodes.get(targetSCXMLID);
+				if (targetNode==null) throw new Exception("Target '"+targetSCXMLID+"' for edge: "+edge+" not found.");
+				mxCell target=internalID2cell.get(targetNode.getInternalID());
 				System.out.println("add edge ("+source+"->"+target+")to graph: "+edge);
 				mxCell e=(mxCell) graph.insertEdge(internalID2cell.get(root.getInternalID()), edge.getInternalID(),edge,source,target);
 				if (!ignoreStoredLayout) {
