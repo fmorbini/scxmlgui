@@ -1,3 +1,4 @@
+#labels Featured
 == Terminology ==
   * State/node are used interchangeably to indicate SCXML states (parallel or not, cluster or not)
   * Edge/transition are used interchangeably to indicate SCXML transitions.
