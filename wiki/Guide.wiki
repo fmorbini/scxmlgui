@@ -18,6 +18,8 @@ If you plan to open an already existing file, first select whether you want to u
 
 A *backup* functionality is available by starting the editor with the *"-b"* option. This function saves each opened file with a time-stamp in its file name.
 
+to initially open a specific file you can use the -i option. For example, "java -jar fsm-editor.jar -i test.scxml" will start the editor and open the file "test.scxml".
+
 == Creating a new file ==
 
 Click on the graph area (the largest portion of the interface) and press *Control-N* or click on *File*->*New*
@@ -63,3 +65,8 @@ When saving a file, the layout is also saved suing comments and can be retrieved
 == Search ==
 
 Press *Control-F* to open the search dialog box. Click on the help button of the search dialog to get further help on how to use that tool.
+
+== No GUI processing ==
+
+The software can be used to batch auto-layout and/or convert to image formats (or dot format) scxml files. To do so you must include in the command line at least the options *"-i"* and *"-o"*.
+For example, the command "java -jar fsm-editor.jar -i test.scxml -o test.png -l" will open test.scxml, apply autolayout and save the result in test.png. If "-l" is omitted, auto-layout will not be called and the saved layout will be used. If the output file must not have an extension then use the option *"-t"* to specify the format of the output (e.g. use "-t png" to force the output to be in the png format).
