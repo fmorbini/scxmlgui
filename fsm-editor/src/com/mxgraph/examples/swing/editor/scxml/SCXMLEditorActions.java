@@ -9,11 +9,13 @@
  */
 package com.mxgraph.examples.swing.editor.scxml;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +29,9 @@ import javax.swing.SwingUtilities;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.AskToSaveIfRequired;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.EditorStatus;
+import com.mxgraph.examples.swing.editor.fileimportexport.DOTImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
+import com.mxgraph.examples.swing.editor.fileimportexport.IMGImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
@@ -764,7 +768,7 @@ public class SCXMLEditorActions
 					IImportExport fie=fileIO.read(fc,editor);
 
 					// apply layout to each cluster from the leaves up:
-					if (fc.ignoreStoredLayout()) {
+					if (fc.ignoreStoredLayout() || SCXMLGraphEditor.isDoLayout()) {
 						mxClusterLayout clusterLayout=new mxClusterLayout(graph);
 						clusterLayout.execute(graph.getDefaultParent());
 					}
@@ -952,6 +956,34 @@ public class SCXMLEditorActions
 		{
 			SCXMLGraphEditor editor = getEditor(e);
 			editor.getGraphComponent().zoomOut();
+		}
+	}
+	
+	public static void convertNoGUI(SCXMLGraphEditor editor) throws Exception {
+		String input=SCXMLGraphEditor.getPresetInput();
+		String output=SCXMLGraphEditor.getPresetOutput();
+		String format=SCXMLGraphEditor.getPresetOutputFormat();
+		boolean doLayout=SCXMLGraphEditor.isDoLayout();
+
+		SCXMLImportExport scxmlImportExport = new SCXMLImportExport();
+		SCXMLGraphComponent graphComponent = editor.getGraphComponent();
+		SCXMLGraph graph = graphComponent.getGraph();
+		
+		graphComponent.getValidator().kill();
+
+		scxmlImportExport.readInGraph(graph, input, doLayout);
+
+		if (doLayout) {
+			mxClusterLayout layout = new mxClusterLayout(graph);
+			layout.execute(graph.getDefaultParent());
+		}
+
+		if (format.equalsIgnoreCase("dot")) {
+			DOTImportExport fie = new DOTImportExport();
+			fie.write(graphComponent,output);
+		} else {
+			IMGImportExport fie = new IMGImportExport();
+			fie.write(graphComponent,output,format,graphComponent.getBackground());
 		}
 	}
 }

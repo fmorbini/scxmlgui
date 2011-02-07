@@ -27,37 +27,37 @@ public class IMGImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws Exception {
 	}
 
 	@Override
-	public void write(mxGraphComponent graphComponent, String into) throws IOException {
+	public void write(mxGraphComponent graphComponent, String into) throws Exception {
 		Color bg = null;
-		mxGraph graph = graphComponent.getGraph();
 		String ext = into.substring(into.lastIndexOf('.') + 1);
-		
-		if ((!ext.equalsIgnoreCase("gif") && !ext
-				.equalsIgnoreCase("png"))
+		if ((!ext.equalsIgnoreCase("gif") && !ext.equalsIgnoreCase("png"))
 				|| JOptionPane.showConfirmDialog(
 						graphComponent, mxResources
 								.get("transparentBackground")) != JOptionPane.YES_OPTION)
 		{
 			bg = graphComponent.getBackground();
 		}
-
-		BufferedImage image = mxCellRenderer
-				.createBufferedImage(graph, null, 1, bg,
-						graphComponent.isAntiAlias(), null,
-						graphComponent.getCanvas());
+		write(graphComponent,into,ext,bg);
+	}
+	public void write(mxGraphComponent graphComponent,String into,String format,Color bg) throws Exception {
+		mxGraph graph = graphComponent.getGraph();
+		BufferedImage image = mxCellRenderer.createBufferedImage(graph, null, 1, bg,
+				graphComponent.isAntiAlias(), null,
+				graphComponent.getCanvas());
 
 		if (image != null)
 		{
-			ImageIO.write(image, ext, new File(into));
+			if (!ImageIO.write(image,format,new File(into))) {
+				throw new Exception(mxResources.get("invalidImageFormat"+": '"+format+"'"));
+			}
 		}
 		else
 		{
-			JOptionPane.showMessageDialog(graphComponent,
-					mxResources.get("noImageData"));
+			throw new Exception(mxResources.get("noImageData"));
 		}
 	}
 
