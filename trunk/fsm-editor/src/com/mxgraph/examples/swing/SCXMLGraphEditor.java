@@ -66,6 +66,7 @@ import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleIgnoreStoredLayout;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorMenuBar;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorPopupMenu;
@@ -175,7 +176,8 @@ public class SCXMLGraphEditor extends JPanel
 	protected File currentFile;
 	protected IImportExport currentFileIOMethod;
 	protected Long lastModifiedDate;
-	private static boolean backupEnabled;
+	private static boolean backupEnabled,doLayout;
+	private static String inputFileName,outputFileName,outputFormat;
 
 	/**
 	 * 
@@ -1345,12 +1347,15 @@ public class SCXMLGraphEditor extends JPanel
 	}
 
 	public static SCXMLGraphEditor startEditor() {
+		return startEditor(false);
+	}
+	public static SCXMLGraphEditor startEditor(boolean noGUI) {
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
 			SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
-			editor.createFrame(editor).setVisible(true);
+			if (!noGUI) editor.createFrame(editor).setVisible(true);
 			editor.getGraphComponent().requestFocusInWindow();
 			
 			return editor;
@@ -1362,10 +1367,24 @@ public class SCXMLGraphEditor extends JPanel
 		return null;
 	}
 
-	public boolean isBackupEnabled() {
-		return backupEnabled;
-	}
+	public static boolean isDoLayout() {return doLayout;}
+	public static void setDoLayout(boolean l) { doLayout=l; }
+	public boolean isBackupEnabled() {return backupEnabled;}
 	public static void setBackupEnabled(boolean e) { backupEnabled=e; }
+	public static String getPresetInput() {return inputFileName;}
+	public static void setInput(String i) { inputFileName=i; }
+	public static String getPresetOutput() {return outputFileName;}
+	public static void setOutput(String o) { outputFileName=o; }
+	public static String getPresetOutputFormat() {
+		String f=outputFormat,o=getPresetOutput();
+		if (StringUtils.isEmptyString(f) && !StringUtils.isEmptyString(o))
+			return o.substring(o.lastIndexOf('.') + 1);
+		return f;
+	}
+	public static void setOutputFormat(String f) { outputFormat=f; }
+	public static boolean isinConvertMode() {
+		return !StringUtils.isEmptyString(getPresetOutput()) && !StringUtils.isEmptyString(getPresetInput());
+	}
 
 	/**
 	 * main of the editor application.
@@ -1373,20 +1392,39 @@ public class SCXMLGraphEditor extends JPanel
 	 *  contains an instance of CustomGraph (mxGraph that is mxEventSourcE))
 	 * create the interface containing the CustomGraphComponent: FSMEditor (FSMGraphEditor (JPanel))
 	 * @param args
+	 * @throws Exception 
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		digestCommandLineArguments(args);
-		startEditor();
+		boolean noGUI=isinConvertMode();
+		SCXMLGraphEditor editor = startEditor(noGUI);
+		if (isinConvertMode()) {
+			SCXMLEditorActions.convertNoGUI(editor);
+		} else {
+			String input=getPresetInput();
+			if (!StringUtils.isEmptyString(input)) {
+				OpenAction open = new OpenAction(new File(input));
+				open.actionPerformed(new ActionEvent(editor, 0, ""));
+			}
+		}
 	}
-	private static final String BACKUP_OPTION="b";
+	private static final String BACKUP_OPTION="b",INPUT_OPTION="i",OUTPUT_OPTION="o",FORMAT_OPTION="t",DOLAYOUT_OPTION="l";
 	private static void digestCommandLineArguments(String[] args) {
 		Options options = new Options();
 		options.addOption(BACKUP_OPTION, false, "Enable saving a backup of opened files.");
+		options.addOption(INPUT_OPTION, true, "File to be opened.");
+		options.addOption(OUTPUT_OPTION, true, "File in which to save the output.");
+		options.addOption(FORMAT_OPTION, true, "Format of the output.");
+		options.addOption(DOLAYOUT_OPTION, false, "If present it forces a new auto layout.");
 		CommandLineParser parser = new PosixParser();
 		try {
 			CommandLine cmd = parser.parse( options, args);
 			setBackupEnabled(cmd.hasOption(BACKUP_OPTION));
+			setInput(cmd.getOptionValue(INPUT_OPTION));
+			setOutput(cmd.getOptionValue(OUTPUT_OPTION));
+			setOutputFormat(cmd.getOptionValue(FORMAT_OPTION));
+			setDoLayout(cmd.hasOption(DOLAYOUT_OPTION));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
