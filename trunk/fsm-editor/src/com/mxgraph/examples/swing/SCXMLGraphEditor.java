@@ -3,6 +3,7 @@ package com.mxgraph.examples.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,6 +55,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -1352,10 +1354,12 @@ public class SCXMLGraphEditor extends JPanel
 	public static SCXMLGraphEditor startEditor(boolean noGUI) {
 		try
 		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			if (!noGUI) UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
-			SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", new SCXMLGraphComponent(new SCXMLGraph()));		
+			SCXMLGraphComponent gc=new SCXMLGraphComponent(new SCXMLGraph());
+			SCXMLGraphEditor editor = new SCXMLGraphEditor("FSM Editor", gc);		
 			if (!noGUI) editor.createFrame(editor).setVisible(true);
+			else gc.getValidator().kill();
 			editor.getGraphComponent().requestFocusInWindow();
 			
 			return editor;
@@ -1397,11 +1401,12 @@ public class SCXMLGraphEditor extends JPanel
 	public static void main(String[] args) throws Exception
 	{
 		digestCommandLineArguments(args);
+		boolean inHeadlessMode=GraphicsEnvironment.isHeadless();
 		boolean noGUI=isinConvertMode();
-		SCXMLGraphEditor editor = startEditor(noGUI);
+		SCXMLGraphEditor editor = startEditor(noGUI || inHeadlessMode);
 		if (isinConvertMode()) {
 			SCXMLEditorActions.convertNoGUI(editor);
-		} else {
+		} else if (!inHeadlessMode) {
 			String input=getPresetInput();
 			if (!StringUtils.isEmptyString(input)) {
 				OpenAction open = new OpenAction(new File(input));
@@ -1409,24 +1414,50 @@ public class SCXMLGraphEditor extends JPanel
 			}
 		}
 	}
-	private static final String BACKUP_OPTION="b",INPUT_OPTION="i",OUTPUT_OPTION="o",FORMAT_OPTION="t",DOLAYOUT_OPTION="l";
-	private static void digestCommandLineArguments(String[] args) {
-		Options options = new Options();
+	private static final String BACKUP_OPTION="b",INPUT_OPTION="i",OUTPUT_OPTION="o",FORMAT_OPTION="t",DOLAYOUT_OPTION="l",HELP_OPTION="h";
+	private static final Options options = new Options();
+	static {
 		options.addOption(BACKUP_OPTION, false, "Enable saving a backup of opened files.");
+		options.addOption(HELP_OPTION, false, "Request this help message to be printed.");
 		options.addOption(INPUT_OPTION, true, "File to be opened.");
 		options.addOption(OUTPUT_OPTION, true, "File in which to save the output.");
 		options.addOption(FORMAT_OPTION, true, "Format of the output.");
 		options.addOption(DOLAYOUT_OPTION, false, "If present it forces a new auto layout.");
+	}
+	private static void digestCommandLineArguments(String[] args) {
 		CommandLineParser parser = new PosixParser();
 		try {
 			CommandLine cmd = parser.parse( options, args);
-			setBackupEnabled(cmd.hasOption(BACKUP_OPTION));
-			setInput(cmd.getOptionValue(INPUT_OPTION));
-			setOutput(cmd.getOptionValue(OUTPUT_OPTION));
-			setOutputFormat(cmd.getOptionValue(FORMAT_OPTION));
-			setDoLayout(cmd.hasOption(DOLAYOUT_OPTION));
+			if ( cmd.hasOption('h') ) {
+				printUsageHelp();
+			} else {
+				setBackupEnabled(cmd.hasOption(BACKUP_OPTION));
+				setConverterModeOptions(cmd);
+			}
 		} catch (ParseException e) {
 			e.printStackTrace();
+		}
+	}
+	private static void printUsageHelp() {
+		HelpFormatter f = new HelpFormatter();
+		f.printHelp("[-"+BACKUP_OPTION+"] [-"+INPUT_OPTION+" input_file] [[-"+OUTPUT_OPTION+" output_file] [-"+FORMAT_OPTION+" {png|jpg|gif|dot}] [-"+DOLAYOUT_OPTION+"]]", options);
+	}
+	private static void setConverterModeOptions(CommandLine cmd) {
+		boolean inHeadlessMode=GraphicsEnvironment.isHeadless();
+		if (cmd.hasOption(INPUT_OPTION)) {
+			setInput(cmd.getOptionValue(INPUT_OPTION));
+			if (inHeadlessMode && !cmd.hasOption(OUTPUT_OPTION)) {
+				System.out.println("In headless mode must have -"+OUTPUT_OPTION+" option.");
+				printUsageHelp();
+			} else {
+				setOutput(cmd.getOptionValue(OUTPUT_OPTION));
+				setOutputFormat(cmd.getOptionValue(FORMAT_OPTION));
+				setDoLayout(cmd.hasOption(DOLAYOUT_OPTION));
+			}
+		} else {
+			if (cmd.hasOption(OUTPUT_OPTION)||cmd.hasOption(FORMAT_OPTION)||cmd.hasOption(DOLAYOUT_OPTION)) {
+				printUsageHelp();
+			}
 		}
 	}
 	

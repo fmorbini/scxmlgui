@@ -731,6 +731,8 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		// Installs the update handler to sync the overlays and controls
 		graph.getModel().addListener(mxEvent.CHANGE, updateHandler);
 
+		graph.addPropertyChangeListener(viewChangeHandler);
+
 		// Repaint after the following events is handled via mxGraph.repaint-events
 		// The respective handlers are installed in mxGraph.setView
 		mxGraphView view = graph.getView();
@@ -741,14 +743,13 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		view.addListener(mxEvent.UP, updateHandler);
 		view.addListener(mxEvent.DOWN, updateHandler);
 
-		graph.addPropertyChangeListener(viewChangeHandler);
 
 		// Resets the zoom policy if the scale changes
-		graph.getView().addListener(mxEvent.SCALE, scaleHandler);
-		graph.getView().addListener(mxEvent.SCALE_AND_TRANSLATE, scaleHandler);
+		view.addListener(mxEvent.SCALE, scaleHandler);
+		view.addListener(mxEvent.SCALE_AND_TRANSLATE, scaleHandler);
 
 		// Invoke the update handler once for initial state
-		updateHandler.invoke(graph.getView(), null);
+		updateHandler.invoke(view, null);
 	}
 
 	/**

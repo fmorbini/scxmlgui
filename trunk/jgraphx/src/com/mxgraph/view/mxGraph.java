@@ -689,14 +689,14 @@ public class mxGraph extends mxEventSource
 		if (this.view != null)
 		{
 			this.view.revalidate();
+			// Listens to changes in the view
+			view.addListener(mxEvent.SCALE, fullRepaintHandler);
+			view.addListener(mxEvent.TRANSLATE, fullRepaintHandler);
+			view.addListener(mxEvent.SCALE_AND_TRANSLATE, fullRepaintHandler);
+			view.addListener(mxEvent.UP, fullRepaintHandler);
+			view.addListener(mxEvent.DOWN, fullRepaintHandler);
 		}
 
-		// Listens to changes in the view
-		view.addListener(mxEvent.SCALE, fullRepaintHandler);
-		view.addListener(mxEvent.TRANSLATE, fullRepaintHandler);
-		view.addListener(mxEvent.SCALE_AND_TRANSLATE, fullRepaintHandler);
-		view.addListener(mxEvent.UP, fullRepaintHandler);
-		view.addListener(mxEvent.DOWN, fullRepaintHandler);
 
 		changeSupport.firePropertyChange("view", oldView, view);
 	}

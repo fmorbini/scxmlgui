@@ -12,6 +12,7 @@ package com.mxgraph.swing.handler;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -182,89 +183,88 @@ public class mxGraphHandler extends mxMouseControl implements
 	 */
 	public mxGraphHandler(final mxGraphComponent graphComponent)
 	{
-		this.graphComponent = graphComponent;
-		highlighter=new CellSelector(graphComponent,false);
-		marker = createMarker();
-
-		// Adds component for rendering the handles (preview is separate)
-		graphComponent.getGraphControl().add(this, 0);
-
-		// Listens to all mouse events on the rendering control
-		graphComponent.getGraphControl().addMouseListener(this);
-		graphComponent.getGraphControl().addMouseMotionListener(this);
-
-		// Redirects events from component to rendering control so
-		// that the event handling order is maintained if other controls
-		// such as overlays are added to the component hierarchy and
-		// consume events before they reach the rendering control
-		mxMouseRedirector redirector = new mxMouseRedirector(graphComponent);
-		addMouseMotionListener(redirector);
-		addMouseListener(redirector);
-
-		// Drag target creates preview image
-		DragGestureListener dragGestureListener = new DragGestureListener()
-		{
-			public void dragGestureRecognized(DragGestureEvent e)
+		if (!GraphicsEnvironment.isHeadless()) {
+			this.graphComponent = graphComponent;
+			highlighter=new CellSelector(graphComponent,false);
+			marker = createMarker();
+	
+			// Adds component for rendering the handles (preview is separate)
+			graphComponent.getGraphControl().add(this, 0);
+	
+			// Listens to all mouse events on the rendering control
+			graphComponent.getGraphControl().addMouseListener(this);
+			graphComponent.getGraphControl().addMouseMotionListener(this);
+	
+			// Redirects events from component to rendering control so
+			// that the event handling order is maintained if other controls
+			// such as overlays are added to the component hierarchy and
+			// consume events before they reach the rendering control
+			mxMouseRedirector redirector = new mxMouseRedirector(graphComponent);
+			addMouseMotionListener(redirector);
+			addMouseListener(redirector);
+	
+			// Drag target creates preview image
+			DragGestureListener dragGestureListener = new DragGestureListener()
 			{
-				if (graphComponent.isDragEnabled() && first != null)
+				public void dragGestureRecognized(DragGestureEvent e)
 				{
-					final TransferHandler th = graphComponent
-							.getTransferHandler();
-
-					if (th instanceof mxGraphTransferHandler)
+					if (graphComponent.isDragEnabled() && first != null)
 					{
-						final mxGraphTransferable t = (mxGraphTransferable) ((mxGraphTransferHandler) th)
-								.createTransferable(graphComponent);
-
-						if (t != null)
+						final TransferHandler th = graphComponent
+								.getTransferHandler();
+	
+						if (th instanceof mxGraphTransferHandler)
 						{
-							e.startDrag(null, mxConstants.EMPTY_IMAGE,
-									new Point(), t, new DragSourceAdapter()
-									{
-
-										/**
-										 * 
-										 */
-										public void dragDropEnd(
-												DragSourceDropEvent dsde)
+							final mxGraphTransferable t = (mxGraphTransferable) ((mxGraphTransferHandler) th)
+									.createTransferable(graphComponent);
+	
+							if (t != null)
+							{
+								e.startDrag(null, mxConstants.EMPTY_IMAGE,
+										new Point(), t, new DragSourceAdapter()
 										{
-											((mxGraphTransferHandler) th)
-													.exportDone(
-															graphComponent,
-															t,
-															TransferHandler.NONE);
-											first = null;
-										}
-									});
+	
+											public void dragDropEnd(
+													DragSourceDropEvent dsde)
+											{
+												((mxGraphTransferHandler) th)
+														.exportDone(
+																graphComponent,
+																t,
+																TransferHandler.NONE);
+												first = null;
+											}
+										});
+							}
 						}
 					}
 				}
-			}
-		};
-
-		DragSource dragSource = new DragSource();
-		dragSource.createDefaultDragGestureRecognizer(graphComponent
-				.getGraphControl(), DnDConstants.ACTION_COPY_OR_MOVE,
-				dragGestureListener);
-
-		// Listens to dropped graph cells
-		DropTarget dropTarget = graphComponent.getDropTarget();
-
-		try
-		{
-			if (dropTarget != null)
+			};
+	
+			DragSource dragSource = new DragSource();
+			dragSource.createDefaultDragGestureRecognizer(graphComponent
+					.getGraphControl(), DnDConstants.ACTION_COPY_OR_MOVE,
+					dragGestureListener);
+	
+			// Listens to dropped graph cells
+			DropTarget dropTarget = graphComponent.getDropTarget();
+	
+			try
 			{
-				dropTarget.addDropTargetListener(this);
+				if (dropTarget != null)
+				{
+					dropTarget.addDropTargetListener(this);
+				}
 			}
+			catch (TooManyListenersException tmle)
+			{
+				// should not happen... swing drop target is multicast
+			}
+	
+			setOpaque(false);
+			setVisible(false);
+			setBorder(mxConstants.PREVIEW_BORDER);
 		}
-		catch (TooManyListenersException tmle)
-		{
-			// should not happen... swing drop target is multicast
-		}
-
-		setOpaque(false);
-		setVisible(false);
-		setBorder(mxConstants.PREVIEW_BORDER);
 	}
 
 	/**

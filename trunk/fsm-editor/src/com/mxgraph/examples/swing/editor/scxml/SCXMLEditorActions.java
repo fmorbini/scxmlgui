@@ -969,8 +969,6 @@ public class SCXMLEditorActions
 		SCXMLGraphComponent graphComponent = editor.getGraphComponent();
 		SCXMLGraph graph = graphComponent.getGraph();
 		
-		graphComponent.getValidator().kill();
-
 		scxmlImportExport.readInGraph(graph, input, doLayout);
 
 		if (doLayout) {
