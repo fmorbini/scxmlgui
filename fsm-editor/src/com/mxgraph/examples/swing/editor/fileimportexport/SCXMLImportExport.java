@@ -143,13 +143,14 @@ public class SCXMLImportExport implements IImportExport {
 		internalID2nodes.put(internalID, node);
 	}
 
-	private SCXMLNode buildAndAddBasicNodeAsChildOf(String id,SCXMLNode pn,boolean isFake) {
+	private SCXMLNode buildAndAddBasicNodeAsChildOf(String id,String name, SCXMLNode pn,boolean isFake) {
 		SCXMLNode node;
 		if (id.equals("") || ((node=scxmlID2nodes.get(id))==null)) {
 			node=new SCXMLNode();
 			node.setID(id);
 			addSCXMLNode(node);
 		}
+		node.setName(name);
 		node.setFake(isFake);
 		// see issue 7 in google code website
 		if (node!=pn) setNodeAsChildOf(node,pn);
@@ -159,7 +160,19 @@ public class SCXMLImportExport implements IImportExport {
 	private SCXMLNode handleSCXMLNode(Node n, SCXMLNode pn, Boolean isParallel, Boolean isHistory) throws Exception {
 		NamedNodeMap att = n.getAttributes();
 		Node nodeID = att.getNamedItem("id");
-		String nodeIDString=(nodeID==null)?(n.getNodeName().toLowerCase().equals(SCXMLNode.ROOTID.toLowerCase())?SCXMLNode.ROOTID:""):StringUtils.cleanupSpaces(nodeID.getNodeValue());
+		String nodeIDString=null,nodeNameString=null;
+		if (nodeID==null) {
+			if (n.getNodeName().toLowerCase().equals(SCXMLNode.ROOTID.toLowerCase())) {
+				nodeIDString=SCXMLNode.ROOTID;
+			} else {
+				nodeIDString="";
+			}
+		} else {
+			nodeIDString=StringUtils.cleanupSpaces(nodeID.getNodeValue());
+		}
+		Node nodeName = att.getNamedItem("name");
+		nodeNameString=(nodeName==null)?null:StringUtils.cleanupSpaces(nodeName.getNodeValue());
+		
 		Node nodeHistoryType = att.getNamedItem("type");
 		String nodeHistoryTypeString=(nodeHistoryType==null)?"shallow":StringUtils.cleanupSpaces(nodeHistoryType.getNodeValue());
 		SCXMLNode.HISTORYTYPE historyType=null;
@@ -168,7 +181,7 @@ public class SCXMLImportExport implements IImportExport {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		SCXMLNode node=buildAndAddBasicNodeAsChildOf(nodeIDString,pn,false);
+		SCXMLNode node=buildAndAddBasicNodeAsChildOf(nodeIDString,nodeNameString,pn,false);
 		if ((!isHistory) || (historyType==null)) {
 			node.setParallel(isParallel);
 			Node isInitial=null;
@@ -314,7 +327,7 @@ public class SCXMLImportExport implements IImportExport {
 	
 	private SCXMLNode setNodeAsOutsourcing(OutSource source,SCXMLNode parent) {
 		String nodeName=(source.getType()==OUTSOURCETYPE.XINC)?source.getLocation():parent.getID();
-		SCXMLNode child=buildAndAddBasicNodeAsChildOf(nodeName, parent, source.getType()==OUTSOURCETYPE.XINC);
+		SCXMLNode child=buildAndAddBasicNodeAsChildOf(nodeName, null,parent, source.getType()==OUTSOURCETYPE.XINC);
 		child.setSRC(source);
 		return child;
 	}
@@ -326,7 +339,7 @@ public class SCXMLImportExport implements IImportExport {
 			HashSet<OutSource> outSources = node.getOutsourcingChildren();
 			if (outSources!=null) {
 				for(OutSource source:outSources) {
-					SCXMLNode child=buildAndAddBasicNodeAsChildOf(source.getLocation(), node, source.getType()==OUTSOURCETYPE.XINC);
+					SCXMLNode child=buildAndAddBasicNodeAsChildOf(source.getLocation(), null,node, source.getType()==OUTSOURCETYPE.XINC);
 					child.setSRC(source);
 				}
 			}
@@ -608,6 +621,7 @@ public class SCXMLImportExport implements IImportExport {
 	private String mxVertex2SCXMLString(mxGraphView view, mxCell n, boolean isRoot) throws Exception {
 		String ret="";
 		String ID=null;
+		String name=null;
 		String datamodel=null;
 		String onentry=null;
 		String onexit=null;
@@ -621,6 +635,7 @@ public class SCXMLImportExport implements IImportExport {
 
 		comments=StringUtils.removeLeadingAndTrailingSpaces(value.getComments());
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
+		name=StringUtils.removeLeadingAndTrailingSpaces(value.getName());
 		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
 		onentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnEntry());
@@ -660,10 +675,9 @@ public class SCXMLImportExport implements IImportExport {
 				String src=value.getSRC().getLocation();
 				ret+=" src=\""+src+"\"";
 			}
-			if (!StringUtils.isEmptyString(ID))
-				ret+=" id=\""+ID+"\"";
-			if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null))
-				ret+=" initial=\""+initialChild.getID()+"\"";
+			if (!StringUtils.isEmptyString(ID)) ret+=" id=\""+ID+"\"";
+			if (!StringUtils.isEmptyString(name)) ret+=" name=\""+name+"\"";
+			if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null)) ret+=" initial=\""+initialChild.getID()+"\"";
 			ret+=">";
 	
 			// save the geometric information of this node:

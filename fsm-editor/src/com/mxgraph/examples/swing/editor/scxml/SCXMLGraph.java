@@ -578,7 +578,10 @@ public class SCXMLGraph extends mxGraph
 		Object v = model.getValue(cell);
 		if (v instanceof SCXMLNode) {
 			SCXMLNode node=((SCXMLNode)v);
-			return node.getID();
+			if (!StringUtils.isEmptyString(node.getName()))
+				return node.getID()+"["+node.getName()+"]";
+			else
+				return node.getID();
 		} else if (v instanceof SCXMLEdge) {
 			SCXMLEdge edge=((SCXMLEdge)v);
 			return edge.getEvent();

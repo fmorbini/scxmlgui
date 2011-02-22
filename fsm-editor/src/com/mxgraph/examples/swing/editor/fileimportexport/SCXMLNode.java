@@ -24,6 +24,7 @@ public class SCXMLNode implements Serializable {
 	
 	public static final String INTERNALID="internalID";
 	public static final String ID="id";
+	public static final String NAME="name";
 	public static final String TYPE="type";
 	public static final String INITIAL="initial";
 	public static final String FINAL="final";
@@ -60,6 +61,8 @@ public class SCXMLNode implements Serializable {
 	
 	public static final String SCXMLIDUNDO="SCXMLIDundo";
 	public static final String SCXMLIDDOC="SCXMLIDdoc";
+	public static final String NAMEUNDO="NAMEundo";
+	public static final String NAMEDOC="NAMEdoc";
 	public static final String ONENTRYUNDO="ENTRYundo";
 	public static final String ONENTRYDOC="ENTRYdoc";
 	public static final String ONEXITUNDO="EXITundo";
@@ -222,6 +225,23 @@ public class SCXMLNode implements Serializable {
 	}
 	public void setID(String scxmlID) {
 		node.put(ID, scxmlID);
+	}
+	public String getName() {
+		String ret=null;
+		Document dmd = getNameDoc();
+		if (dmd!=null) {
+			try {
+				ret=dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				ret=(String)node.get(NAME);
+			}
+		}
+		else
+			ret=(String)node.get(NAME);
+		return (ret==null)?"":ret;
+	}
+	public void setName(String name) {
+		node.put(NAME, name);
 	}
 	public String getOnEntry() {
 		String ret=null;
@@ -556,6 +576,20 @@ public class SCXMLNode implements Serializable {
 		node.put(SCXMLIDDOC,doc);
 		return doc;
 	}
+	public MyUndoManager getNameUndoManager() {
+		return (MyUndoManager) node.get(NAMEUNDO);
+	}
+	public MyUndoManager setNameUndoManager(MyUndoManager um) {
+		node.put(NAMEUNDO,um);
+		return um;
+	}
+	public Document getNameDoc() {
+		return (Document) node.get(NAMEDOC);
+	}
+	public Document setNameDoc(Document doc) {
+		node.put(NAMEDOC,doc);
+		return doc;
+	}
 
 	public SCXMLNode cloneNode() {
 		SCXMLNode n=new SCXMLNode();
@@ -582,6 +616,8 @@ public class SCXMLNode implements Serializable {
 		n.setOnExit(getOnExit());
 		n.setIDDoc(null);
 		n.setIDUndoManager(null);
+		n.setNameUndoManager(null);
+		n.setNameDoc(null);
 		n.setSRC(getSRC());
 		n.setSRCDoc(null);
 		n.setSRCUndoManager(null);
@@ -589,6 +625,7 @@ public class SCXMLNode implements Serializable {
 		n.setNamespaceDoc(null);
 		n.setNamespaceUndoManager(null);
 		n.setID(getID());
+		n.setName(getName());
 		n.setFake(getFake());
 		return n;
 	}

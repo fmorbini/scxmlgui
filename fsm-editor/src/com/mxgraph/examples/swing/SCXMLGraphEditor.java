@@ -1402,8 +1402,8 @@ public class SCXMLGraphEditor extends JPanel
 	{
 		digestCommandLineArguments(args);
 		boolean inHeadlessMode=GraphicsEnvironment.isHeadless();
-		boolean noGUI=isinConvertMode();
-		SCXMLGraphEditor editor = startEditor(noGUI || inHeadlessMode);
+		boolean inConvertMode=isinConvertMode();
+		SCXMLGraphEditor editor = startEditor(inConvertMode || inHeadlessMode);
 		if (isinConvertMode()) {
 			SCXMLEditorActions.convertNoGUI(editor);
 		} else if (!inHeadlessMode) {
