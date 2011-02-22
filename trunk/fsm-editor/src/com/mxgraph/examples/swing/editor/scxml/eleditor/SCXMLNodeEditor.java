@@ -32,6 +32,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	private static final long serialVersionUID = 3563719047023065063L;
 
 	private UndoJTextField scxmlIDTextPane;
+	private UndoJTextField nameTextPane;
 	private UndoJTextPane onentryTextPane;
 	private UndoJTextPane onexitTextPane;
 	private UndoJTextPane initialTextPane;
@@ -134,6 +135,21 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 				tabbedPane.addTab(mxResources.get("initialEntryTAB"), scrollPane);
 				doc.addDocumentListener(changeListener);
 			}
+		} else {
+			undo=node.getNameUndoManager();
+			doc=node.getNameDoc();
+			nameTextPane=new UndoJTextField(node.getName(), doc, undo);
+			if (doc==null) {
+				node.setNameDoc(doc=nameTextPane.getDocument());
+				node.setNameUndoManager(undo=nameTextPane.getUndoManager());
+			}
+			nameTextPane.setCaretPosition(0);
+			nameTextPane.setMargin(new Insets(5,5,5,5));
+			JScrollPane scrollPane = new JScrollPane(nameTextPane);
+			nameTextPane.setScrollPane(scrollPane);
+			scrollPane.setPreferredSize(new Dimension(400, 200));
+			tabbedPane.addTab(mxResources.get("nodeNameTAB"), scrollPane);
+			doc.addDocumentListener(changeListener);
 		}
         if (!node.isHistoryNode() && !node.getFake()) {
 	        undo=node.getDatamodelUndoManager();

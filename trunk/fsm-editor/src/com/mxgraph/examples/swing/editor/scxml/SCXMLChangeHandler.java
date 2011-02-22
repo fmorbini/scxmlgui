@@ -225,17 +225,18 @@ public class SCXMLChangeHandler {
 		}
 	}
 	
-	private static Method getSRC,getID,getOnEntry,getOnExit,getOnInitialEntry,getDoneData,getDatamodel,getNamespace,getExe,getCondition,getEvent,getNodeComments,getEdgeComments;
-	private static Method getSRCDoc,getIDDoc,getOnEntryDoc,getOnExitDoc,getOnInitialEntryDoc,getDoneDataDoc,getDatamodelDoc,getNamespaceDoc,getExeDoc,getConditionDoc,getEventDoc,getNodeCommentsDoc,getEdgeCommentsDoc;
-	private static Method getSRCUndoManager,getIDUndoManager,getOnEntryUndoManager,getOnExitUndoManager,getOnInitialEntryUndoManager,getDoneDataUndoManager,getDatamodelUndoManager,getNamespaceUndoManager,getExeUndoManager,getConditionUndoManager,getEventUndoManager,getNodeCommentsUndoManager,getEdgeCommentsUndoManager;
-	private static Method setSRC,setID,setOnEntry,setOnExit,setOnInitialEntry,setDoneData,setDatamodel,setNamespace,setExe,setCondition,setEvent,setNodeComments,setEdgeComments;
-	private static Method setSRCDoc,setIDDoc,setOnEntryDoc,setOnExitDoc,setOnInitialEntryDoc,setDoneDataDoc,setDatamodelDoc,setNamespaceDoc,setExeDoc,setConditionDoc,setEventDoc,setNodeCommentsDoc,setEdgeCommentsDoc;
-	private static Method setSRCUndoManager,setIDUndoManager,setOnEntryUndoManager,setOnExitUndoManager,setOnInitialEntryUndoManager,setDoneDataUndoManager,setDatamodelUndoManager,setNamespaceUndoManager,setExeUndoManager,setConditionUndoManager,setEventUndoManager,setNodeCommentsUndoManager,setEdgeCommentsUndoManager;
+	private static Method getSRC,getID,getName,getOnEntry,getOnExit,getOnInitialEntry,getDoneData,getDatamodel,getNamespace,getExe,getCondition,getEvent,getNodeComments,getEdgeComments;
+	private static Method getSRCDoc,getIDDoc,getNameDoc,getOnEntryDoc,getOnExitDoc,getOnInitialEntryDoc,getDoneDataDoc,getDatamodelDoc,getNamespaceDoc,getExeDoc,getConditionDoc,getEventDoc,getNodeCommentsDoc,getEdgeCommentsDoc;
+	private static Method getSRCUndoManager,getIDUndoManager,getNameUndoManager,getOnEntryUndoManager,getOnExitUndoManager,getOnInitialEntryUndoManager,getDoneDataUndoManager,getDatamodelUndoManager,getNamespaceUndoManager,getExeUndoManager,getConditionUndoManager,getEventUndoManager,getNodeCommentsUndoManager,getEdgeCommentsUndoManager;
+	private static Method setSRC,setID,setName,setOnEntry,setOnExit,setOnInitialEntry,setDoneData,setDatamodel,setNamespace,setExe,setCondition,setEvent,setNodeComments,setEdgeComments;
+	private static Method setSRCDoc,setIDDoc,setNameDoc,setOnEntryDoc,setOnExitDoc,setOnInitialEntryDoc,setDoneDataDoc,setDatamodelDoc,setNamespaceDoc,setExeDoc,setConditionDoc,setEventDoc,setNodeCommentsDoc,setEdgeCommentsDoc;
+	private static Method setSRCUndoManager,setIDUndoManager,setNameUndoManager,setOnEntryUndoManager,setOnExitUndoManager,setOnInitialEntryUndoManager,setDoneDataUndoManager,setDatamodelUndoManager,setNamespaceUndoManager,setExeUndoManager,setConditionUndoManager,setEventUndoManager,setNodeCommentsUndoManager,setEdgeCommentsUndoManager;
 	static {
 		try {
 			//getters
 			getSRC=SCXMLNode.class.getDeclaredMethod("getOutsourcedLocation");
 			getID=SCXMLNode.class.getDeclaredMethod("getID");
+			getName=SCXMLNode.class.getDeclaredMethod("getName");
 			getOnEntry=SCXMLNode.class.getDeclaredMethod("getOnEntry");
 			getOnExit=SCXMLNode.class.getDeclaredMethod("getOnExit");
 			getOnInitialEntry=SCXMLNode.class.getDeclaredMethod("getOnInitialEntry");
@@ -250,6 +251,7 @@ public class SCXMLChangeHandler {
 
 			getSRCDoc=SCXMLNode.class.getDeclaredMethod("getSRCDoc");
 			getIDDoc=SCXMLNode.class.getDeclaredMethod("getIDDoc");
+			getNameDoc=SCXMLNode.class.getDeclaredMethod("getNameDoc");
 			getOnEntryDoc=SCXMLNode.class.getDeclaredMethod("getOnEntryDoc");
 			getOnExitDoc=SCXMLNode.class.getDeclaredMethod("getOnExitDoc");
 			getOnInitialEntryDoc=SCXMLNode.class.getDeclaredMethod("getOnInitialEntryDoc");
@@ -264,6 +266,7 @@ public class SCXMLChangeHandler {
 			
 			getSRCUndoManager=SCXMLNode.class.getDeclaredMethod("getSRCUndoManager");
 			getIDUndoManager=SCXMLNode.class.getDeclaredMethod("getIDUndoManager");
+			getNameUndoManager=SCXMLNode.class.getDeclaredMethod("getNameUndoManager");
 			getOnEntryUndoManager=SCXMLNode.class.getDeclaredMethod("getOnEntryUndoManager");
 			getOnExitUndoManager=SCXMLNode.class.getDeclaredMethod("getOnExitUndoManager");
 			getOnInitialEntryUndoManager=SCXMLNode.class.getDeclaredMethod("getOnInitialEntryUndoManager");
@@ -278,6 +281,7 @@ public class SCXMLChangeHandler {
 			//setters
 			setSRC=SCXMLNode.class.getDeclaredMethod("setOutsourcedLocation",String.class);
 			setID=SCXMLNode.class.getDeclaredMethod("setID",String.class);
+			setName=SCXMLNode.class.getDeclaredMethod("setName",String.class);
 			setOnEntry=SCXMLNode.class.getDeclaredMethod("setOnEntry",String.class);
 			setOnExit=SCXMLNode.class.getDeclaredMethod("setOnExit",String.class);
 			setOnInitialEntry=SCXMLNode.class.getDeclaredMethod("setOnInitialEntry",String.class);
@@ -292,6 +296,7 @@ public class SCXMLChangeHandler {
 
 			setSRCDoc=SCXMLNode.class.getDeclaredMethod("setSRCDoc",Document.class);
 			setIDDoc=SCXMLNode.class.getDeclaredMethod("setIDDoc",Document.class);
+			setNameDoc=SCXMLNode.class.getDeclaredMethod("setNameDoc",Document.class);
 			setOnEntryDoc=SCXMLNode.class.getDeclaredMethod("setOnEntryDoc",Document.class);
 			setOnExitDoc=SCXMLNode.class.getDeclaredMethod("setOnExitDoc",Document.class);
 			setOnInitialEntryDoc=SCXMLNode.class.getDeclaredMethod("setOnInitialEntryDoc",Document.class);
@@ -306,6 +311,7 @@ public class SCXMLChangeHandler {
 
 			setSRCUndoManager=SCXMLNode.class.getDeclaredMethod("setSRCUndoManager",MyUndoManager.class);
 			setIDUndoManager=SCXMLNode.class.getDeclaredMethod("setIDUndoManager",MyUndoManager.class);
+			setNameUndoManager=SCXMLNode.class.getDeclaredMethod("setNameUndoManager",MyUndoManager.class);
 			setOnEntryUndoManager=SCXMLNode.class.getDeclaredMethod("setOnEntryUndoManager",MyUndoManager.class);
 			setOnExitUndoManager=SCXMLNode.class.getDeclaredMethod("setOnExitUndoManager",MyUndoManager.class);
 			setOnInitialEntryUndoManager=SCXMLNode.class.getDeclaredMethod("setOnInitialEntryUndoManager",MyUndoManager.class);
@@ -335,6 +341,7 @@ public class SCXMLChangeHandler {
 				model.addChangeToCurrentEdit(instance.new SCXMLHistoryStateProperty(node));
 				model.addChangeToCurrentEdit(instance.new SCXMLOutsourcingStateProperty(node));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getID,getIDDoc,getIDUndoManager,setID,setIDDoc));
+				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getName,getNameDoc,getNameUndoManager,setName,setNameDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnEntry,getOnEntryDoc,getOnEntryUndoManager,setOnEntry,setOnEntryDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnExit,getOnExitDoc,getOnExitUndoManager,setOnExit,setOnExitDoc));
 				model.addChangeToCurrentEdit(instance.new SCXMLGenericTextProperty<SCXMLNode>(node,getOnInitialEntry,getOnInitialEntryDoc,getOnInitialEntryUndoManager,setOnInitialEntry,setOnInitialEntryDoc));
