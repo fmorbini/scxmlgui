@@ -1,6 +1,7 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,11 +12,15 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
@@ -648,7 +653,7 @@ public class SCXMLImportExport implements IImportExport {
 		String close="";
 		if (!isRoot || value.shouldThisRootBeSaved()) {
 			if (isRoot) {
-				ret="<scxml";
+				ret="<scxml version=\"0.9\"";
 				close="</scxml>";
 			} else if (value.isParallel()) {
 				ret="<parallel";
@@ -675,7 +680,7 @@ public class SCXMLImportExport implements IImportExport {
 				String src=value.getSRC().getLocation();
 				ret+=" src=\""+src+"\"";
 			}
-			if (!StringUtils.isEmptyString(ID)) ret+=" id=\""+ID+"\"";
+			if (!isRoot && !StringUtils.isEmptyString(ID)) ret+=" id=\""+ID+"\"";
 			if (!StringUtils.isEmptyString(name)) ret+=" name=\""+name+"\"";
 			if (StringUtils.isEmptyString(oninitialentry) && (initialChild!=null)) ret+=" initial=\""+initialChild.getID()+"\"";
 			ret+=">";
@@ -921,5 +926,21 @@ public class SCXMLImportExport implements IImportExport {
 				}
 			}
 		}
+	}
+
+	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+		docBuilderFactory.setXIncludeAware(true);
+		docBuilderFactory.setNamespaceAware(true);
+		docBuilderFactory.setValidating(true);
+		docBuilderFactory.setAttribute(
+				"http://java.sun.com/xml/jaxp/properties/schemaLanguage", 
+		"http://www.w3.org/2001/XMLSchema");
+		docBuilderFactory.setAttribute(
+				"http://java.sun.com/xml/jaxp/properties/schemaSource",
+		"http://www.w3.org/2011/04/SCXML/scxml.xsd");
+		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+		File inp=new File("C:\\Users\\morbini\\Desktop\\scxml-experiments\\ex2.scxml");
+		docBuilder.parse(inp);		
 	}
 }
