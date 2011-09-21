@@ -31,8 +31,8 @@ A node (i.e. a SCXML state) can be added only as child (i.e. contained) in a clu
 == Adding an Edge ==
 
 The filled part of each node is divided into two regions:
-  * *edge region*: the central region in which the mouse cursor becomes a hand is used to create edges.
-  * *move region*: the surrounding region in which the cursor becomes the standard move "four arrows" is used to move nodes.
+  * *edge region*: the central region, in which the mouse cursor becomes a hand is used to create edges.
+  * *move region*: the surrounding region, in which the cursor becomes the standard move "four arrows" is used to move nodes.
 
 To connect two nodes, move the mouse in the edge region of the starting node; when the cursor becomes a hand, start the drag gesture (left-click and hold) and finish it in the edge region of the destination node (the destination node will become highlighted in green if the edge is possible).
 
@@ -60,7 +60,7 @@ All editing functions are available through the context menu. Either directly as
 == Save ==
 
 To save in the same file just use *Control-S*. to save in a different file use *Control-Shift-S*. Exporting in different formats is available in the *"Save as"* dialog.
-When saving a file, the layout is also saved suing comments and can be retrieved next time you open the file by unselecting the *"Ignore stored layout"* option in the *File* menu.
+When saving a file, the layout is also saved using comments and can be retrieved next time you open the file by unselecting the *"Ignore stored layout"* option in the *File* menu.
 
 == Search ==
 
