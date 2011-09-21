@@ -69,4 +69,4 @@ Press *Control-F* to open the search dialog box. Click on the help button of the
 == No GUI processing ==
 
 The software can be used to batch auto-layout and/or convert to image formats (or dot format) scxml files. To do so you must include in the command line at least the options *"-i"* and *"-o"*.
-For example, the command "java -jar fsm-editor.jar -i test.scxml -o test.png -l" will open test.scxml, apply autolayout and save the result in test.png. If "-l" is omitted, auto-layout will not be called and the saved layout will be used. If the output file must not have an extension then use the option *"-t"* to specify the format of the output (e.g. use "-t png" to force the output to be in the png format).
+For example, the command "java -jar fsm-editor.jar -i test.scxml -o test.png -l" will open test.scxml, apply autolayout and save the result in test.png. If *"-l"* is omitted, auto-layout will not be called and the saved layout will be used. If the output file must not have an extension then use the option *"-t"* to specify the format of the output (e.g. use "-t png" to force the output to be in the png format).
