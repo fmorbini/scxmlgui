@@ -354,4 +354,6 @@ public interface mxIGraphModel
 	void highlightCell(mxCell node, String strokeColor, String width,String fontColor,String labelBackground);*/
 	
 	public boolean isLoop(mxIGraphModel model, Object edge);
+	
+	public Object getNearestCommonAncestor(Object cell1, Object cell2);
 }
