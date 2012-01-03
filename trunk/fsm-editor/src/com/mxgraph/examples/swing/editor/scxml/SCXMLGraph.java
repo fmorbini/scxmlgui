@@ -209,6 +209,11 @@ public class SCXMLGraph extends mxGraph
 				if (StringUtils.isEmptyString(source.getID()) || StringUtils.isEmptyString(target.getID())) {
 					warnings+="target and source of a transition must have not empty name.\n";
 				}
+				Object lca = model.getNearestCommonAncestor(edge.getSource(), edge.getTarget());
+				if (lca!=null && lca instanceof mxCell) {
+					SCXMLNode scxmlLCA = (SCXMLNode) ((mxCell)lca).getValue();
+					if (scxmlLCA.isParallel()) warnings+=source.getID()+" and "+target.getID()+" are (descendats of) siblings of a parallel node ("+scxmlLCA.getID()+").";
+				}
 			}
 		}
 		if (StringUtils.isEmptyString(warnings)) return null;
