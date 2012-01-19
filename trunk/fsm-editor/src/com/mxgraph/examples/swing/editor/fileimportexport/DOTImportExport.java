@@ -1,6 +1,8 @@
 package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.swing.JFileChooser;
 
@@ -62,6 +64,23 @@ public class DOTImportExport implements IImportExport {
 		}
 	}
 
+	public mxCell getSimpleChildOf(mxCell n) {
+		Queue<mxCell> list=new LinkedList<mxCell>();
+		list.add(n);
+		while(!list.isEmpty()) {
+			mxCell x=list.poll();
+			int l=x.getChildCount();
+			for (int i=0;i<l;i++) {
+				mxCell c = (mxCell)x.getChildAt(i);
+				if (c.isVertex()) {
+					if (c.hasAVertexAsChild()) list.add(c);
+					else return c;
+				}
+			}
+		}
+		return n;
+	}
+	
 	private String mxVertex2DOTString(mxGraphView view, mxCell n, StringBuffer transitions,boolean isRoot) {
 		mxGraph graph=view.getGraph();
 		String ret="",close="";		
@@ -69,7 +88,7 @@ public class DOTImportExport implements IImportExport {
 		String id=n.getId();
 		
 		if (isRoot) {
-			ret += "digraph {";
+			ret += "digraph {\ncompound=true;";
 			close="}";
 		} else {
 			if (n.hasAVertexAsChild()) {
@@ -86,17 +105,22 @@ public class DOTImportExport implements IImportExport {
 			if (c.isVertex()) {
 				ret+=mxVertex2DOTString(view,c,transitions,false);
 			} else {
-				String source=c.getSource().getId();
-				String target=c.getTarget().getId();
-				if (c.getSource().hasAVertexAsChild()) source="cluster_"+source;
-				if (c.getTarget().hasAVertexAsChild()) target="cluster_"+target;
+				mxCell nSource=(mxCell)c.getSource(),nTarget=(mxCell)c.getTarget();
+				boolean sourceIsCluster=nSource.hasAVertexAsChild();
+				boolean targetIsCluster=nTarget.hasAVertexAsChild();
+				String source=(sourceIsCluster)?"cluster_"+nSource.getId():null;
+				String target=(targetIsCluster)?"cluster_"+nTarget.getId():null;
+				String realStart=(sourceIsCluster)? realStart=getSimpleChildOf(nSource).getId():nSource.getId();
+				String realEnd=(targetIsCluster)? realEnd=getSimpleChildOf(nTarget).getId():nTarget.getId();
 				String edgeLabel;
 				if (graph instanceof SCXMLGraph) {
 					edgeLabel=((SCXMLGraph) graph).getLabel(c);
 				} else {
 					edgeLabel=graph.getLabel(c);
 				}
-				transitions.append("\n"+source+" -> "+target+" [label=\""+edgeLabel+"\"];");
+				String ltail=(source!=null)?"ltail=\""+source+"\"":null;
+				String lhead=(target!=null)?"lhead=\""+target+"\"":null;
+				transitions.append("\n"+realStart+" -> "+realEnd+" ["+((ltail!=null)?ltail+",":"")+((lhead!=null)?lhead+",":"")+" label=\""+edgeLabel+"\"];");
 			}
 		}
 		if (isRoot) ret+=transitions.toString();
