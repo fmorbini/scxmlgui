@@ -420,11 +420,16 @@ public class SCXMLImportExport implements IImportExport {
 		root=readSCXMLFileContentAndAttachAsChildrenOf(filename, null);
 		if (root!=scxmlID2nodes.get(SCXMLNode.ROOTID)) {
 			SCXMLNode firstChild=root;
+			mxGeometry geometry = root.getGeometry();
 			root=new SCXMLNode();
 			root.setID(SCXMLNode.ROOTID);
 			addSCXMLNode(root);
 			setNodeAsChildOf(firstChild, root);
 			root.setSaveThisRoot(false);
+			if (geometry!=null) {
+				double x=geometry.getX(),y=geometry.getY();
+				root.setGeometry(0, 0, geometry.getWidth()+(2*x), geometry.getHeight()+(2*y));
+			}
 		}
 		
 		// empty the graph
@@ -463,6 +468,7 @@ public class SCXMLImportExport implements IImportExport {
 		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
 		readInGraph(graph,from,((SCXMLFileChoser)fc).ignoreStoredLayout());
 		if (hasUnhandledXIncludeUsage()) displayWarningAboutUnhandledXIncludeUsage(editor,false);
+		gc.validateGraph();
 	}
 
 	private HashMap<String,mxCell> internalID2cell=new HashMap<String, mxCell>();
