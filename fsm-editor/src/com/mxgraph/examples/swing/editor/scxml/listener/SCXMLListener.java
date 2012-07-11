@@ -588,12 +588,14 @@ public class SCXMLListener extends JDialog implements ListSelectionListener, Win
 	}
 	
 	public void resetAllSCXMLEventExecutions(int i) {
-		if (i>0) {
+		if (i>=0) {
 			HashSet<mxCell> highlightedCells = getHighlightAtIndex(i);
-			for (mxCell c:highlightedCells) {
-				if (c!=null) {
-					if (c.isEdge()) doEdgeHide(model, c,true,null);
-					else doNodeHide(model, c,true,null);
+			if (highlightedCells!=null) {
+				for (mxCell c:highlightedCells) {
+					if (c!=null) {
+						if (c.isEdge()) doEdgeHide(model, c,true,null);
+						else doNodeHide(model, c,true,null);
+					}
 				}
 			}
 		}
