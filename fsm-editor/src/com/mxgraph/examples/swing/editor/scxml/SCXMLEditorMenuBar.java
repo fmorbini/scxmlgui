@@ -1,9 +1,6 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
-import java.awt.Dialog;
-import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dialog.ModalityType;
-import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

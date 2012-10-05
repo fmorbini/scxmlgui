@@ -2,8 +2,6 @@ package com.mxgraph.examples.swing.editor.scxml;
 
 import java.util.Vector;
 
-import javax.sql.rowset.spi.SyncResolver;
-import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;

@@ -9,13 +9,11 @@
  */
 package com.mxgraph.examples.swing.editor.scxml;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

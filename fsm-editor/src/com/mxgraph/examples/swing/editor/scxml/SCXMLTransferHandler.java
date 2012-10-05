@@ -17,7 +17,6 @@ import javax.swing.TransferHandler;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
 import com.mxgraph.swing.handler.mxGraphTransferHandler;
-import com.mxgraph.swing.util.mxGraphTransferable;
 import com.mxgraph.util.mxResources;
 
 public class SCXMLTransferHandler extends mxGraphTransferHandler {

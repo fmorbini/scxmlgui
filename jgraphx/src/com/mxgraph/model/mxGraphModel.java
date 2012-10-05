@@ -14,13 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUndoableEdit;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
 /**

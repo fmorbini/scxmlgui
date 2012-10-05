@@ -54,8 +54,8 @@ import javax.swing.TransferHandler;
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.canvas.mxICanvas;
 import com.mxgraph.model.mxGraphModel;
-import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.model.mxGraphModel.Filter;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.handler.mxCellHandler;
 import com.mxgraph.swing.handler.mxConnectionHandler;
 import com.mxgraph.swing.handler.mxEdgeHandler;
@@ -73,18 +73,18 @@ import com.mxgraph.swing.view.mxInteractiveCanvas;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUtils;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.validation.Validator;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxEdgeStyle;
+import com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 import com.mxgraph.view.mxTemporaryCellStates;
-import com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction;
 
 /**
  * For setting the preferred size of the viewport for scrolling, use

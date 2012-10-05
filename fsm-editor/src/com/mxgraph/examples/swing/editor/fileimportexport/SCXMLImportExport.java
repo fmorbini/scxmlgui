@@ -622,7 +622,6 @@ public class SCXMLImportExport implements IImportExport {
 		mxCell root=followUniqueDescendantLineTillSCXMLValueIsFound(model);
 		if (root!=null) {
 			String scxml=mxVertex2SCXMLString(view,root,true);
-			scxml=new String(scxml.getBytes("UTF8"));
 			System.out.println(scxml);
 			scxml=XMLUtils.prettyPrintXMLString(scxml, " ",true);			
 			System.out.println(scxml);

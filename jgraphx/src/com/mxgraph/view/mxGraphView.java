@@ -20,8 +20,8 @@ import com.mxgraph.util.mxEventSource;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxUndoableEdit;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction;
 import com.mxgraph.view.mxPerimeter.mxPerimeterFunction;
 
