@@ -8,7 +8,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 
-public class SCXMLAnalyzer extends Analyzer {
+public final class SCXMLAnalyzer extends Analyzer {
 
 	Pattern p = Pattern.compile("[a-zA-Z0-9]");
 	@Override

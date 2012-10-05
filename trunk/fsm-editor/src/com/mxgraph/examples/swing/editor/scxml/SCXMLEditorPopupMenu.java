@@ -1,15 +1,12 @@
 package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.KeyStroke;
 
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource;

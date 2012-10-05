@@ -14,7 +14,6 @@ import java.awt.datatransfer.Transferable;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import com.mxgraph.swing.mxGraphComponent;

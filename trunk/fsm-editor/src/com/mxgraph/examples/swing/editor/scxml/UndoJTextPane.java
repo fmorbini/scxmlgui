@@ -11,7 +11,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;

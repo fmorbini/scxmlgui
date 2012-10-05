@@ -3,7 +3,6 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;

@@ -8,7 +8,6 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -24,12 +23,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1478,10 +1476,13 @@ public class mxUtils
 	 * @param filename Name of the file to be written.
 	 * @throws IOException
 	 */
-	public static void writeFile(String contents, String filename)
-			throws IOException
+	public static void writeFile(String contents, String filename) throws IOException {
+		writeFile(contents, filename, "UTF8");
+	}
+	public static void writeFile(String contents, String filename,String encoding) throws IOException
 	{
-		FileWriter fw = new FileWriter(filename);
+		OutputStreamWriter fw=new OutputStreamWriter(new FileOutputStream(filename),encoding);
+		//FileWriter fw = new FileWriter(filename);
 		fw.write(contents);
 		fw.flush();
 		fw.close();
@@ -2022,7 +2023,10 @@ public class mxUtils
 		return parseXML(new InputSource(new StringReader(xml)),xincludeAware,namespaceAware);
 	}
 	public static Document parseXMLFile(File file,boolean xincludeAware,boolean namespaceAware) throws ParserConfigurationException, SAXException, IOException {
-		InputSource i = new InputSource(new FileInputStream(file));
+		return parseXMLFile(file, xincludeAware, namespaceAware, "UTF8");
+	}
+	public static Document parseXMLFile(File file,boolean xincludeAware,boolean namespaceAware,String encoding) throws ParserConfigurationException, SAXException, IOException {
+		InputSource i = new InputSource(new InputStreamReader(new FileInputStream(file),encoding));
 		i.setSystemId(file.toURI().toURL().toExternalForm());
 	
 		return parseXML(i,xincludeAware,namespaceAware);

@@ -3,25 +3,20 @@ package com.mxgraph.examples.swing.editor.scxml;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BoundedRangeModel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
 
 public class UndoJTextField extends JTextField implements CaretListener {
 

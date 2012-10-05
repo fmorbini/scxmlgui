@@ -10,17 +10,17 @@ import java.util.Set;
 
 import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.model.mxGraphModel;
-import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.model.mxGraphModel.mxChildChange;
 import com.mxgraph.model.mxGraphModel.mxGeometryChange;
 import com.mxgraph.model.mxGraphModel.mxRootChange;
 import com.mxgraph.model.mxGraphModel.mxTerminalChange;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
 import com.mxgraph.util.mxUndoableEdit;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
+import com.mxgraph.util.mxUtils;
 
 /**
  * Implements a layout manager that updates the layout for a given transaction.

@@ -19,8 +19,8 @@ import com.mxgraph.swing.mxGraphComponent.mxGraphControl;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.util.mxUtils;
 
 /**
  * Implements a rubberband selection.

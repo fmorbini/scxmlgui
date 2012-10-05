@@ -20,8 +20,8 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraphView;
 

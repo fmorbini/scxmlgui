@@ -9,7 +9,7 @@
 
     <path id="FSM.archives">
 		<pathelement path="${Lib}/jgraphx.jar"/>
-		<pathelement path="${Lib}/lucene-core-3.0.1.jar"/>
+		<pathelement path="${Lib}/lucene-core-3.6.1.jar"/>
 		<pathelement path="${Lib}/rsyntaxtextarea.jar"/>
 		<pathelement path="${Lib}/dom4j.jar"/>
 		<pathelement path="${Lib}/commons-cli-1.2.jar"/>
@@ -49,7 +49,7 @@
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/jgraphx.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="${Lib}/lucene-core-3.0.1.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${Lib}/lucene-core-3.6.1.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/rsyntaxtextarea.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/commons-cli-1.2.jar"/>

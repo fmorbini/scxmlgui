@@ -13,7 +13,9 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -94,7 +96,8 @@ public class SCXMLSearch {
 		SCXMLGraph graph = editor.getGraphComponent().getGraph();
 		analyzer=Class.forName("com.mxgraph.examples.swing.editor.scxml.SCXMLAnalyzer");
 		Constructor constructor = analyzer.getConstructor();
-		IndexWriter writer = new IndexWriter(idx, (Analyzer) constructor.newInstance(), IndexWriter.MaxFieldLength.UNLIMITED);
+		//IndexWriter writer = new IndexWriter(idx, (Analyzer) constructor.newInstance(), IndexWriter.MaxFieldLength.UNLIMITED);
+		IndexWriter writer = new IndexWriter(idx, new IndexWriterConfig(Version.LUCENE_36, (Analyzer) constructor.newInstance()));
         writer.deleteAll();
         writer.commit();
         
@@ -106,7 +109,7 @@ public class SCXMLSearch {
         //writer.optimize();
         writer.close();
 
-        searcher = new IndexSearcher(idx);
+        searcher = new IndexSearcher(IndexReader.open(idx));
 	}
 	
 	HashSet<String> cellsAlreadySeen=new HashSet<String>();
