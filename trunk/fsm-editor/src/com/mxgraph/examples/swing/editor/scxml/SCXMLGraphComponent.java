@@ -14,12 +14,14 @@ import org.w3c.dom.Document;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
+import com.mxgraph.examples.swing.handler.SCXMLConnectionHandler;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.handler.mxConnectionHandler;
 import com.mxgraph.swing.handler.mxGraphHandler;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -80,6 +82,12 @@ public class SCXMLGraphComponent extends mxGraphComponent //implements Component
 	{
 		return (SCXMLGraph) graph;
 	}
+	
+	@Override
+	protected mxConnectionHandler createConnectionHandler() {
+		return new SCXMLConnectionHandler(this);
+	}
+	
 	/**
 	 * Overrides drop behaviour to set the cell style if the target
 	 * is not a valid drop target and the cells are of the same

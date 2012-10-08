@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -111,7 +112,7 @@ public class ImportExportPicker {
 			for(FileFilter ff1 : fileIO.keySet()) {
 				if ((io=fileIO.get(ff1)).canImport())
 					try {
-						io.read(fileName, graphComponent,fc);
+						io.read(fileName, graphComponent,fc, editor.getRestrictedStatesConfig());
 						foundImporter=io;
 						break;
 					} catch (Exception e) {}
@@ -120,7 +121,7 @@ public class ImportExportPicker {
 			else return foundImporter;
 		} else {
 			// run the selected importer
-			io.read(fileName,graphComponent,fc);
+			io.read(fileName,graphComponent,fc,editor.getRestrictedStatesConfig());
 			return io;
 		}
 	}
@@ -158,5 +159,17 @@ public class ImportExportPicker {
 			fie.write(graphComponent, filename);
 			editor.setModified(false);
 		}
+	}
+	
+	public void clearFileIO(){
+		FileFilter ff = null;
+		Set<SortableFileFilter> fileFilters = fileIO.keySet();
+		for(SortableFileFilter fileFilter: fileFilters){
+			if (fileFilter.getDescription().contains("scxml")) {
+				ff = fileFilter;
+			}
+		}
+		IImportExport importExport = fileIO.get(ff);
+		importExport.clearInternalID2NodesAndSCXMLID2Nodes();
 	}
 }

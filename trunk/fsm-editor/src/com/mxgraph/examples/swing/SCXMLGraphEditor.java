@@ -15,7 +15,10 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,6 +55,7 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
+import javax.xml.bind.JAXBContext;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -62,6 +66,7 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.LockObtainFailedException;
 
+import com.mxgraph.examples.config.SCXMLConstraints;
 import com.mxgraph.examples.swing.editor.fileimportexport.IImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.ImportExportPicker;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
@@ -180,6 +185,11 @@ public class SCXMLGraphEditor extends JPanel
 	protected Long lastModifiedDate;
 	private static boolean backupEnabled,doLayout;
 	private static String inputFileName,outputFileName,outputFormat;
+	
+	/*
+	 * Restricted states configuration
+	 * */
+	private SCXMLConstraints restrictedStatesConfig;
 
 	/**
 	 * 
@@ -312,7 +322,7 @@ public class SCXMLGraphEditor extends JPanel
 			file2importer.put(fileName, ie=new SCXMLImportExport());								
 			// read the graph, this will throw an exception if something goes wrong
 			System.out.println("reading "+fileName);
-			ie.readInGraph(ig=new SCXMLGraph(),fileName,preferences.getBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT, true));
+			ie.readInGraph(ig=new SCXMLGraph(),fileName,preferences.getBoolean(SCXMLFileChoser.FileChoserCustomControls.PREFERENCE_IGNORE_STORED_LAYOUT, true), getRestrictedStatesConfig());
 			ig.setEditor(this);
 			file2graph.put(fileName, ig);
 		}
@@ -511,6 +521,35 @@ public class SCXMLGraphEditor extends JPanel
 		graph.setMultiplicities(m);
 		
 		preferences = Preferences.userRoot();
+		
+		/*
+		 * Parse restricted states configuration file
+		 * */
+		restrictedStatesConfig = null;
+		InputStream fileInputStream = null;
+		try {
+			File file = new File("restrictedStates.xml");
+			fileInputStream = new FileInputStream(file);
+		} catch (FileNotFoundException e1) {
+			System.out.println("Restriction configuration file not found. The application starts in normal mode without restriction handling.");
+		}
+		try{
+			JAXBContext context = JAXBContext.newInstance(SCXMLConstraints.class);
+			if (fileInputStream != null) {
+				restrictedStatesConfig = (SCXMLConstraints) context.createUnmarshaller().unmarshal(fileInputStream);
+			}
+		} catch (Exception e) {
+			System.out.println("Error while parsing restrictedStates.xml file: " + e.getMessage());
+		}
+		finally {
+			try {
+				if (fileInputStream != null) {
+					fileInputStream.close();
+				}
+			} catch (IOException e) {
+				System.out.println("Error while closing restriction configuration file!" + e.getMessage());
+			}
+		}
 	}
 
 	/**
@@ -1481,17 +1520,19 @@ public class SCXMLGraphEditor extends JPanel
 		if (editorsForCell==null) editorForCellAndType.put(cell,editorsForCell=new HashMap<Type, JDialog>());
 		editorsForCell.put(type,editor);
 	}
+	public void clearEditorForCellAndType(){
+		editorForCellAndType.clear();
+	}
 	public void openElementEditorFor(mxCell cell, Type type, Point pos) throws Exception {
 		JDialog ee=getEditorForCellAndType(cell, type);
 		if (ee!=null) {
-			ee.setLocation(pos);
 			ee.setVisible(true);
 		}
 		else {
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
 			switch(type) {
 			case EDGE:
-				ee=new SCXMLEdgeEditor(frame, cell, (SCXMLEdge)cell.getValue(),this, pos);
+				ee=new SCXMLEdgeEditor(frame, cell, (SCXMLEdge)cell.getValue(),this);
 				break;
 			case NODE:
 				SCXMLGraphComponent gc = getGraphComponent();
@@ -1509,7 +1550,29 @@ public class SCXMLGraphEditor extends JPanel
 			default:
 				throw new Exception("Unknown element editor type requested: "+type);
 			}
-			setEditorForCellAndType(cell, type, ee);
+			if (!(type.equals(Type.EDGE))) {
+				setEditorForCellAndType(cell, type, ee);
+			}
 		}
+		int screenMaxX = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width;
+		int screenMaxY = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height;
+		int dialogMaxXCoordinateOnScreen = pos.x+ee.getWidth();
+		int dialogMaxYCoordinateOnScreen = pos.y+ee.getHeight();
+		int diff;
+		if (dialogMaxXCoordinateOnScreen > screenMaxX) {
+			diff = dialogMaxXCoordinateOnScreen - screenMaxX;
+			pos.x = pos.x - diff;
+		}
+		if (dialogMaxYCoordinateOnScreen > screenMaxY) {
+			diff = dialogMaxYCoordinateOnScreen - screenMaxY;
+			pos.y = pos.y - diff;
+		}
+		ee.setLocation(pos);
+	}
+	public SCXMLConstraints getRestrictedStatesConfig() {
+		return restrictedStatesConfig;
+	}
+	public void setRestrictedStatesConfig(SCXMLConstraints restrictedStatesConfig) {
+		this.restrictedStatesConfig = restrictedStatesConfig;
 	}
 }

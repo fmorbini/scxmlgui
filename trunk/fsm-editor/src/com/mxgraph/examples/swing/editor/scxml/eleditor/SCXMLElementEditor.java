@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.DocumentEvent;
@@ -87,61 +88,84 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
     	if (o instanceof JScrollPane) {
     		// put focus on text field
             focusOnTextPanel(o);
-
     		JScrollPane scrollPane=(JScrollPane) o;
     		o=scrollPane.getViewport().getComponent(0);
-    		//o=scrollPane.getComponent(0);
     		if (o instanceof UndoJTextPane) {
-    	    	UndoJTextPane u;
-    			u=(UndoJTextPane) o;
-    			ActionMap actionMap = u.getActionMap();
-    			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
-    			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
-    			actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
-    			actions.put(DefaultEditorKit.selectAllAction,actionMap.get(DefaultEditorKit.selectAllAction));
-    			UndoJTextPane.UndoAction ua=u.getUndoAction();
-    			UndoJTextPane.RedoAction ra=u.getRedoAction();
-    			actions.put(undoAction,ua);
-    			actions.put(redoAction,ra);
-    			//System.out.println("update actions, pane side, before");
-    			if ((externalUndoAction!=null) && (externalRedoAction!=null)) {
-        			//System.out.println("update actions, pane side, after");
-    				if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
-    				if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
-    		    	externalUndoAction.setInternalAction(ua);
-    		    	externalRedoAction.setInternalAction(ra);
-    		    	ua.updateUndoState();
-    		    	ra.updateRedoState();
-    			}
-    			if (keyboardHandler!=null) keyboardHandler.updateActionMap();
+    			setActionsForUndoJTextPane(o, actions);
     			return actions;
     		} else if (o instanceof UndoJTextField) {
-    	    	UndoJTextField u;
-    			u=(UndoJTextField) o;
-    			ActionMap actionMap = u.getActionMap();
-    			actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
-    			actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
-    			actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
-    			actions.put(DefaultEditorKit.selectAllAction,actionMap.get(DefaultEditorKit.selectAllAction));
-    			UndoJTextField.UndoAction ua=u.getUndoAction();
-    			UndoJTextField.RedoAction ra=u.getRedoAction();
-    			actions.put(undoAction,ua);
-    			actions.put(redoAction,ra);
-    			//System.out.println("update actions, field side, before");
-    			if ((externalUndoAction!=null) && (externalRedoAction!=null)) {
-        			//System.out.println("update actions, field side, after");
-    				if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
-    				if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
-    		    	externalUndoAction.setInternalAction(ua);    	
-    		    	externalRedoAction.setInternalAction(ra);
-    		    	ua.updateUndoState();
-    		    	ra.updateRedoState();
-    			}
-    			if (keyboardHandler!=null) keyboardHandler.updateActionMap();
+    			setActionsForUndoJTextField(o, actions);
     			return actions;
     		}
-    	}
+    	} else if (o instanceof JPanel) {
+    		JPanel firstPanel = (JPanel) o;
+    		o = firstPanel.getComponent(1);
+    		if (o instanceof JPanel) {
+				JPanel secondPanel = (JPanel) o;
+				o = secondPanel.getComponent(1);
+				if (o instanceof JScrollPane) {
+					// put focus on text field
+		            focusOnTextPanel(o);
+		    		JScrollPane scrollPane=(JScrollPane) o;
+		    		o=scrollPane.getViewport().getComponent(0);
+		    		if (o instanceof UndoJTextPane) {
+		    			setActionsForUndoJTextPane(o, actions);
+		    			return actions;
+		    		} else if (o instanceof UndoJTextField) {
+		    			setActionsForUndoJTextField(o, actions);
+		    			return actions;
+		    		}
+				}
+			}
+		}
     	return null;
+    }
+    
+    private void setActionsForUndoJTextPane(Component o, HashMap<Object, Action> actions){
+    	UndoJTextPane u;
+		u=(UndoJTextPane) o;
+		ActionMap actionMap = u.getActionMap();
+		setDefaultActions(actions, actionMap);
+		UndoJTextPane.UndoAction ua=u.getUndoAction();
+		UndoJTextPane.RedoAction ra=u.getRedoAction();
+		actions.put(undoAction,ua);
+		actions.put(redoAction,ra);
+		if ((externalUndoAction!=null) && (externalRedoAction!=null)) {
+			if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
+			if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
+	    	externalUndoAction.setInternalAction(ua);
+	    	externalRedoAction.setInternalAction(ra);
+	    	ua.updateUndoState();
+	    	ra.updateRedoState();
+		}
+		if (keyboardHandler!=null) keyboardHandler.updateActionMap();
+    }
+    
+    private void setActionsForUndoJTextField(Component o, HashMap<Object, Action> actions){
+    	UndoJTextField u;
+		u=(UndoJTextField) o;
+		ActionMap actionMap = u.getActionMap();
+		setDefaultActions(actions, actionMap);
+		UndoJTextField.UndoAction ua=u.getUndoAction();
+		UndoJTextField.RedoAction ra=u.getRedoAction();
+		actions.put(undoAction,ua);
+		actions.put(redoAction,ra);
+		if ((externalUndoAction!=null) && (externalRedoAction!=null)) {
+			if (ua.getExternalAction()==null) ua.setExternalAction(externalUndoAction);
+			if (ra.getExternalAction()==null) ra.setExternalAction(externalRedoAction);
+	    	externalUndoAction.setInternalAction(ua);    	
+	    	externalRedoAction.setInternalAction(ra);
+	    	ua.updateUndoState();
+	    	ra.updateRedoState();
+		}
+		if (keyboardHandler!=null) keyboardHandler.updateActionMap();
+    }
+    
+    private void setDefaultActions(HashMap<Object, Action> actions, ActionMap actionMap){
+    	actions.put(DefaultEditorKit.copyAction,actionMap.get(DefaultEditorKit.copyAction));
+		actions.put(DefaultEditorKit.cutAction,actionMap.get(DefaultEditorKit.cutAction));
+		actions.put(DefaultEditorKit.pasteAction,actionMap.get(DefaultEditorKit.pasteAction));
+		actions.put(DefaultEditorKit.selectAllAction,actionMap.get(DefaultEditorKit.selectAllAction));
     }
     
 	public class CloseAction extends AbstractAction {

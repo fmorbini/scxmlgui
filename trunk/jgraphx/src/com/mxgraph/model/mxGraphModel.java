@@ -152,6 +152,10 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel
 	{
 		setRoot(createRoot());
 	}
+	
+	public void clearCells(){
+		cells.clear();
+	}
 
 	/**
 	 * 

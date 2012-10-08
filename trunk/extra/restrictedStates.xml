@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<SCXMLConstraints>
+	<restrictedState name="restriction1">
+		<color>blue</color>
+		<documentation>first test restriction</documentation>
+		<possibleEvent name="possible_event1">
+			<documentation>documentation of possible_event1</documentation>
+		</possibleEvent>
+		<possibleEvent name="possible_event2">
+			<documentation>documentation of possible_event2</documentation>
+		</possibleEvent>
+		<possibleEvent name="eventA">
+			<documentation>documentation of eventA</documentation>
+		</possibleEvent>
+		<possibleEvent name="eventB">
+			<documentation>documentation of eventB</documentation>
+		</possibleEvent>
+		<possibleEvent name="eventC">
+			<documentation>documentation of eventC</documentation>
+		</possibleEvent>
+		<possibleEvent name="eventD">
+			<documentation>documentation of eventD</documentation>
+		</possibleEvent>
+		<possibleEvent name="eventE">
+			<documentation>documentation of eventE</documentation>
+		</possibleEvent>
+		<possibleEvent name="eventF">
+			<documentation>documentation of eventF</documentation>
+		</possibleEvent>
+		<possibleEvent name="start">
+			<documentation>start event aaaaaaaaaaaaaa aaaaaa aaaaaa aaaaaa aaaaaa aaaaabbb bbbbbb bbbb bbbbb bbbbb bbbbbb bbbbbbbb bbbbbb cccc cccccc ccc cccccc</documentation>
+		</possibleEvent>
+		<possibleEvent name="stop">
+			<documentation>stop event</documentation>
+		</possibleEvent>
+		<possibleEvent name="resume">
+			<documentation>resume event</documentation>
+		</possibleEvent>
+		<possibleEvent name="cancel">
+			<documentation>cancel event</documentation>
+		</possibleEvent>
+		<possibleEvent name="save">
+			<documentation>save event</documentation>
+		</possibleEvent>
+		<possibleEvent name="exit">
+			<documentation>exit event</documentation>
+		</possibleEvent>
+		<possibleEvent name="undo">
+			<documentation>undo event</documentation>
+		</possibleEvent>
+		<possibleEvent name="redo">
+			<documentation>redo event</documentation>
+		</possibleEvent>
+	</restrictedState>
+	<restrictedState name="restriction2">
+		<color>blue</color>
+		<documentation>second test restriction</documentation>
+		<possibleEvent name="posible_event3">
+			<documentation>documentation of possible_event3</documentation>
+		</possibleEvent>
+		<possibleEvent name="posible_event4">
+			<documentation>documentation of possible_event4</documentation>
+		</possibleEvent>
+	</restrictedState>
+</SCXMLConstraints>

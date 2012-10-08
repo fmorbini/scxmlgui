@@ -6,6 +6,7 @@ import java.util.Queue;
 
 import javax.swing.JFileChooser;
 
+import com.mxgraph.examples.config.SCXMLConstraints;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
@@ -45,7 +46,7 @@ public class DOTImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc, SCXMLConstraints restrictedConstraints) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
@@ -126,5 +127,11 @@ public class DOTImportExport implements IImportExport {
 		if (isRoot) ret+=transitions.toString();
 		ret+=close;
 		return ret;
+	}
+
+	@Override
+	public void clearInternalID2NodesAndSCXMLID2Nodes() {
+		// TODO Auto-generated method stub
+		
 	}
 }

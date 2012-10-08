@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState;
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState.PossibleEvent;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.EditorStatus;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
@@ -213,6 +215,23 @@ public class SCXMLGraph extends mxGraph
 				if (lca!=null && lca instanceof mxCell) {
 					SCXMLNode scxmlLCA = (SCXMLNode) ((mxCell)lca).getValue();
 					if (scxmlLCA.isParallel()) warnings+=source.getID()+" and "+target.getID()+" are (descendats of) siblings of a parallel node ("+scxmlLCA.getID()+").";
+				}
+
+				String edgeEventName = edgeValue.getEvent();
+				//event name can not be null
+				if (edgeEventName==null || edgeEventName.isEmpty()) {
+					warnings += "Event can not be null!";
+				} else if (source.isRestricted()){
+					//check that edge event is allowed by the restriction on the source node
+					boolean isEventPossible = false;
+					for(PossibleEvent possibleEvent: source.getPossibleEvents()){
+						if (possibleEvent.getName().equals(edgeEventName)) {
+							isEventPossible = true;
+						}
+					}
+					if (!isEventPossible) {
+						warnings += "Invalid event from " + source.getID() + " to " + target.getID() + "!";
+					}
 				}
 			}
 		}
@@ -643,12 +662,29 @@ public class SCXMLGraph extends mxGraph
 					tip+="type: "+v.getSRC().getType()+"<br>";
 					tip += "</html>";
 				} else {
-					tip="<html>";
-					if (v.isInitial()) tip+="onInitialEntry: <pre>"+XMLUtils.escapeStringForXML(v.getOnInitialEntry())+"</pre><br>";
-					tip+="onEntry: <pre>"+XMLUtils.escapeStringForXML(v.getOnEntry())+"</pre><br>";
-					tip+="onExit: <pre>"+XMLUtils.escapeStringForXML(v.getOnExit())+"</pre><br>";
-					if (v.isFinal()) tip+="exitData: "+v.getDoneData()+"<br>";
-					tip += "</html>";
+					String tipBody="";
+					if (v.isRestricted()) {
+						tipBody += "Restrictions:<br><pre>";
+						for(RestrictedState restriction: v.getRestrictedStates()){
+							tipBody += restriction.getName() + "<br>";
+						}
+						tipBody += "</pre><br>";
+					}
+					if (v.isInitial()) tipBody+="onInitialEntry: <pre>"+XMLUtils.escapeStringForXML(v.getOnInitialEntry())+"</pre><br>";
+					String onEntry = v.getOnEntry();
+					if ((onEntry!=null) && (!(onEntry.isEmpty()))) {
+						tipBody+="onEntry:<br><pre>"+XMLUtils.escapeStringForXML(onEntry)+"</pre><br>";
+					}
+					String onExit = v.getOnExit();
+					if ((onExit!=null) && (!(onExit.isEmpty()))) {
+						tipBody+="onExit:<br><pre>"+XMLUtils.escapeStringForXML(onExit)+"</pre><br>";
+					}
+					if (v.isFinal()) tipBody+="exitData: "+v.getDoneData()+"<br>";
+					if (!tipBody.isEmpty()) {
+						tip = "<html>";
+						tip += tipBody;
+						tip += "</html>";
+					}
 				}
 			}
 		}
@@ -765,6 +801,10 @@ public class SCXMLGraph extends mxGraph
 		}
 
 		return super.createEdge(parent, id, value, source, target, style);
+	}
+	
+	public void clearUndeletable(){
+		undeletable.clear();
 	}
 
 }

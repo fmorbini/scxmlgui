@@ -24,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.AskToSaveIfRequired;
 import com.mxgraph.examples.swing.SCXMLGraphEditor.EditorStatus;
@@ -98,6 +99,17 @@ public class SCXMLEditorActions
 			mxGraph graph = editor.getGraphComponent().getGraph();
 			SCXMLGraphComponent c = (SCXMLGraphComponent) editor.getGraphComponent();
 			SCXMLNode value=(SCXMLNode)editor.getCurrentFileIO().buildNodeValue();
+			
+			if (!(e.getActionCommand().equals(mxResources.get("addNode")))) {
+				RestrictedState restrictedState = null;
+				for(RestrictedState tempState: editor.getRestrictedStatesConfig().getRestrictedState()){
+					if (tempState.getName().equals(e.getActionCommand())) {
+						restrictedState = tempState;
+					}
+				}
+				value.setRestricted(true, restrictedState);
+			}
+			
 			pos=c.mouseCoordToGraphCoord(pos);
 			// the state contains the absolute coordinate
 			mxGraphView view = graph.getView();
@@ -105,7 +117,7 @@ public class SCXMLEditorActions
 			mxCellState parentState = view.getState(parent);
 			double parentX=parentState.getX()/scale;
 			double parentY=parentState.getY()/scale;
-			mxCell p = (mxCell) graph.insertVertex(parent, value.getInternalID(), value, pos.x-parentX, pos.y-parentY, 100, 100, value.getStyle());
+			mxCell p = (mxCell) graph.insertVertex(parent, value.getInternalID(), value, pos.x-parentX, pos.y-parentY, 75, 75, value.getStyle());
 		}
 	}
 	public static class EditEdgeOrderAction extends AbstractAction
@@ -448,6 +460,39 @@ public class SCXMLEditorActions
 		}
 	}
 
+	public static class SetNodeAsRestricted extends AbstractAction
+	{
+		
+		private mxCell cell;
+		
+		public SetNodeAsRestricted(mxCell c) {
+			cell=c;
+		}
+		public void actionPerformed(ActionEvent e)
+		{
+			SCXMLGraphEditor editor = getEditor(e);
+			mxGraph graph = editor.getGraphComponent().getGraph();
+			assert(cell.isVertex());
+			SCXMLNode n=(SCXMLNode) cell.getValue();
+
+			mxIGraphModel model = editor.getGraphComponent().getGraph().getModel();
+			model.beginUpdate();
+			try {
+				SCXMLChangeHandler.addStateOfNodeInCurrentEdit(cell, model);
+				RestrictedState restrictedState = null;
+				for(RestrictedState tempState: editor.getRestrictedStatesConfig().getRestrictedState()){
+					if (tempState.getName().equals(e.getActionCommand())) {
+						restrictedState = tempState;
+					}
+				}
+				n.setRestricted(!n.isRestricted(restrictedState), restrictedState);
+				graph.setCellStyle(n.getStyle(),cell);
+			} finally {
+				model.endUpdate();
+			}
+		}
+	}
+
 	public static class SetNodeAsHistory extends AbstractAction
 	{
 		private mxCell cell;
@@ -635,9 +680,17 @@ public class SCXMLEditorActions
 				if (AskToSaveIfRequired.check(editor)) {
 					editor.setCurrentFile(null,new SCXMLImportExport());
 					
-					mxGraphComponent gc = editor.getGraphComponent();
+					SCXMLGraphComponent gc = editor.getGraphComponent();
 					SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
-
+					
+					//Memory leak fix
+					gc.clearSCXMLNodes();
+					editor.getSCXMLSearchTool().clearSCXMLSearchMXCells();
+					editor.getIOPicker().clearFileIO();
+					editor.clearEditorForCellAndType();
+					graph.clearUndeletable();
+					graph.getModel().clearCells();
+					
 					mxCell root = new mxCell();
 					root.insert(new mxCell());
 					graph.getModel().setRoot(root);
@@ -650,7 +703,6 @@ public class SCXMLEditorActions
 					value.setCluster(true);
 					mxCell p = (mxCell) graph.insertVertex(null, value.getInternalID(), value, 0, 0, gc.getSize().width, gc.getSize().height, value.getStyle());
 					p.setValue(value);
-
 					graph.setDefaultParent(p);
 
 					graph.setCellAsDeletable(p, false);
@@ -727,6 +779,17 @@ public class SCXMLEditorActions
 		 */
 		public void actionPerformed(ActionEvent e)
 		{
+			//Memory leak fix
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraphComponent gc = editor.getGraphComponent();
+			SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
+			gc.clearSCXMLNodes();
+			editor.getSCXMLSearchTool().clearSCXMLSearchMXCells();
+			editor.getIOPicker().clearFileIO();
+			editor.clearEditorForCellAndType();
+			graph.clearUndeletable();
+			graph.getModel().clearCells();
+			
 			if (inNewWindow) {
 				Thread openingThread = new Thread(new Runnable() {
 					@Override
@@ -967,7 +1030,7 @@ public class SCXMLEditorActions
 		SCXMLGraphComponent graphComponent = editor.getGraphComponent();
 		SCXMLGraph graph = graphComponent.getGraph();
 		
-		scxmlImportExport.readInGraph(graph, input, doLayout);
+		scxmlImportExport.readInGraph(graph, input, doLayout, editor.getRestrictedStatesConfig());
 
 		if (doLayout) {
 			mxClusterLayout layout = new mxClusterLayout(graph);

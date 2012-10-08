@@ -22,6 +22,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.mxgraph.examples.config.SCXMLConstraints;
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLFileChoser;
@@ -48,6 +50,7 @@ public class SCXMLImportExport implements IImportExport {
 	private HashMap<String,SCXMLNode> scxmlID2nodes=new HashMap<String, SCXMLNode>();
 	private HashMap<String,HashMap<String,HashSet<SCXMLEdge>>> fromToEdges=new HashMap<String, HashMap<String,HashSet<SCXMLEdge>>>();
 	private int internalIDcounter=11;
+	public static final String RESTRICTEDSTATECOMMENT="restriction_type";
 
 	private HashSet<SCXMLEdge> getEdges(String SCXMLfromID,String SCXMLtoID) {
 		assert(!SCXMLfromID.equals(""));
@@ -226,11 +229,11 @@ public class SCXMLImportExport implements IImportExport {
 		return node;
 	}
 
-	public void scanChildrenOf(Node el,SCXMLNode pn, File pwd) throws Exception {
+	public void scanChildrenOf(SCXMLGraphEditor editor, Node el,SCXMLNode pn, File pwd, SCXMLConstraints restrictedConstraints) throws Exception {
 		NodeList states = el.getChildNodes();
 		for (int s = 0; s < states.getLength(); s++) {
 			Node n = states.item(s);
-			getNodeHier(n, pn,pwd);
+			getNodeHier(editor, n, pn,pwd, restrictedConstraints);
 		}
 	}
 	private static String[] commentsCollector=new String[]{""};
@@ -249,7 +252,7 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		return thing;
 	}
-	public SCXMLNode getNodeHier(Node n, SCXMLNode pn, File pwd) throws Exception {
+	public SCXMLNode getNodeHier(SCXMLGraphEditor editor, Node n, SCXMLNode pn, File pwd, SCXMLConstraints restrictedConstraints) throws Exception {
 		SCXMLNode root=null;
 		switch (n.getNodeType()) {
 		case Node.ELEMENT_NODE:
@@ -261,7 +264,7 @@ public class SCXMLImportExport implements IImportExport {
 				root = handleSCXMLNode(n,pn,isParallel,isHistory);
 				addCommentsAndResetCollectorTo(root);
 				// continue recursion on the children of this node
-				scanChildrenOf(n, root,pwd);
+				scanChildrenOf(editor, n, root,pwd, restrictedConstraints);
 				processOutsourcingChildrenForNode(root, pwd);
 			} else if (name.equals("transition")) {
 				SCXMLEdge edge = addEdge(processEdge(pn,n));
@@ -270,7 +273,7 @@ public class SCXMLImportExport implements IImportExport {
 				SCXMLNode node = handleSCXMLNode(n,pn,isParallel,false);
 				addCommentsAndResetCollectorTo(node);
 				node.setFinal(true);
-				scanChildrenOf(n, node,pwd);
+				scanChildrenOf(editor, n, node,pwd, restrictedConstraints);
 			} else if (name.equals("initial")) {
 				//pn.setInitial(true);
 				// only one child that is a transition
@@ -316,14 +319,31 @@ public class SCXMLImportExport implements IImportExport {
 				System.out.println(location);
 				if (!StringUtils.isEmptyString(location)) {
 					SCXMLNode child = setNodeAsOutsourcing(new OutSource(OUTSOURCETYPE.XINC,location), pn);
-					scanChildrenOf(n,child,pwd);
+					scanChildrenOf(editor, n,child,pwd, restrictedConstraints);
 				}
 			}
 			break;
 		case Node.COMMENT_NODE:
 			String nodeValueString=n.getNodeValue();
-			if (!readNodeGeometry(pn,nodeValueString)) {
+			if ((!readNodeGeometry(pn,nodeValueString)) && (!(nodeValueString.contains(RESTRICTEDSTATECOMMENT)))) {
 				commentsCollector[0]+=nodeValueString;
+			}
+			if ((nodeValueString.contains(RESTRICTEDSTATECOMMENT)) && (restrictedConstraints != null)) {
+				System.out.println("Contains restriction comment...");
+				String[] restrictionTypes = nodeValueString.split(":")[1].replace(" ", "").split(";");
+				boolean isValidRestriction = false;
+				for (int i = 0; i < restrictionTypes.length; i++) {
+					String restrictionType = restrictionTypes[i];
+					for(RestrictedState restrictedState: restrictedConstraints.getRestrictedState()){
+						if (restrictedState.getName().equals(restrictionType)) {
+							pn.setRestricted(true, restrictedState);
+							isValidRestriction = true;
+						}
+					}
+					if (!isValidRestriction) {
+						JOptionPane.showMessageDialog(editor, mxResources.get("invalidRestrictionTypeMessage") + " [" + restrictionType + "]", mxResources.get("invalidRestrictionTypeTitle"), JOptionPane.WARNING_MESSAGE);
+					}
+				}
 			}
 			break;
 		}
@@ -399,16 +419,16 @@ public class SCXMLImportExport implements IImportExport {
 		}
 		return StringUtils.removeLeadingAndTrailingSpaces(content);
 	}
-	public SCXMLNode readSCXMLFileContentAndAttachAsChildrenOf(String filename,SCXMLNode parent) throws Exception {
+	public SCXMLNode readSCXMLFileContentAndAttachAsChildrenOf(SCXMLGraphEditor editor, String filename,SCXMLNode parent, SCXMLConstraints restrictedConstraints) throws Exception {
 		System.out.println("Parsing file: "+filename);
 		File file=new File(filename);
 		Document doc = mxUtils.parseXMLFile(file,false,false);
 		doc.getDocumentElement().normalize();
-		SCXMLNode rootNode=getNodeHier(doc.getDocumentElement(),parent,file.getParentFile());
+		SCXMLNode rootNode=getNodeHier(editor, doc.getDocumentElement(),parent,file.getParentFile(), restrictedConstraints);
 		System.out.println("Done reading file");
 		return rootNode;
 	}
-	public void readInGraph(SCXMLGraph graph, String filename, boolean ignoreStoredLayout) throws Exception {
+	public void readInGraph(SCXMLGraph graph, String filename, boolean ignoreStoredLayout, SCXMLConstraints restrictedConstraints) throws Exception {
 		// clean importer data-structures
 		internalID2cell.clear();
 		internalID2clusters.clear();
@@ -417,7 +437,7 @@ public class SCXMLImportExport implements IImportExport {
 		scxmlID2nodes.clear();
 		internalIDcounter=11;
 
-		root=readSCXMLFileContentAndAttachAsChildrenOf(filename, null);
+		root=readSCXMLFileContentAndAttachAsChildrenOf(graph.getEditor(), filename, null, restrictedConstraints);
 		if (root!=scxmlID2nodes.get(SCXMLNode.ROOTID)) {
 			SCXMLNode firstChild=root;
 			mxGeometry geometry = root.getGeometry();
@@ -448,6 +468,13 @@ public class SCXMLImportExport implements IImportExport {
 
 		graph.setDefaultParent(gr);
 	}
+	public void clearInternalID2NodesAndSCXMLID2Nodes(){
+		internalID2nodes.clear();
+		scxmlID2nodes.clear();
+		internalID2cell.clear();
+		internalID2clusters.clear();
+		fromToEdges.clear();
+	}
 	private HashSet<SCXMLNode> saveProblematicNodes=new HashSet<SCXMLNode>();
 	public boolean hasUnhandledXIncludeUsage() { return !saveProblematicNodes.isEmpty(); }
 	public int displayWarningAboutUnhandledXIncludeUsage(SCXMLGraphEditor editor,boolean asQuestion) {
@@ -461,12 +488,12 @@ public class SCXMLImportExport implements IImportExport {
 		return -1;
 	}
 	@Override
-	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws Exception {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc, SCXMLConstraints restrictedConstraints) throws Exception {
 		SCXMLGraphComponent gc=(SCXMLGraphComponent)graphComponent;
 		SCXMLGraphEditor editor = gc.getGraph().getEditor();
 		saveProblematicNodes.clear();
 		SCXMLGraph graph = (SCXMLGraph) gc.getGraph();
-		readInGraph(graph,from,((SCXMLFileChoser)fc).ignoreStoredLayout());
+		readInGraph(graph,from,((SCXMLFileChoser)fc).ignoreStoredLayout(), restrictedConstraints);
 		if (hasUnhandledXIncludeUsage()) displayWarningAboutUnhandledXIncludeUsage(editor,false);
 		gc.validateGraph();
 	}
@@ -645,6 +672,7 @@ public class SCXMLImportExport implements IImportExport {
 		boolean isFake=value.getFake();
 
 		comments=StringUtils.removeLeadingAndTrailingSpaces(value.getComments());
+		
 		ID=StringUtils.removeLeadingAndTrailingSpaces(value.getID());
 		name=StringUtils.removeLeadingAndTrailingSpaces(value.getName());
 		datamodel=StringUtils.removeLeadingAndTrailingSpaces(value.getDatamodel());
@@ -704,6 +732,15 @@ public class SCXMLImportExport implements IImportExport {
 				ret+="</xi:include>";
 			} else if (!StringUtils.isEmptyString(nodeGeometry))
 				ret+="<!-- "+nodeGeometry+" -->";
+			
+			//save restriction type
+			if (value.isRestricted()) {
+				String restrictionNames = "";
+				for(RestrictedState restrictionState: value.getRestrictedStates()){
+					restrictionNames += restrictionState.getName() + ";";
+				}
+				ret+="<!-- restriction_type:" + restrictionNames +" -->";
+			}
 			
 			if (!isFake) {
 				if (!StringUtils.isEmptyString(datamodel))
