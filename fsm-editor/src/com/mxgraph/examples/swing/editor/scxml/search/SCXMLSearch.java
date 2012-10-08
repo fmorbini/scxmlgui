@@ -247,4 +247,8 @@ public class SCXMLSearch {
 			}
 		}
 	}
+	
+	public void clearDoc2mxCell() {
+		doc2mxCell.clear();
+	}
 }

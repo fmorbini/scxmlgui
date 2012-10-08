@@ -6,6 +6,7 @@ import javax.swing.JFileChooser;
 
 import org.w3c.dom.Document;
 
+import com.mxgraph.examples.config.SCXMLConstraints;
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxUtils;
@@ -24,7 +25,7 @@ public class MXEImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws Exception {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc, SCXMLConstraints restrictedConstraints) throws Exception {
 		Document document = mxUtils.parseXMLString(mxUtils.readFile(from),false,false);
 		mxCodec codec = new mxCodec(document);
 		codec.decode(document.getDocumentElement(),graphComponent.getGraph().getModel());
@@ -51,5 +52,11 @@ public class MXEImportExport implements IImportExport {
 	@Override
 	public Object cloneValue(Object value) {
 		return value;
+	}
+
+	@Override
+	public void clearInternalID2NodesAndSCXMLID2Nodes() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -4,6 +4,7 @@
  */
 package com.mxgraph.analysis;
 
+import com.mxgraph.analysis.mxICostFunction;
 import com.mxgraph.view.mxCellState;
 
 /**

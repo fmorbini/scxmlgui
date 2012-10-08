@@ -5,10 +5,14 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState;
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState.PossibleEvent;
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.model.mxGeometry;
@@ -26,6 +30,7 @@ public class SCXMLNode implements Serializable {
 	public static final String ID="id";
 	public static final String NAME="name";
 	public static final String TYPE="type";
+	public static final String RESTRICTEDSTATE="restrictedState";
 	public static final String INITIAL="initial";
 	public static final String FINAL="final";
 	public static final String ONENTRYEXE="onentryexe";
@@ -35,6 +40,7 @@ public class SCXMLNode implements Serializable {
 	public static final String HISTORY="history";
 	public static final String PARALLEL="parallel";
 	public static final String NORMAL="normal";
+	public static final String RESTICTED="restricted";
 	public static final String STYLE="style";
 	public static final String DATAMODEL="datamodel";
 	public static final String DONEDATA="donedata";
@@ -381,6 +387,64 @@ public class SCXMLNode implements Serializable {
 	}
 	public Boolean isInitial() {
 		return (Boolean)node.get(INITIAL);
+	}
+	public void setRestricted(Boolean b, RestrictedState restrictedState) {
+		if (isRestricted()) {
+			List<RestrictedState> nodeRestrictions = getRestrictedStates();
+			if ((isRestricted(restrictedState)) && (!b)) {
+				nodeRestrictions.remove(restrictedState);
+				if (nodeRestrictions.isEmpty()) {
+					this.setStrokeColor(DEFAULTSTROKECOLOR);
+					this.setStrokeWidth(null);
+					node.put(TYPE, NORMAL);
+					node.remove(RESTRICTEDSTATE);
+				}
+			} else if ((b) && (!isRestricted(restrictedState))){
+				nodeRestrictions.add(restrictedState);
+			}
+		} else if (b) {
+			this.setStrokeColor(restrictedState.getColor());
+			this.setStrokeWidth("4");
+			node.put(TYPE, RESTICTED);
+			List<RestrictedState> nodeRestrictions = new LinkedList<RestrictedState>();
+			nodeRestrictions.add(restrictedState);
+			node.put(RESTRICTEDSTATE, nodeRestrictions);
+		}
+	}
+	public Boolean isRestricted(){
+		if (node.get(TYPE).equals(RESTICTED)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public Boolean isRestricted(RestrictedState restrictedState){
+		if (isRestricted()) {
+			List<RestrictedState> restrictedStates = getRestrictedStates();
+			for(RestrictedState tempState: restrictedStates){
+				if (restrictedState.getName().equals(tempState.getName())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	public List<RestrictedState> getRestrictedStates(){
+		if (isRestricted()) {
+			return (List<RestrictedState>)node.get(RESTRICTEDSTATE);
+		} else {
+			return null;
+		}
+	}
+	public List<PossibleEvent> getPossibleEvents(){
+		List<PossibleEvent> possibleEvents = null;
+		if (isRestricted()) {
+			possibleEvents = new LinkedList<PossibleEvent>();
+	    	for(RestrictedState tempState: this.getRestrictedStates()){
+	    		possibleEvents.addAll(tempState.getPossibleEvent());
+	    	}
+		}
+		return possibleEvents;
 	}
 	public void setAsHistory(final HISTORYTYPE type) {
 		if (type==null) this.setFillColor(DEFAULTFILLCOLOR);

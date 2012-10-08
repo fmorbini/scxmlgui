@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 
+import com.mxgraph.examples.config.SCXMLConstraints;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxUtils;
@@ -22,7 +23,7 @@ public class HTMLImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws IOException {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc, SCXMLConstraints restrictedConstraints) throws IOException {
 	}
 
 	@Override
@@ -45,4 +46,11 @@ public class HTMLImportExport implements IImportExport {
 	public Object buildEdgeValue() {
 		return null;
 	}
+
+	@Override
+	public void clearInternalID2NodesAndSCXMLID2Nodes() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

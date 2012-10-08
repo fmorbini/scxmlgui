@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import com.mxgraph.examples.config.SCXMLConstraints;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxResources;
@@ -26,7 +27,7 @@ public class IMGImportExport implements IImportExport {
 	}
 
 	@Override
-	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc) throws Exception {
+	public void read(String from, mxGraphComponent graphComponent,JFileChooser fc, SCXMLConstraints restrictedConstraints) throws Exception {
 	}
 
 	@Override
@@ -74,5 +75,11 @@ public class IMGImportExport implements IImportExport {
 	@Override
 	public Object cloneValue(Object value) {
 		return null;
+	}
+
+	@Override
+	public void clearInternalID2NodesAndSCXMLID2Nodes() {
+		// TODO Auto-generated method stub
+		
 	}
 }

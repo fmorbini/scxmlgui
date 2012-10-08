@@ -356,4 +356,6 @@ public interface mxIGraphModel
 	public boolean isLoop(mxIGraphModel model, Object edge);
 	
 	public Object getNearestCommonAncestor(Object cell1, Object cell2);
+	
+	public void clearCells();
 }

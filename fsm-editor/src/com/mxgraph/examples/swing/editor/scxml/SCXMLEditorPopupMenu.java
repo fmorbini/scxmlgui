@@ -2,12 +2,14 @@ package com.mxgraph.examples.swing.editor.scxml;
 
 import java.awt.Point;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-
+import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
@@ -27,6 +29,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsHisto
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsInitial;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsOutsourced;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsParallel;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SetNodeAsRestricted;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleDisplayOutsourcedContentInNode;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleWithTargetAction;
 import com.mxgraph.model.mxCell;
@@ -76,8 +79,9 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 						int lastIndex=cellState.getAbsolutePointCount()-1;
 						if ((index=cellState.getIndexOfEdgePointAt(graphPt.x, graphPt.y,gc.getTolerance()))==-1) {
 							int indexOfNewPoint=cellState.getIndexOfNewPoint(graphPt.x, graphPt.y,gc.getTolerance())-1;
-							if (indexOfNewPoint>=0)
+							if (indexOfNewPoint>=0){
 								add(editor.bind(mxResources.get("addCorner"), new AddCornerToEdgeAction(c,unscaledGraphPoint,graphPt,indexOfNewPoint)));
+							}
 						} else if (index>0 && index<lastIndex)
 							add(editor.bind(mxResources.get("removeCorner"), new RemoveCornerToEdgeAction(c,index-1)));
 					} else {
@@ -98,6 +102,25 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 					// add node in case the cell under the pointer is a swimlane
 					boolean addNodeEnabled=graph.isSwimlane(c) && (editor.getCurrentFileIO()!=null);
 					add(editor.bind(mxResources.get("addNode"), new AddAction(mousePt,c))).setEnabled(addNodeEnabled);
+					/*
+					 * Add new, restricted node
+					 * */
+					if (editor.getRestrictedStatesConfig() != null) {
+						JMenu addRestrictedNodeMenu = new JMenu(mxResources.get("addRestrictedNode"));
+						addRestrictedNodeMenu.setEnabled(addNodeEnabled);
+						List<RestrictedState> restrictedStatesList = editor.getRestrictedStatesConfig().getRestrictedState();
+						if (restrictedStatesList != null) {
+							for (RestrictedState restrictedState: restrictedStatesList) {
+								JMenuItem addRestrictedStateMenuItem = new JMenuItem(editor.bind(restrictedState.getName(), new AddAction(mousePt,c)));
+								addRestrictedStateMenuItem.setEnabled(addNodeEnabled);
+								addRestrictedStateMenuItem.setToolTipText(restrictedState.getDocumentation());
+								addRestrictedNodeMenu.add(addRestrictedStateMenuItem);
+							}
+						}
+						add(addRestrictedNodeMenu);
+					}
+					
+					
 					addSeparator();
 					mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
 					add(editor.bind(mxResources.get("editNode"), new EditNodeAction(c,root,screenCoord)));
@@ -124,6 +147,24 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsParallelNode"), new SetNodeAsParallel(c)));
 								menuItem.setSelected(((SCXMLNode)(c.getValue())).isParallel());
 								add(menuItem);
+								
+								/*
+								 * Toggle node as restricted
+								 * */
+								if (editor.getRestrictedStatesConfig() != null) {
+									JMenu toggleRestrictedMenu = new JMenu(mxResources.get("setAsRestrictedNode"));
+									List<RestrictedState> restrictedStatesList = editor.getRestrictedStatesConfig().getRestrictedState();
+									SCXMLNode tempNode = (SCXMLNode)c.getValue();
+									if (restrictedStatesList != null) {
+										for (RestrictedState restrictedState: restrictedStatesList) {
+											menuItem = new JCheckBoxMenuItem(editor.bind(restrictedState.getName(), new SetNodeAsRestricted(c)));
+											menuItem.setToolTipText(restrictedState.getDocumentation());
+											menuItem.setSelected(tempNode.isRestricted(restrictedState));
+											toggleRestrictedMenu.add(menuItem);
+										}
+									}
+									add(toggleRestrictedMenu);
+								}
 							}
 							if ((parent!=root) && ((SCXMLNode)parent.getValue()).isClusterNode()) {
 								if (!isParallelNode && !isClusterNode && !isFinalNode) {

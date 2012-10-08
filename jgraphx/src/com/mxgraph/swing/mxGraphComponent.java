@@ -351,7 +351,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	/**
 	 * Specifies the tolerance for mouse clicks. Default is 4.
 	 */
-	protected int tolerance = 4;
+	protected int tolerance = 12;
 
 	/**
 	 * Specifies if swimlanes are selected when the mouse is released over the

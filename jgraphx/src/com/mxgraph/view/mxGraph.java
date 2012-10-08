@@ -3296,11 +3296,20 @@ public class mxGraph extends mxEventSource
 						height = snap(height + gridSize / 2);
 					}
 
+					if (width < 75) {
+						width = 75;
+					}
+					if (height < 75) {
+						height = 75;
+					}
 					result = new mxRectangle(0, 0, width, height);
 				}
 				else
 				{
 					double gs2 = 4 * gridSize;
+					if (gs2 < 75) {
+						gs2 = 75;
+					}
 					result = new mxRectangle(0, 0, gs2, gs2);
 				}
 			}

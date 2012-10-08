@@ -46,7 +46,7 @@ public class mxInteractiveCanvas extends mxGraphics2DCanvas
 			{
 				rect = (Rectangle) rect.clone();
 				int tolerance = graphComponent.getTolerance();
-				rect.grow(tolerance, tolerance);
+				rect.grow(tolerance/5, tolerance/5);
 				mxPoint p0 = state.getAbsolutePoint(0);
 
 				// Handles the special arrow line shape

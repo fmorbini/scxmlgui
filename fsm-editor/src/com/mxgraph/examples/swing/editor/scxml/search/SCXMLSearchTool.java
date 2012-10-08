@@ -286,4 +286,9 @@ public class SCXMLSearchTool extends JDialog implements ListSelectionListener, W
 	public void valueChanged(ListSelectionEvent e) {
 		listSelectorHandler.handleSelectEvent(e);
 	}
+	
+	public void clearSCXMLSearchMXCells(){
+		search.clearDoc2mxCell();
+		editor.getIOPicker().clearFileIO();
+	}
 }
