@@ -27,7 +27,7 @@ Click on the graph area (the largest portion of the interface) and press *Contro
 
 == Adding a Node ==
 
-A node (i.e. a SCXML state) can be added only as child (i.e. contained) in a cluster node. Every file has a default cluster node that contains the entire graph and that is called SCXML. To add a node, right click on the location in which you want to add the node and select *"Add node"* from the context menu. You can also add a restricted node by selecting the *"Add restricted node"* option and a restriction from the context menu.
+A node (i.e. a SCXML state) can be added only as child (i.e. contained) in a cluster node. Every file has a default cluster node that contains the entire graph and that is called SCXML. To add a node, right click on the location in which you want to add the node and select *"Add node"* from the context menu. You can also add a restricted node by selecting the *"Add restricted node"* option and a restriction type from the context menu. When the cursor is over the restriction type, its documentation will appear in a tooltip field.
 
 == Adding an Edge ==
 
@@ -76,7 +76,8 @@ For example, the command "java -jar fsm-editor.jar -i test.scxml -o test.png -l"
 
 == Restriction handling ==
 
-The software can handle restrictions on states. In this case restriction means that only defined events can trigger state change from a restricted source state. In SCXML editor this means that in edge editor the user can select an event from a group of possible events if the edge’s source node is restricted. The restrictions and the possible events are stored in a configuration xml file (named restrictedStates.xml), which is placed next to the fsm-editor.jar. If the user doesn’t define a restriction configuration, the editor will start in normal mode, without using restrictions on nodes. The restriction configuration xml file looks like the following:
+The software can handle restrictions on states. In this case restriction means that only defined events can trigger state change from a restricted source state. In SCXML editor this means that in edge editor the user can select an event from a group of possible events if the edge’s source node is restricted. It is possible to place more than one restriction on a state with the “Toggle restricted” function. If you drag the mouse over a node, a tooltip field will be appear, which contains the list of restrictions on the state. When a state has more restrictions, its possible event list is the union of the restricted state’s possible event lists.
+The restrictions and the possible events are stored in a configuration xml file (named restrictedStates.xml), which is placed next to the fsm-editor.jar. If the user doesn’t define a restriction configuration, the editor will start in normal mode, without using restrictions on nodes. The restriction configuration xml file looks like the following:
 
 [http://scxmlgui.googlecode.com/svn/trunk/extra/sample-restriction-config.png]
 
