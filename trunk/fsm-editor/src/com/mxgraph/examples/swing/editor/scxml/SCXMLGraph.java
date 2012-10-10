@@ -218,11 +218,8 @@ public class SCXMLGraph extends mxGraph
 				}
 
 				String edgeEventName = edgeValue.getEvent();
-				//event name can not be null
-				if (edgeEventName==null || edgeEventName.isEmpty()) {
-					warnings += "Event can not be null!";
-				} else if (source.isRestricted()){
-					//check that edge event is allowed by the restriction on the source node
+				//check that edge event is allowed by the restriction on the source node
+				if (source.isRestricted()){
 					boolean isEventPossible = false;
 					for(PossibleEvent possibleEvent: source.getPossibleEvents()){
 						if (possibleEvent.getName().equals(edgeEventName)) {
