@@ -1,0 +1,9 @@
+Editor for SCXML networks
+Initially coded by Fabrizio Morbini starting from the
+Graph Editor example contained in the JGraphX library.
+
+Institute for Creative Technologies
+University of Southern California
+
+Contributions by:
+Társi Róbert, Alerant Zrt (Hungary)

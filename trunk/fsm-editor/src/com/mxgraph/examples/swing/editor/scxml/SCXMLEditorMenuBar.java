@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
@@ -31,6 +32,7 @@ import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ToggleIgnoreSt
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphActions;
 import com.mxgraph.util.mxResources;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 
 public class SCXMLEditorMenuBar extends JMenuBar
@@ -154,12 +156,21 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		{
 			public void actionPerformed(ActionEvent e) {
 				Window parent;
-				TextDialog a = new TextDialog(parent=SwingUtilities.windowForComponent(editor),"About","Editor for SCXML networks\n"+
-						"Coded by Fabrizio Morbini starting from the\n"+
+				String svn="";
+				String info="Editor for SCXML networks\n"+
+						"Initially coded by Fabrizio Morbini starting from the\n"+
 						"Graph Editor example contained in the JGraphX library.\n\n"+
 						"Institute for Creative Technologies\n"+
-						"University of Southern California\n",
-						ModalityType.TOOLKIT_MODAL);
+						"University of Southern California\n\n"+
+						"Contributions by:\n" +
+						"Társi Róbert, Alerant Zrt (Hungary)\n";
+				try {
+					info=mxUtils.readFile("info.txt");
+					svn=mxUtils.readFile("svn.version");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				TextDialog a = new TextDialog(parent=SwingUtilities.windowForComponent(editor),"About",info+"\n"+svn,ModalityType.TOOLKIT_MODAL);
 				a.setResizable(false);
 			}
 		});
