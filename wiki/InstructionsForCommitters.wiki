@@ -1,5 +1,3 @@
-#contains instructions on how to commit properly update the svn version number used in the info dialog
-
 = How to commit code changes =
 
   * commit all source files that have changed or that have been added or deleted.
