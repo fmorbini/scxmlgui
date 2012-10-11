@@ -28,9 +28,23 @@
 		<echo message="Completed building."/>
 	</target>
 	<target name="jar">
+		<exec executable="svn" output="${FSM}/svn.properties">
+			<arg value="info" />
+		</exec>
+		<property prefix="svn" file="${FSM}/svn.properties"/>
+		<echo file="${FSM}/svn.version">SVN revision: ${svn.Revision}</echo>
+		<echo>SVN revision: ${svn.Revision}</echo>
 		<echo message="Started building jar archives..."/>
 		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="jar"/>
 		<echo message="Completed jars."/>
+	</target>
+	<target name="svn">
+		<exec executable="svn" output="${FSM}/svn.properties">
+			<arg value="info" />
+		</exec>
+		<property prefix="svn" file="${FSM}/svn.properties"/>
+		<echo file="${FSM}/svn.version">SVN revision: ${svn.Revision}</echo>
+		<echo>SVN revision: ${svn.Revision}</echo>
 	</target>
 
 	<!-- Eclipse targets -->
