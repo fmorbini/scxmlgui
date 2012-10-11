@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
@@ -165,9 +167,10 @@ public class SCXMLEditorMenuBar extends JMenuBar
 						"Contributions by:\n" +
 						"Társi Róbert, Alerant Zrt (Hungary)\n";
 				try {
-					info=mxUtils.readFile("info.txt");
-					svn=mxUtils.readFile("svn.version");
-				} catch (IOException e1) {
+					
+					info=mxUtils.readFile(mxUtils.getURIForResourceNamed("info.txt"));
+					svn=mxUtils.readFile(mxUtils.getURIForResourceNamed("svn.version"));
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 				TextDialog a = new TextDialog(parent=SwingUtilities.windowForComponent(editor),"About",info+"\n"+svn,ModalityType.TOOLKIT_MODAL);

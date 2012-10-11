@@ -54,6 +54,8 @@
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/dom4j.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${Lib}/commons-cli-1.2.jar"/>
             <fileset dir="${FSM.binaries}"/>
+            <fileset file="${FSM}/info.txt"/>
+            <fileset file="${FSM}/svn.version"/>
 		</jar>
 		<copy file="${FSM.binaries}/${FSM.archive}" todir="${FSM}/../extra/"/>
     </target>

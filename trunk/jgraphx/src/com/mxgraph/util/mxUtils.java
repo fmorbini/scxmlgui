@@ -23,11 +23,16 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1444,6 +1449,17 @@ public class mxUtils
 				| (color.getAlpha() << 24));
 	}
 
+	public static InputStream getURIForResourceNamed(String name) throws FileNotFoundException  {
+		InputStream is = ClassLoader.getSystemResourceAsStream(name);
+		if (is == null) {
+			return new FileInputStream(new File(name));
+		} else {
+			return is;
+		}
+	}
+	public static String readFile(String filename) throws IOException {
+		return readFile(new File(filename));
+	}
 	/**
 	 * Reads the given filename into a string.
 	 * 
@@ -1451,10 +1467,12 @@ public class mxUtils
 	 * @return Returns a string representing the file contents.
 	 * @throws IOException
 	 */
-	public static String readFile(String filename) throws IOException
+	public static String readFile(File file) throws IOException {
+		return readFile(new FileInputStream(file));
+	}
+	public static String readFile(InputStream is) throws IOException
 	{
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				new FileInputStream(filename)));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		StringBuffer result = new StringBuffer();
 		String tmp = reader.readLine();
 
