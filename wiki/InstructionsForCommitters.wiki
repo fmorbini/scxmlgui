@@ -1,3 +1,4 @@
+#labels Featured
 = How to commit code changes =
 
   * commit all source files that have changed or that have been added or deleted.
