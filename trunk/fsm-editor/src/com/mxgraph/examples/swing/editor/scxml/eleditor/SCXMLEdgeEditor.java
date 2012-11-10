@@ -11,7 +11,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -28,12 +32,15 @@ import javax.swing.text.Document;
 import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState.PossibleEvent;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxResources;
+import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
 
 public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
@@ -57,9 +64,10 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
     private JPanel possibleEventDetailsPanel;
     private SCXMLNode sourceNode;
 
-    public SCXMLEdgeEditor(JFrame parent,mxCell en,SCXMLEdge e, SCXMLGraphEditor editor) {
+    public SCXMLEdgeEditor(JFrame parent,mxCell en,SCXMLEdge e, SCXMLGraphEditor editor, Point pos) {
     	super(parent,editor,en);
     	setTitle(mxResources.get("titleEdgeEditor"));
+    	setLocation(pos);
 
         edge=e;
         //we need 3 editors:
@@ -67,6 +75,7 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         // one for the condition
         // one for the executable content
         tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(new Dimension(650, 300));
 
         DocumentChangeListener changeListener = new DocumentChangeListener(editor);
 
@@ -121,44 +130,51 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         sourceNode = (SCXMLNode) editor.getGraphComponent().getSCXMLNodeForID(edge.getSCXMLSource()).getValue();
         if (sourceNode.isRestricted()) {
         	possibleEventsButtonGroupPanel = new JPanel(new GridBagLayout());
+        	GridBagConstraints c = new GridBagConstraints();
         	buttonGroupScrollPane = new JScrollPane(possibleEventsButtonGroupPanel);
 			buttonGroupScrollPane.setPreferredSize(new Dimension(200, 200));
-			restrictedEdgeEditorPanel = new JPanel(new GridLayout(0, 2));
-			restrictedEdgeEditorPanel.add(buttonGroupScrollPane);
+			restrictedEdgeEditorPanel = new JPanel(new GridBagLayout());
+			c.fill = GridBagConstraints.VERTICAL;
+			c.weightx = 0.1;
+			c.gridx = 0;
+			c.gridy = 0;
+			restrictedEdgeEditorPanel.add(buttonGroupScrollPane, c);
 			possibleEventDetailsPanel = new JPanel(new GridBagLayout());
-			GridBagConstraints c = new GridBagConstraints();
 			eventTextPane.setEditable(false);
 			JLabel eventNameTitleLabel = new JLabel(mxResources.get("eventNameTitle"));
-			eventNameTitleLabel.setPreferredSize(new Dimension(200, 15));
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.weighty = 0.1;
 			c.gridx = 0;
 			c.gridy = 0;
 			possibleEventDetailsPanel.add(eventNameTitleLabel, c);
-			scrollPane.setPreferredSize(new Dimension(200, 60));
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.weighty = 0.5;
 			c.gridx = 0;
 			c.gridy = 1;
 			possibleEventDetailsPanel.add(scrollPane, c);
 			JLabel evenDocumentationTitleLabel = new JLabel(mxResources.get("eventDocumentationTitle"));
-			evenDocumentationTitleLabel.setPreferredSize(new Dimension(200, 10));
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.weighty = 0.1;
 			c.gridx = 0;
 			c.gridy = 2;
 			possibleEventDetailsPanel.add(evenDocumentationTitleLabel, c);
-			eventDocumentationLabel.setPreferredSize(new Dimension(200, 60));
 			c.fill = GridBagConstraints.HORIZONTAL;
 			c.weighty = 0.5;
 			c.gridx = 0;
 			c.gridy = 3;
-			possibleEventDetailsPanel.add(eventDocumentationLabel, c);
-			restrictedEdgeEditorPanel.add(possibleEventDetailsPanel);
+			JScrollPane documentationScrollPane = new JScrollPane(eventDocumentationLabel);
+			documentationScrollPane.setPreferredSize(new Dimension(400, 200));
+			possibleEventDetailsPanel.add(documentationScrollPane, c);
+			c.fill = GridBagConstraints.VERTICAL;
+			c.weightx = 0.3;
+			c.gridx = 1;
+			c.gridy = 0;
+			restrictedEdgeEditorPanel.add(possibleEventDetailsPanel, c);
 			
-			loadPossibleEventsButtonGroup();
+			loadPossibleEventsButtonGroup(editor);
 			
 			tabbedPane.addTab(mxResources.get("eventTAB"), restrictedEdgeEditorPanel);
+			setResizable(false);
 		} else {
 	        tabbedPane.addTab(mxResources.get("eventTAB"), scrollPane);
 		}
@@ -199,19 +215,30 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 		SCXMLElementEditor.focusOnTextPanel(tabbedPane.getSelectedComponent());
     }
     
-    private void loadPossibleEventsButtonGroup(){
+    private void loadPossibleEventsButtonGroup(SCXMLGraphEditor editor){
     	eventButtonGroup = new ButtonGroup();
+    	//Get all outgoing event names
+    	mxCell sourceCell = editor.getGraphComponent().getSCXMLNodeForID(edge.getSCXMLSource());
+    	Object[] allOutgoingEdges = editor.getGraphComponent().getGraph().getAllOutgoingEdges(sourceCell);
+    	List<String> existingEventsOnSourceNode = new LinkedList<String>();
+    	for(Object object : allOutgoingEdges){
+    		SCXMLEdge tempEdge = (SCXMLEdge)((mxCell)object).getValue();
+    		existingEventsOnSourceNode.add(tempEdge.getEvent());
+    	}
+    	
     	String eventName;
     	int rowNumber = 0;
 		for(PossibleEvent possibleEvent: sourceNode.getPossibleEvents()){
 			eventName = possibleEvent.getName();
 			possibleEventRadioButton = new JRadioButton(eventName);
-			possibleEventRadioButton.setActionCommand(mxResources.get("changeEvent") + eventName + ":" + possibleEvent.getDocumentation());
+			possibleEventRadioButton.setActionCommand(mxResources.get("changeEvent") + eventName + "#&@" + possibleEvent.getDocumentation());
 			possibleEventRadioButton.addActionListener(this);
 			//If the file is imported
 			if (eventName.equals(edge.getEvent())) {
 				setEventDocumentationLabel(possibleEvent.getDocumentation());
 				possibleEventRadioButton.setSelected(true);
+			} else {
+				possibleEventRadioButton.setEnabled(!existingEventsOnSourceNode.contains(eventName));
 			}
 			eventButtonGroup.add(possibleEventRadioButton);
 			possibleEventRadioButton.setPreferredSize(new Dimension(180, 25));
@@ -228,19 +255,19 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
     public void actionPerformed(ActionEvent e) {
     	String cmd=e.getActionCommand();
 		if (cmd.startsWith(mxResources.get("changeEvent"))) {
-			String[] eventProperties = cmd.split(":");
+			String[] eventProperties = cmd.split("#&@");
 			String eventName = eventProperties[1];
 			String eventDocumentation = eventProperties[2];
 			setEventDocumentationLabel(eventDocumentation);
 			eventTextPane.setText(eventName);
+			this.pack();
 		} else {
 			super.actionPerformed(e);
 		}
     }
     
     private void setEventDocumentationLabel(String eventDocumentation){
-    	//html formatted text usage because of auto wrap
-    	eventDocumentationLabel.setText("<html><p>" + eventDocumentation + "</p></html>");
+    	eventDocumentationLabel.setText(eventDocumentation.trim());
     }
     
 }

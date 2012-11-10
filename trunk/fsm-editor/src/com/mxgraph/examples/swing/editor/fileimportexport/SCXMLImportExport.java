@@ -330,18 +330,22 @@ public class SCXMLImportExport implements IImportExport {
 			}
 			if ((nodeValueString.contains(RESTRICTEDSTATECOMMENT)) && (restrictedConstraints != null)) {
 				System.out.println("Contains restriction comment...");
-				String[] restrictionTypes = nodeValueString.split(":")[1].replace(" ", "").split(";");
-				boolean isValidRestriction = false;
-				for (int i = 0; i < restrictionTypes.length; i++) {
-					String restrictionType = restrictionTypes[i];
-					for(RestrictedState restrictedState: restrictedConstraints.getRestrictedState()){
-						if (restrictedState.getName().equals(restrictionType)) {
-							pn.setRestricted(true, restrictedState);
-							isValidRestriction = true;
+				if (pn.isFinal()) {
+					JOptionPane.showMessageDialog(editor, mxResources.get("finalNodeCanNotBeToggledWithRestriction") + " [node id: " + pn.getID() + "]", mxResources.get("restrictionOnFinalNode"), JOptionPane.WARNING_MESSAGE);
+				} else {
+					String[] restrictionTypes = nodeValueString.split(":")[1].replace(" ", "").split(";");
+					boolean isValidRestriction = false;
+					for (int i = 0; i < restrictionTypes.length; i++) {
+						String restrictionType = restrictionTypes[i];
+						for(RestrictedState restrictedState: restrictedConstraints.getRestrictedState()){
+							if (restrictedState.getName().equals(restrictionType)) {
+								pn.setRestricted(true, restrictedState);
+								isValidRestriction = true;
+							}
 						}
-					}
-					if (!isValidRestriction) {
-						JOptionPane.showMessageDialog(editor, mxResources.get("invalidRestrictionTypeMessage") + " [" + restrictionType + "]", mxResources.get("invalidRestrictionTypeTitle"), JOptionPane.WARNING_MESSAGE);
+						if (!isValidRestriction) {
+							JOptionPane.showMessageDialog(editor, mxResources.get("invalidRestrictionTypeMessage") + " [" + restrictionType + "]", mxResources.get("invalidRestrictionTypeTitle"), JOptionPane.WARNING_MESSAGE);
+						}
 					}
 				}
 			}
