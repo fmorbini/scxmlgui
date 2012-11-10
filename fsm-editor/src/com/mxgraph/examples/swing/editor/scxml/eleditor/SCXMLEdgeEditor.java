@@ -6,12 +6,14 @@ package com.mxgraph.examples.swing.editor.scxml.eleditor;
  */
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,15 +34,12 @@ import javax.swing.text.Document;
 import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState.PossibleEvent;
 import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
-import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLImportExport;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
-import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextField;
 import com.mxgraph.examples.swing.editor.scxml.UndoJTextPane;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxResources;
-import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
 
 public class SCXMLEdgeEditor extends SCXMLElementEditor {
 
@@ -129,52 +128,67 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
         
         sourceNode = (SCXMLNode) editor.getGraphComponent().getSCXMLNodeForID(edge.getSCXMLSource()).getValue();
         if (sourceNode.isRestricted()) {
-        	possibleEventsButtonGroupPanel = new JPanel(new GridBagLayout());
+            GridBagLayout gbl = new GridBagLayout();
+            restrictedEdgeEditorPanel = new JPanel(gbl);
+
+            possibleEventsButtonGroupPanel = new JPanel(new GridBagLayout());
+            loadPossibleEventsButtonGroup(editor);
+            
         	GridBagConstraints c = new GridBagConstraints();
         	buttonGroupScrollPane = new JScrollPane(possibleEventsButtonGroupPanel);
-			buttonGroupScrollPane.setPreferredSize(new Dimension(200, 200));
-			restrictedEdgeEditorPanel = new JPanel(new GridBagLayout());
-			c.fill = GridBagConstraints.VERTICAL;
-			c.weightx = 0.1;
+			c.fill = GridBagConstraints.BOTH;
+			c.weightx = 0.3;
+			c.weighty = 1;
 			c.gridx = 0;
 			c.gridy = 0;
 			restrictedEdgeEditorPanel.add(buttonGroupScrollPane, c);
 			possibleEventDetailsPanel = new JPanel(new GridBagLayout());
 			eventTextPane.setEditable(false);
 			JLabel eventNameTitleLabel = new JLabel(mxResources.get("eventNameTitle"));
+			c = new GridBagConstraints();
 			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weighty = 0.1;
+			c.weightx = 0.5;
+			c.weighty = 0;
 			c.gridx = 0;
 			c.gridy = 0;
 			possibleEventDetailsPanel.add(eventNameTitleLabel, c);
-			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weighty = 0.5;
+			c = new GridBagConstraints();
+			c.fill = GridBagConstraints.BOTH;
+			c.weightx = 0.5;
+			c.weighty = 0.25;
 			c.gridx = 0;
 			c.gridy = 1;
 			possibleEventDetailsPanel.add(scrollPane, c);
 			JLabel evenDocumentationTitleLabel = new JLabel(mxResources.get("eventDocumentationTitle"));
+			c = new GridBagConstraints();
 			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weighty = 0.1;
+			c.weightx = 0.5;
+			c.weighty = 0;
 			c.gridx = 0;
 			c.gridy = 2;
 			possibleEventDetailsPanel.add(evenDocumentationTitleLabel, c);
-			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weighty = 0.5;
+			c = new GridBagConstraints();
+			c.fill = GridBagConstraints.BOTH;
+			c.weightx = 0.5;
+			c.weighty = 1;
 			c.gridx = 0;
 			c.gridy = 3;
 			JScrollPane documentationScrollPane = new JScrollPane(eventDocumentationLabel);
-			documentationScrollPane.setPreferredSize(new Dimension(400, 200));
+			//documentationScrollPane.setPreferredSize(new Dimension(400, 200));
 			possibleEventDetailsPanel.add(documentationScrollPane, c);
-			c.fill = GridBagConstraints.VERTICAL;
-			c.weightx = 0.3;
+			c = new GridBagConstraints();
+			c.fill = GridBagConstraints.BOTH;
+			c.weightx = 1;
+			c.weighty = 1;
 			c.gridx = 1;
 			c.gridy = 0;
 			restrictedEdgeEditorPanel.add(possibleEventDetailsPanel, c);
 			
-			loadPossibleEventsButtonGroup(editor);
+			gbl.columnWidths = new int[]{buttonGroupScrollPane.getPreferredSize().width + 100, 600};
+			
+			restrictedEdgeEditorPanel.validate();
 			
 			tabbedPane.addTab(mxResources.get("eventTAB"), restrictedEdgeEditorPanel);
-			setResizable(false);
 		} else {
 	        tabbedPane.addTab(mxResources.get("eventTAB"), scrollPane);
 		}
@@ -241,14 +255,16 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
 				possibleEventRadioButton.setEnabled(!existingEventsOnSourceNode.contains(eventName));
 			}
 			eventButtonGroup.add(possibleEventRadioButton);
-			possibleEventRadioButton.setPreferredSize(new Dimension(180, 25));
+			//possibleEventRadioButton.setPreferredSize(new Dimension(180, 25));
 			GridBagConstraints c = new GridBagConstraints();
-			c.fill = GridBagConstraints.HORIZONTAL;
+			c.fill = GridBagConstraints.NONE;
+			c.anchor = GridBagConstraints.WEST;
 			c.gridx = 0;
 			c.gridy = rowNumber;
 			possibleEventsButtonGroupPanel.add(possibleEventRadioButton, c);
 			rowNumber++;
 		}
+		possibleEventsButtonGroupPanel.validate();
     }
 
     @Override
