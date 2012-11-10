@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -172,6 +173,26 @@ public class SCXMLGraph extends mxGraph
 						else gc.addSCXMLNode(nodeValue,node);
 					}
 				}
+				//Restricted node should have at least one related event
+				if (nodeValue.isRestricted()) {
+					List<RestrictedState> restrictionsOnNode = nodeValue.getRestrictedStates();
+					Object[] allOutgoingEdges = editor.getGraphComponent().getGraph().getAllOutgoingEdges(node);
+			    	List<String> existingEventsOnSourceNode = new LinkedList<String>();
+			    	for(Object object : allOutgoingEdges){
+			    		SCXMLEdge tempEdge = (SCXMLEdge)((mxCell)object).getValue();
+			    		existingEventsOnSourceNode.add(tempEdge.getEvent());
+			    	}
+			    	for(RestrictedState restrictedState : restrictionsOnNode){
+			    		List<String> possibleEventNames = new LinkedList<String>();
+			    		for(PossibleEvent possibleEvent : restrictedState.getPossibleEvent()){
+			    			possibleEventNames.add(possibleEvent.getName());
+			    		}
+			    		possibleEventNames.retainAll(existingEventsOnSourceNode);
+			    		if (possibleEventNames.isEmpty()) {
+							warnings += "There is no event for restriction [" + restrictedState.getName() + "] on node [" + nodeValue.getID() + "]\n";
+						}
+			    	}
+				}
 				if (nodeValue.isClusterNode()) {
 					int numInitialChildren=0;
 					int numOutGoingTransitions=0;
@@ -214,7 +235,7 @@ public class SCXMLGraph extends mxGraph
 				Object lca = model.getNearestCommonAncestor(edge.getSource(), edge.getTarget());
 				if (lca!=null && lca instanceof mxCell) {
 					SCXMLNode scxmlLCA = (SCXMLNode) ((mxCell)lca).getValue();
-					if (scxmlLCA.isParallel()) warnings+=source.getID()+" and "+target.getID()+" are (descendats of) siblings of a parallel node ("+scxmlLCA.getID()+").";
+					if (scxmlLCA.isParallel()) warnings+=source.getID()+" and "+target.getID()+" are (descendats of) siblings of a parallel node ("+scxmlLCA.getID()+").\n";
 				}
 
 				String edgeEventName = edgeValue.getEvent();
@@ -227,8 +248,13 @@ public class SCXMLGraph extends mxGraph
 						}
 					}
 					if (!isEventPossible) {
-						warnings += "Invalid event from " + source.getID() + " to " + target.getID() + "!";
+						warnings += "Invalid event from " + source.getID() + " to " + target.getID() + "!\n";
 					}
+				}
+				
+				//check if the source node is final
+				if (source.isFinal()) {
+					warnings += "Outgoing edge from a final node!\n";
 				}
 			}
 		}

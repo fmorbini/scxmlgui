@@ -3,6 +3,7 @@ package com.mxgraph.examples.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -702,6 +703,25 @@ public class SCXMLGraphEditor extends JPanel
 
 		e.consume();
 	}
+	
+	protected void showElementEditor(MouseEvent e){
+		Point mousePoint = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(),graphComponent);
+		Point graphPoint=((SCXMLGraphComponent)graphComponent).mouseCoordToGraphMouseCoord(mousePoint);
+		mxCell cell = (mxCell)graphComponent.getCellAt(graphPoint.x, graphPoint.y);
+		if (cell.isVertex()) {
+			try {
+				openElementEditorFor(cell, Type.NODE, e.getLocationOnScreen());
+			} catch (Exception e1) {
+				System.out.println("Error while opening node editor.");
+			}
+		} else if (cell.isEdge()) {
+			try {
+				openElementEditorFor(cell, Type.EDGE, e.getLocationOnScreen());
+			} catch (Exception e1) {
+				System.out.println("Error while opening edge editor.");
+			}
+		}
+	}
 
 	/**
 	 * 
@@ -794,6 +814,13 @@ public class SCXMLGraphEditor extends JPanel
 				if (e.isPopupTrigger())
 				{
 					showGraphPopupMenu(e);
+				}
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					showElementEditor(e);
 				}
 			}
 
@@ -1532,7 +1559,7 @@ public class SCXMLGraphEditor extends JPanel
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
 			switch(type) {
 			case EDGE:
-				ee=new SCXMLEdgeEditor(frame, cell, (SCXMLEdge)cell.getValue(),this);
+				ee=new SCXMLEdgeEditor(frame, cell, (SCXMLEdge)cell.getValue(),this, pos);
 				break;
 			case NODE:
 				SCXMLGraphComponent gc = getGraphComponent();

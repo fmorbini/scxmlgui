@@ -139,6 +139,7 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 							if (!isHistoryNode) {
 								menuItem = new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsFinalNode"), new SetNodeAsFinal(c)));
 								menuItem.setSelected(((SCXMLNode)(c.getValue())).isFinal());
+								menuItem.setEnabled(!((SCXMLNode)(c.getValue())).isRestricted());
 								add(menuItem);
 								menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsClusterNode"), new SetNodeAsCluster(c)));
 								menuItem.setSelected(((SCXMLNode)(c.getValue())).isClusterNode());
@@ -155,11 +156,13 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 									JMenu toggleRestrictedMenu = new JMenu(mxResources.get("setAsRestrictedNode"));
 									List<RestrictedState> restrictedStatesList = editor.getRestrictedStatesConfig().getRestrictedState();
 									SCXMLNode tempNode = (SCXMLNode)c.getValue();
+									toggleRestrictedMenu.setEnabled(!tempNode.isFinal());
 									if (restrictedStatesList != null) {
 										for (RestrictedState restrictedState: restrictedStatesList) {
 											menuItem = new JCheckBoxMenuItem(editor.bind(restrictedState.getName(), new SetNodeAsRestricted(c)));
 											menuItem.setToolTipText(restrictedState.getDocumentation());
 											menuItem.setSelected(tempNode.isRestricted(restrictedState));
+											menuItem.setEnabled(!tempNode.isFinal());
 											toggleRestrictedMenu.add(menuItem);
 										}
 									}

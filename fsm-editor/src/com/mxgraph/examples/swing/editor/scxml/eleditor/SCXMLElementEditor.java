@@ -51,7 +51,7 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 	
     protected HashMap<Object, Action> actions=new HashMap<Object, Action>();;
 
-	private SCXMLGraphEditor editor;
+	protected SCXMLGraphEditor editor;
 
 	protected EditorKeyboardHandler keyboardHandler=null;
     
@@ -81,6 +81,7 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 		idButton.setEnabled(true);
 		
 		getContentPane().add(idButton, BorderLayout.SOUTH);
+		setModal(true);
     }
 
     protected HashMap<Object, Action> updateActionTable(JTabbedPane tabbedPane,HashMap<Object, Action> actions) {
