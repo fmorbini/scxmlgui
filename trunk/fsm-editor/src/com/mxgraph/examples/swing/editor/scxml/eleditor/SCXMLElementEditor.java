@@ -81,7 +81,6 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 		idButton.setEnabled(true);
 		
 		getContentPane().add(idButton, BorderLayout.SOUTH);
-		setModal(true);
     }
 
     protected HashMap<Object, Action> updateActionTable(JTabbedPane tabbedPane,HashMap<Object, Action> actions) {
