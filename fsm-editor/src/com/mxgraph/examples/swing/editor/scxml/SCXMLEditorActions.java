@@ -46,6 +46,7 @@ import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.util.mxGraphActions.DeleteAction;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.view.mxCellState;
@@ -1044,5 +1045,37 @@ public class SCXMLEditorActions
 			IMGImportExport fie = new IMGImportExport();
 			fie.write(graphComponent,output,format,graphComponent.getBackground());
 		}
+	}
+	
+	public static class SCXMLDelete extends DeleteAction {
+
+		public SCXMLDelete() {
+			super("delete");
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SCXMLGraphEditor editor = getEditor(e);
+			SCXMLGraphComponent graphComponent = editor.getGraphComponent();
+			SCXMLGraph graph = graphComponent.getGraph();
+			Object[] cells = graph.getDeletableCells(graph.addAllEdges(graph.getSelectionCells()));
+			boolean cannotDelete=false;
+			if (cells!=null && cells.length>0) {
+				for(Object cell:cells) {
+					if (editor.isCellBeingEdited((mxCell)cell)) {
+						cannotDelete=true;
+						break;
+					}
+				}
+			}
+			if (cannotDelete) {
+				JOptionPane.showMessageDialog(editor.getGraphComponent(),
+						"Some elements are being edited. Please close all edit dialogs before deleting an element.\nSome may be indirectly deleted elements (e.g. edges connecting to a node being deleted)",
+						mxResources.get("error"),
+						JOptionPane.ERROR_MESSAGE);
+			} else {
+				super.actionPerformed(e);
+			}
+		}
+
 	}
 }

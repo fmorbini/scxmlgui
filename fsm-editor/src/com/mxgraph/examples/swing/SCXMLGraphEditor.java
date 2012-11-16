@@ -1535,6 +1535,10 @@ public class SCXMLGraphEditor extends JPanel
 			}
 		}
 	}
+	public boolean isCellBeingEdited(mxCell cell) {
+		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
+		return (editorsForCell!=null && !editorsForCell.isEmpty());
+	}
 	public JDialog getEditorForCellAndType(mxCell cell, Type type) {
 		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
 		if (editorsForCell!=null) {
@@ -1577,9 +1581,7 @@ public class SCXMLGraphEditor extends JPanel
 			default:
 				throw new Exception("Unknown element editor type requested: "+type);
 			}
-			if (!(type.equals(Type.EDGE))) {
-				setEditorForCellAndType(cell, type, ee);
-			}
+			setEditorForCellAndType(cell, type, ee);
 		}
 		int screenMaxX = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width;
 		int screenMaxY = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height;
