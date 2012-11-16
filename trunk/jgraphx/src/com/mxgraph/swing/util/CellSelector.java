@@ -34,7 +34,7 @@ public class CellSelector {
 		mxIEventListener updateListener=new mxIEventListener() {
 			@Override
 			public void invoke(Object sender, mxEventObject evt) {
-				System.out.println("Updating marker because of event: "+evt.getName()+" change: "+evt.getProperties());
+				//System.out.println("Updating marker because of event: "+evt.getName()+" change: "+evt.getProperties());
 				
 				Object changes=evt.getProperty("changes");
 				if (changes!=null && changes instanceof List) {

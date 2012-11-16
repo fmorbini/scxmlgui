@@ -8,6 +8,7 @@ import javax.swing.KeyStroke;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.util.mxGraphActions;
+import com.mxgraph.swing.util.mxGraphActions.DeleteAction;
 
 /**
  * @author Administrator
@@ -32,13 +33,12 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 	{
 		InputMap map = super.getInputMap(condition);
 
-		if (condition == JComponent.WHEN_FOCUSED && map != null)
+		if ((condition == JComponent.WHEN_FOCUSED || condition == JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT) && map != null)
 		{
 			map.put(KeyStroke.getKeyStroke("control S"), "save");
 			map.put(KeyStroke.getKeyStroke("control shift S"), "saveAs");
 			map.put(KeyStroke.getKeyStroke("control N"), "new");
 			map.put(KeyStroke.getKeyStroke("control O"), "open");
-
 			map.put(KeyStroke.getKeyStroke("DELETE"), "delete");
 			map.put(KeyStroke.getKeyStroke("control Z"), "undo");
 			map.put(KeyStroke.getKeyStroke("control Y"), "redo");			
@@ -65,8 +65,7 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 		map.put("saveAs", new SCXMLEditorActions.SaveAction(true));
 		map.put("new", new SCXMLEditorActions.NewSCXMLAction());
 		map.put("open", new SCXMLEditorActions.OpenAction());
-		map.put("delete", mxGraphActions.getDeleteAction());
-		//map.put("delete",new SCXMLEditorActions.DeleteAction("delete"));
+		map.put("delete",new SCXMLEditorActions.SCXMLDelete());
 		map.put("undo", new SCXMLEditorActions.HistoryAction(true));
 		map.put("redo", new SCXMLEditorActions.HistoryAction(false));
 		map.put("selectVertices", mxGraphActions.getSelectVerticesAction());

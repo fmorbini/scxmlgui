@@ -26,6 +26,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.HistoryAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.NewSCXMLAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.OpenAction;
+import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SCXMLDelete;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.SaveAction;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLFindTool;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLEditorActions.ShowSCXMLListener;
@@ -128,7 +129,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 
 		menu.addSeparator();
 
-		menu.add(editor.bind(mxResources.get("delete"), mxGraphActions.getDeleteAction(),"/com/mxgraph/examples/swing/images/delete.gif"));
+		menu.add(editor.bind(mxResources.get("delete"), new SCXMLDelete(),"/com/mxgraph/examples/swing/images/delete.gif"));
 
 		menu.addSeparator();
 
