@@ -1,9 +1,11 @@
 package com.mxgraph.swing.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGraphModel.mxStyleChange;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxCellMarker;
@@ -21,8 +23,9 @@ public class CellSelector {
 	private mxGraphView view;
 	private mxIGraphModel model;
 	private boolean withScroll;
-	
-	public CellSelector(mxGraphComponent gc,boolean withScroll) {
+	private boolean selectSetAsValid=true;
+
+	public CellSelector(final mxGraphComponent gc,final boolean withScroll) {
 		this.gc=gc;
 		this.graph=gc.getGraph();
 		this.view=graph.getView();
@@ -31,7 +34,23 @@ public class CellSelector {
 		mxIEventListener updateListener=new mxIEventListener() {
 			@Override
 			public void invoke(Object sender, mxEventObject evt) {
-				//System.out.println("Updating marker because of event: "+evt.getName());
+				System.out.println("Updating marker because of event: "+evt.getName()+" change: "+evt.getProperties());
+				
+				Object changes=evt.getProperty("changes");
+				if (changes!=null && changes instanceof List) {
+					for(Object change:((List)changes)) {
+						if (change !=null && change instanceof mxStyleChange) {
+							Object cell=((mxStyleChange)change).getCell();
+							mxCellState state = view.getState(cell, false);
+							if (currentSelectedCells.containsKey(cell)) {
+								mxCellMarker thisCellSelector = currentSelectedCells.get(cell);
+								thisCellSelector.unmark();
+								thisCellSelector.process(state, thisCellSelector.getMarkerColor(null, state, selectSetAsValid), selectSetAsValid);
+								thisCellSelector.mark();
+							}
+						}
+					}
+				}
 				for(Entry<mxCell,mxCellMarker> el:currentSelectedCells.entrySet()) {
 					el.getValue().unmark();
 					el.getValue().mark();
@@ -53,7 +72,6 @@ public class CellSelector {
 		if (c!=null) {
 			mxCellMarker thisCellSelector=currentSelectedCells.get(c);
 			mxCellState state=view.getState(c);
-			boolean selectSetAsValid=true;
 			if (thisCellSelector==null) {			
 				thisCellSelector=new mxCellMarker(gc);
 				currentSelectedCells.put(c,thisCellSelector);
