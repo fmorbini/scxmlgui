@@ -37,6 +37,7 @@ import com.mxgraph.examples.swing.SCXMLGraphEditor;
 import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLEdge;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraph;
 import com.mxgraph.examples.swing.editor.scxml.SCXMLGraphComponent;
+import com.mxgraph.examples.swing.editor.scxml.eleditor.SCXMLElementEditor.Type;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.util.mxEvent;
@@ -59,6 +60,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 	private SCXMLGraphEditor editor;
 	private SCXMLGraphComponent gc;
 	private SCXMLGraph graph;
+	private mxCell cell;
 	
 	private static final String title=mxResources.get("titleEdgeOrderEditor");
 	
@@ -67,6 +69,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 		editor=e;
 		gc=editor.getGraphComponent();
 		graph=gc.getGraph();
+		this.cell=source;
 		
 		highlightedCellsEachInstant=new ArrayList<HashSet<mxCell>>();
 		
@@ -105,6 +108,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
 			SCXMLOutEdgeOrderEditor.this.actionPerformed(new ActionEvent(this, 0, "cancel"));
+			editor.setEditorForCellAndType(cell, Type.OUTGOING_EDGE_ORDER, null);
 		}
 	}
 	

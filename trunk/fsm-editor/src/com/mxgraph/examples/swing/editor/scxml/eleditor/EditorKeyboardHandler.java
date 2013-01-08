@@ -30,7 +30,7 @@ public class EditorKeyboardHandler {
 	}
 
 	ActionMap map=null;
-	public void updateActionMap()
+	public ActionMap updateActionMap()
 	{
 		if (map==null) {
 			map = new ActionMap();
@@ -44,5 +44,6 @@ public class EditorKeyboardHandler {
 		map.put("copy", editor.getActionByName(DefaultEditorKit.copyAction));
 		map.put("paste", editor.getActionByName(DefaultEditorKit.pasteAction));
 		map.put("close", editor.closeAction);
+		return map;
 	}
 }

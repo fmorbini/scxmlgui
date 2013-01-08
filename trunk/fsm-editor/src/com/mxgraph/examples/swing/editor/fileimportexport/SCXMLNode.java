@@ -32,6 +32,7 @@ public class SCXMLNode implements Serializable {
 	public static final String TYPE="type";
 	public static final String RESTRICTEDSTATE="restrictedState";
 	public static final String INITIAL="initial";
+	public static final String CLUSTER="cluster";
 	public static final String FINAL="final";
 	public static final String ONENTRYEXE="onentryexe";
 	public static final String INITEXE="initexe";
@@ -103,6 +104,7 @@ public class SCXMLNode implements Serializable {
 		this.setFillColor(DEFAULTFILLCOLOR);
 		this.setStrokeColor(DEFAULTSTROKECOLOR);
 		this.setInitial(false);
+		this.setCluster(false);
 		this.setFinal(false);
 		this.setParallel(false);
 		outSourcingChildren=new HashSet<OutSource>();
@@ -381,9 +383,17 @@ public class SCXMLNode implements Serializable {
 		else
 			return false;
 	}
+	
+	private void setShapeFromState() {
+		Boolean cluster=isClusterNode();
+		if (cluster!=null && cluster) setShape(CLUSTERSHAPE);
+		else setShape(DEFAULTSHAPE);
+	}
+	
 	public void setInitial(Boolean b) {
 		this.setFillColor((b)?INITIALFILLCOLOR:((isParallel())?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
 		node.put(INITIAL, b);
+		setShapeFromState();
 	}
 	public Boolean isInitial() {
 		return (Boolean)node.get(INITIAL);
@@ -465,11 +475,11 @@ public class SCXMLNode implements Serializable {
 				(node.get(HISTORY).equals(HISTORYTYPE.SHALLOW)));
 	}
 	public void setCluster(Boolean b) {
-		if (b) setShape(CLUSTERSHAPE);
-		else setShape(DEFAULTSHAPE);
+		node.put(CLUSTER, b);
+		setShapeFromState();
 	}
-	public boolean isClusterNode() {
-		return getShape().equals(CLUSTERSHAPE);
+	public Boolean isClusterNode() {
+		return (Boolean)node.get(CLUSTER);
 	}
 	public void setFinal(Boolean b) {
 		this.setStrokeColor((b)?FINALSTROKECOLOR:((isParallel())?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));

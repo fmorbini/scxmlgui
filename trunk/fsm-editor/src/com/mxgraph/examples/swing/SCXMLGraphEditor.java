@@ -708,17 +708,19 @@ public class SCXMLGraphEditor extends JPanel
 		Point mousePoint = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(),graphComponent);
 		Point graphPoint=((SCXMLGraphComponent)graphComponent).mouseCoordToGraphMouseCoord(mousePoint);
 		mxCell cell = (mxCell)graphComponent.getCellAt(graphPoint.x, graphPoint.y);
-		if (cell.isVertex()) {
-			try {
-				openElementEditorFor(cell, Type.NODE, e.getLocationOnScreen());
-			} catch (Exception e1) {
-				System.out.println("Error while opening node editor.");
-			}
-		} else if (cell.isEdge()) {
-			try {
-				openElementEditorFor(cell, Type.EDGE, e.getLocationOnScreen());
-			} catch (Exception e1) {
-				System.out.println("Error while opening edge editor.");
+		if (cell!=null) {
+			if (cell.isVertex()) {
+				try {
+					openElementEditorFor(cell, Type.NODE, e.getLocationOnScreen());
+				} catch (Exception e1) {
+					System.out.println("Error while opening node editor.");
+				}
+			} else if (cell.isEdge()) {
+				try {
+					openElementEditorFor(cell, Type.EDGE, e.getLocationOnScreen());
+				} catch (Exception e1) {
+					System.out.println("Error while opening edge editor.");
+				}
 			}
 		}
 	}
@@ -1537,7 +1539,10 @@ public class SCXMLGraphEditor extends JPanel
 	}
 	public boolean isCellBeingEdited(mxCell cell) {
 		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
-		return (editorsForCell!=null && !editorsForCell.isEmpty());
+		if (editorsForCell!=null && !editorsForCell.isEmpty()) {
+			for (JDialog e:editorsForCell.values()) if (e!=null) return true;
+		}
+		return false;
 	}
 	public JDialog getEditorForCellAndType(mxCell cell, Type type) {
 		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
@@ -1547,9 +1552,11 @@ public class SCXMLGraphEditor extends JPanel
 		return null;
 	}
 	public void setEditorForCellAndType(mxCell cell, Type type, JDialog editor) {
-		HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
-		if (editorsForCell==null) editorForCellAndType.put(cell,editorsForCell=new HashMap<Type, JDialog>());
-		editorsForCell.put(type,editor);
+		if (type!=null) {
+			HashMap<Type,JDialog> editorsForCell=editorForCellAndType.get(cell);
+			if (editorsForCell==null) editorForCellAndType.put(cell,editorsForCell=new HashMap<Type, JDialog>());
+			editorsForCell.put(type,editor);
+		}
 	}
 	public void clearEditorForCellAndType(){
 		editorForCellAndType.clear();

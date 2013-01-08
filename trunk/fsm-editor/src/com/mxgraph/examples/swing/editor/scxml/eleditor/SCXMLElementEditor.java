@@ -9,6 +9,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +42,7 @@ import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUndoableEdit;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
 
-public class SCXMLElementEditor extends JDialog implements ActionListener {
+public class SCXMLElementEditor extends JDialog implements ActionListener, WindowListener {
 
 	private static final long serialVersionUID = 3563719047023065063L;
 	
@@ -80,9 +82,15 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 		idButton.addActionListener(this);
 		idButton.setEnabled(true);
 		
+		addWindowListener(this);
+		
 		getContentPane().add(idButton, BorderLayout.SOUTH);
     }
 
+    public SCXMLGraphEditor getEditor() {
+		return editor;
+	}
+    
     protected HashMap<Object, Action> updateActionTable(JTabbedPane tabbedPane,HashMap<Object, Action> actions) {
     	Component o=tabbedPane.getSelectedComponent();
     	if (o instanceof JScrollPane) {
@@ -170,6 +178,7 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
     
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
+			editor.setEditorForCellAndType(cell, getTypeForEditorClass(), null);
 			cellSelector.unselectAll();
 			dispose();
 			try {
@@ -179,6 +188,14 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 			}
 		}
 	}    
+
+	public Type getTypeForEditorClass() {
+		String cn=this.getClass().getName();
+		if (cn.equals(SCXMLEdgeEditor.class.getName())) return Type.EDGE;
+		else if (cn.equals(SCXMLNodeEditor.class.getName())) return Type.NODE;
+		else if (cn.equals(SCXMLOutsourcingEditor.class.getName())) return Type.OUTSOURCING;
+		return null;
+	}
 	
 	// any time a change is made to the document, the scxml editor "modified" flag is set 
     protected class DocumentChangeListener implements DocumentListener {
@@ -241,5 +258,44 @@ public class SCXMLElementEditor extends JDialog implements ActionListener {
 		if (cmd.equals("id")) {
 			cellSelector.toggleSelection(cell);
 		}
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		closeAction.actionPerformed(null);
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
