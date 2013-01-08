@@ -33,7 +33,7 @@ public class SCXMLKeyboardHandler extends mxKeyboardHandler
 	{
 		InputMap map = super.getInputMap(condition);
 
-		if ((condition == JComponent.WHEN_FOCUSED || condition == JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT) && map != null)
+		if ((condition == JComponent.WHEN_FOCUSED ) && map != null)
 		{
 			map.put(KeyStroke.getKeyStroke("control S"), "save");
 			map.put(KeyStroke.getKeyStroke("control shift S"), "saveAs");
