@@ -169,7 +169,8 @@ public class SCXMLEditorPopupMenu extends JPopupMenu
 									add(toggleRestrictedMenu);
 								}
 							}
-							if ((parent!=root) && ((SCXMLNode)parent.getValue()).isClusterNode()) {
+							if (//(parent!=root) &&
+									((SCXMLNode)parent.getValue()).isClusterNode()) {
 								if (!isParallelNode && !isClusterNode && !isFinalNode) {
 									addSeparator();
 									menuItem=new JCheckBoxMenuItem(editor.bind(mxResources.get("setAsDeepHistoryNode"), new SetNodeAsHistory(c,true)));
