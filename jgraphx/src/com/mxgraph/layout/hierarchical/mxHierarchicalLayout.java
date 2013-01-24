@@ -208,6 +208,10 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 		// Track initial coordinate x-positioning
 		double initialX = 0;
 		
+		// resize states
+		for(Object r:rootsAndChildren.keySet()) {
+			graph.updateCellSize(r, false);
+		}
 		for(Object r:rootsAndChildren.keySet()) {
 			Set<Object> vertexSet = rootsAndChildren.get(r);
 			
