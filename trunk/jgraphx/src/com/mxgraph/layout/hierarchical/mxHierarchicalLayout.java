@@ -24,6 +24,7 @@ import com.mxgraph.layout.hierarchical.stage.mxCoordinateAssignment;
 import com.mxgraph.layout.hierarchical.stage.mxHierarchicalLayoutStage;
 import com.mxgraph.layout.hierarchical.stage.mxMedianHybridCrossingReduction;
 import com.mxgraph.layout.hierarchical.stage.mxMinimumCycleRemover;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
 
@@ -210,7 +211,12 @@ public class mxHierarchicalLayout extends mxGraphLayout/*,
 		
 		// resize states
 		for(Object r:rootsAndChildren.keySet()) {
-			graph.updateCellSize(r, false);
+			Set<Object> vertexSet = rootsAndChildren.get(r);
+			for(Object rc:vertexSet) { 
+				if (!graph.isSwimlane(rc)) {
+					graph.updateCellSize(rc, true);
+				}
+			}
 		}
 		for(Object r:rootsAndChildren.keySet()) {
 			Set<Object> vertexSet = rootsAndChildren.get(r);
