@@ -37,6 +37,7 @@ public class SCXMLNode implements Serializable {
 	public static final String ONENTRYEXE="onentryexe";
 	public static final String INITEXE="initexe";
 	public static final String ONEXITEXE="onexitexe";
+	public static final String SCRIPT="script";
 
 	public static final String HISTORY="history";
 	public static final String PARALLEL="parallel";
@@ -74,6 +75,8 @@ public class SCXMLNode implements Serializable {
 	public static final String ONENTRYDOC="ENTRYdoc";
 	public static final String ONEXITUNDO="EXITundo";
 	public static final String ONEXITDOC="EXITdoc";
+	public static final String SCRIPTUNDO="SCRIPTundo";
+	public static final String SCRIPTDOC="SCRIPTdoc";
 	// only initial states
 	public static final String ONINITIALENTRYUNDO="INITIALundo";
 	public static final String ONINITIALENTRYDOC="INITIALdoc";
@@ -293,6 +296,20 @@ public class SCXMLNode implements Serializable {
 			ret=(String)node.get(INITEXE);
 		return (ret==null)?"":ret;
 	}
+	public String getScript() {
+		String ret=null;
+		Document dmd = getScriptDoc();
+		if (dmd!=null) {
+			try {
+				ret=dmd.getText(0, dmd.getLength());
+			} catch (BadLocationException e) {
+				ret=(String)node.get(SCRIPT);
+			}
+		}
+		else
+			ret=(String)node.get(SCRIPT);
+		return (ret==null)?"":ret;
+	}
 	public void setOnEntry(String exe) {
 		node.put(ONENTRYEXE,exe);
 	}
@@ -301,6 +318,13 @@ public class SCXMLNode implements Serializable {
 	}
 	public void setOnInitialEntry(String exe) {
 		node.put(INITEXE,exe);
+	}
+	public void setScript(String script) {
+		node.put(SCRIPT,script);
+	}
+	public void appendToScript(String script) {
+		String existingContent=getScript();
+		node.put(SCRIPT,(StringUtils.isEmptyString(existingContent))?script:existingContent+script);
 	}
 	public void setDoneData(String dd) {
 		node.put(DONEDATA,dd);
@@ -620,6 +644,21 @@ public class SCXMLNode implements Serializable {
 		node.put(ONINITIALENTRYDOC,doc);
 		return doc;
 	}
+	// getter and setter for document and undomanager for extra unknown content (including script)
+	public MyUndoManager getScriptUndoManager() {
+		return (MyUndoManager) node.get(SCRIPTUNDO);
+	}
+	public MyUndoManager setScriptUndoManager(MyUndoManager um) {
+		node.put(SCRIPTUNDO,um);
+		return um;
+	}
+	public Document getScriptDoc() {
+		return (Document) node.get(SCRIPTDOC);
+	}
+	public Document setScriptDoc(Document doc) {
+		node.put(SCRIPTDOC,doc);
+		return doc;
+	}
 	// getter and setter for document and undomanager for the donedata field of a final node
 	public MyUndoManager getDoneDataUndoManager() {
 		return (MyUndoManager) node.get(FINALDONEDATAUNDO);
@@ -688,6 +727,9 @@ public class SCXMLNode implements Serializable {
 		n.setOnExitDoc(null);
 		n.setOnExitUndoManager(null);
 		n.setOnExit(getOnExit());
+		n.setScriptDoc(null);
+		n.setScriptUndoManager(null);
+		n.setScript(getScript());
 		n.setIDDoc(null);
 		n.setIDUndoManager(null);
 		n.setNameUndoManager(null);
