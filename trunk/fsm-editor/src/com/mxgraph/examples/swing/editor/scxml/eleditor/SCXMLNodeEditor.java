@@ -40,6 +40,7 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	private UndoJTextPane namespacePane;
 	private UndoJTextPane datamodelPane;
 	private UndoJTextPane commentsPane;
+	private UndoJTextPane scriptPane;
 	private MyUndoManager undo;
 	private Document doc;
 	private SCXMLNode node;
@@ -195,7 +196,21 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 			tabbedPane.addTab(mxResources.get("commentsTAB"), scrollPane);
 			doc.addDocumentListener(changeListener);
 		}
+		undo=node.getScriptUndoManager();
+		doc=node.getScriptDoc();
+		scriptPane=new UndoJTextPane(node.getScript(), doc, undo, keyboardHandler);
+		if (doc==null) {
+			node.setScriptDoc(doc=scriptPane.getDocument());
+			node.setScriptUndoManager(undo=scriptPane.getUndoManager());
+		}
+		scriptPane.setCaretPosition(0);
+		scriptPane.setMargin(new Insets(5,5,5,5));
+		JScrollPane scrollPane = new JScrollPane(scriptPane);
+		scrollPane.setPreferredSize(new Dimension(400, 200));
+		tabbedPane.addTab(mxResources.get("scriptTAB"), scrollPane);
+		doc.addDocumentListener(changeListener);
 
+		
         tabbedPane.setSelectedIndex(0);
         updateActionTable(tabbedPane,actions);
         editMenu=createEditMenu();

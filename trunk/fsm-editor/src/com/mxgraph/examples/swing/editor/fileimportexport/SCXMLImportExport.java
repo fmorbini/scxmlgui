@@ -321,6 +321,9 @@ public class SCXMLImportExport implements IImportExport {
 					SCXMLNode child = setNodeAsOutsourcing(new OutSource(OUTSOURCETYPE.XINC,location), pn);
 					scanChildrenOf(editor, n,child,pwd, restrictedConstraints);
 				}
+			} else {
+				String content=XMLUtils.prettyPrintXMLString(XMLUtils.domNode2String(n, true)," ",true);
+				pn.appendToScript(content);
 			}
 			break;
 		case Node.COMMENT_NODE:
@@ -671,6 +674,7 @@ public class SCXMLImportExport implements IImportExport {
 		String donedata=null;
 		String transitions=null;
 		String comments=null;
+		String otherContent=null;
 		assert(n.isVertex());
 		SCXMLNode value=(SCXMLNode) n.getValue();
 		boolean isFake=value.getFake();
@@ -683,6 +687,7 @@ public class SCXMLImportExport implements IImportExport {
 		if (value.isFinal()) donedata=StringUtils.removeLeadingAndTrailingSpaces(value.getDoneData());
 		onentry=StringUtils.removeLeadingAndTrailingSpaces(value.getOnEntry());
 		onexit=StringUtils.removeLeadingAndTrailingSpaces(value.getOnExit());
+		otherContent=StringUtils.removeLeadingAndTrailingSpaces(value.getScript());
 
 		transitions=edgesOfmxVertex2SCXMLString(n,value,view);
 
@@ -764,6 +769,10 @@ public class SCXMLImportExport implements IImportExport {
 				if (!StringUtils.isEmptyString(transitions))
 					ret+=transitions;
 			}
+		}
+		// additional content that is not a comment
+		if (!StringUtils.isEmptyString(otherContent)) {
+			ret+=otherContent;
 		}
 		// add the children only if the node is not outsourced
 		if (!value.isOutsourcedNode()) {
