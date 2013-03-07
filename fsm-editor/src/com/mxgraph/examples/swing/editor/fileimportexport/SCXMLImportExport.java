@@ -2,6 +2,7 @@ package com.mxgraph.examples.swing.editor.fileimportexport;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -787,6 +788,7 @@ public class SCXMLImportExport implements IImportExport {
 		return ret;
 	}
 	private String getGeometryString(mxGraphView view, mxCell n) {
+		DecimalFormat numberFormatter = new DecimalFormat("#.##");
 		double scale = view.getScale();
 		mxCellState ns=view.getState(n);
 		if (n.isVertex()) {
@@ -800,7 +802,12 @@ public class SCXMLImportExport implements IImportExport {
 					yp=ps.getY();
 				}
 			}
-			if (ns!=null) return " node-size-and-position x="+((ns.getX()-xp)/scale)+" y="+((ns.getY()-yp)/scale)+" w="+(ns.getWidth()/scale)+" h="+(ns.getHeight()/scale);
+			double x=((ns.getX()-xp)/scale);
+			double y=((ns.getY()-yp)/scale);
+			double w=(ns.getWidth()/scale);
+			double h=(ns.getHeight()/scale);
+			if (ns!=null) return " node-size-and-position x="+numberFormatter.format(x)+" y="+numberFormatter.format(y)+
+					" w="+numberFormatter.format(w)+" h="+numberFormatter.format(h);
 			else return null;
 		} else if (n.isEdge()) {			
 			String target=getIDOfThisEdgeTarget(n);
@@ -812,12 +819,13 @@ public class SCXMLImportExport implements IImportExport {
 				ret=" edge-path ["+((StringUtils.isEmptyString(target))?"":target)+"] ";
 				if (points!=null) {
 					for (mxPoint p:points) {
-						ret+=" x="+p.getX()+" y="+p.getY();
+						ret+=" x="+numberFormatter.format(p.getX())+" y="+numberFormatter.format(p.getY());
 					}
 				}
 				if (offset!=null) {
 					mxPoint pt = view.getPoint(ns, geo);
-					ret+=" pointx="+geo.getX()+" pointy="+geo.getY()+" offsetx="+(offset.getX())+" offsety="+(offset.getY());
+					ret+=" pointx="+numberFormatter.format(geo.getX())+" pointy="+numberFormatter.format(geo.getY())+
+							" offsetx="+numberFormatter.format(offset.getX())+" offsety="+numberFormatter.format(offset.getY());
 				}
 			}
 			return ret;
