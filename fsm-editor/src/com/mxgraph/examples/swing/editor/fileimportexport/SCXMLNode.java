@@ -14,9 +14,11 @@ import javax.swing.text.Document;
 import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState;
 import com.mxgraph.examples.config.SCXMLConstraints.RestrictedState.PossibleEvent;
 import com.mxgraph.examples.swing.editor.fileimportexport.OutSource.OUTSOURCETYPE;
+import com.mxgraph.examples.swing.editor.fileimportexport.SCXMLNode.HISTORYTYPE;
 import com.mxgraph.examples.swing.editor.scxml.MyUndoManager;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.util.StringUtils;
+import com.mxgraph.util.mxConstants;
 
 public class SCXMLNode implements Serializable {
 	private static final long serialVersionUID = -2136349535452806563L;
@@ -49,17 +51,18 @@ public class SCXMLNode implements Serializable {
 	
 	public enum HISTORYTYPE {DEEP,SHALLOW};
 	
-	public static final String DEFAULTFILLCOLOR="#fcd087";
+	public static final String DEFAULTFILLCOLOR="#cdd5ff";
 	public static final String DEFAULTSTROKECOLOR="#000000";
 	public static final String DEFAULTSHAPE="rounded=1";
 	public static final String PARALLELFILLCOLOR="#c2d200";
 	public static final String PARALLELSTROKECOLOR="#c2d200";
-	public static final String INITIALFILLCOLOR="#cffc87";
+	public static final String INITIALFILLCOLOR="#ffab75";
 	public static final String FINALSTROKECOLOR="#FF0000";
-	public static final String CLUSTERSHAPE="swimlane";
 	public static final String DEEPHISTORYFILLCOLOR="#bb00a6";
 	public static final String SHALLOWHISTORYFILLCOLOR="#dd6fd1";
-	
+
+	public static final String CLUSTERSHAPE="swimlane";
+
 	public static final String COMMENTS="comments";
 	public static final String COMMENTSUNDO="COundo";
 	public static final String COMMENTSDOC="COdoc";
@@ -103,14 +106,14 @@ public class SCXMLNode implements Serializable {
 	public SCXMLNode() {
 		node=new HashMap<String, Object>();
 		node.put(TYPE,NORMAL);
-		this.setShape(DEFAULTSHAPE);
-		this.setFillColor(DEFAULTFILLCOLOR);
-		this.setStrokeColor(DEFAULTSTROKECOLOR);
-		this.setInitial(false);
-		this.setCluster(false);
-		this.setFinal(false);
-		this.setParallel(false);
+		setShape(DEFAULTSHAPE);
+		setStrokeColor(DEFAULTSTROKECOLOR);
+		setInitial(false);
+		setCluster(false);
+		setFinal(false);
+		setParallel(false);
 		outSourcingChildren=new HashSet<OutSource>();
+		setFillColorFromState();
 	}
 	public boolean getFake() {return isFake;}
 	public void setFake(boolean f) {isFake=f;}
@@ -396,10 +399,10 @@ public class SCXMLNode implements Serializable {
 		return (ret==null)?"":ret;
 	}
 	public void setParallel(boolean b) {
-		this.setFillColor((isInitial())?INITIALFILLCOLOR:((b)?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
-		this.setStrokeColor((isFinal())?FINALSTROKECOLOR:((b)?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
+		setStrokeColor((isFinal())?FINALSTROKECOLOR:((b)?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
 		node.put(TYPE, (b)?PARALLEL:NORMAL);
 		if (b) setCluster(true); // a parallel node must be a cluster
+		setFillColorFromState();
 	}
 	public boolean isParallel() {
 		if (node.get(TYPE).equals(PARALLEL))
@@ -415,9 +418,9 @@ public class SCXMLNode implements Serializable {
 	}
 	
 	public void setInitial(Boolean b) {
-		this.setFillColor((b)?INITIALFILLCOLOR:((isParallel())?PARALLELFILLCOLOR:DEFAULTFILLCOLOR));
 		node.put(INITIAL, b);
 		setShapeFromState();
+		setFillColorFromState();
 	}
 	public Boolean isInitial() {
 		return (Boolean)node.get(INITIAL);
@@ -428,8 +431,8 @@ public class SCXMLNode implements Serializable {
 			if ((isRestricted(restrictedState)) && (!b)) {
 				nodeRestrictions.remove(restrictedState);
 				if (nodeRestrictions.isEmpty()) {
-					this.setStrokeColor(DEFAULTSTROKECOLOR);
-					this.setStrokeWidth(null);
+					setStrokeColor(DEFAULTSTROKECOLOR);
+					setStrokeWidth(null);
 					node.put(TYPE, NORMAL);
 					node.remove(RESTRICTEDSTATE);
 				}
@@ -437,8 +440,8 @@ public class SCXMLNode implements Serializable {
 				nodeRestrictions.add(restrictedState);
 			}
 		} else if (b) {
-			this.setStrokeColor(restrictedState.getColor());
-			this.setStrokeWidth("4");
+			setStrokeColor(restrictedState.getColor());
+			setStrokeWidth("4");
 			node.put(TYPE, RESTICTED);
 			List<RestrictedState> nodeRestrictions = new LinkedList<RestrictedState>();
 			nodeRestrictions.add(restrictedState);
@@ -474,17 +477,15 @@ public class SCXMLNode implements Serializable {
 		List<PossibleEvent> possibleEvents = null;
 		if (isRestricted()) {
 			possibleEvents = new LinkedList<PossibleEvent>();
-	    	for(RestrictedState tempState: this.getRestrictedStates()){
+	    	for(RestrictedState tempState: getRestrictedStates()){
 	    		possibleEvents.addAll(tempState.getPossibleEvent());
 	    	}
 		}
 		return possibleEvents;
 	}
 	public void setAsHistory(final HISTORYTYPE type) {
-		if (type==null) this.setFillColor(DEFAULTFILLCOLOR);
-		else if (type.equals(HISTORYTYPE.DEEP)) this.setFillColor(DEEPHISTORYFILLCOLOR);
-		else if (type.equals(HISTORYTYPE.SHALLOW)) this.setFillColor(SHALLOWHISTORYFILLCOLOR);
 		node.put(HISTORY, type);
+		setFillColorFromState();
 	}
 	public Boolean isHistoryNode() {
 		return (node.get(HISTORY) instanceof HISTORYTYPE);
@@ -506,7 +507,7 @@ public class SCXMLNode implements Serializable {
 		return (Boolean)node.get(CLUSTER);
 	}
 	public void setFinal(Boolean b) {
-		this.setStrokeColor((b)?FINALSTROKECOLOR:((isParallel())?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
+		setStrokeColor((b)?FINALSTROKECOLOR:((isParallel())?PARALLELSTROKECOLOR:DEFAULTSTROKECOLOR));
 		node.put(FINAL, b);
 	}
 	public Boolean isFinal() {
@@ -529,19 +530,51 @@ public class SCXMLNode implements Serializable {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
 		return (sh==null)?null:sh.get("root");
 	}
+	private void setFillColorFromState() {
+		String fillColor=DEFAULTFILLCOLOR;
+		String gradientColor;
+		boolean isHistory=isHistoryNode();
+		boolean isInitial=isInitial();
+		boolean isParallel=isParallel();
+		assert(!(isHistory && isParallel));
+
+		if (isHistory) {
+			HISTORYTYPE historyType = getHistoryType();
+			if (historyType.equals(HISTORYTYPE.DEEP)) fillColor=DEEPHISTORYFILLCOLOR;
+			else if (historyType.equals(HISTORYTYPE.SHALLOW)) fillColor=SHALLOWHISTORYFILLCOLOR;
+		}
+		
+		if (isParallel) fillColor=PARALLELFILLCOLOR;
+		
+		gradientColor=null;
+		if (isInitial) gradientColor=INITIALFILLCOLOR;
+
+		setFillColor(fillColor);
+		setGradientColor(gradientColor);
+	}
 	public void setFillColor(String color) {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
 		if (sh==null) {
 			node.put(STYLE,sh=new HashMap<String, String>());
 		}
 		if (color==null)
-			sh.remove("fillColor");
+			sh.remove(mxConstants.STYLE_FILLCOLOR);
 		else
-			sh.put("fillColor",color);
+			sh.put(mxConstants.STYLE_FILLCOLOR,color);
+	}
+	public void setGradientColor(String color) {
+		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
+		if (sh==null) {
+			node.put(STYLE,sh=new HashMap<String, String>());
+		}
+		if (color==null)
+			sh.remove(mxConstants.STYLE_GRADIENTCOLOR);
+		else
+			sh.put(mxConstants.STYLE_GRADIENTCOLOR,color);
 	}
 	public String getFillColor() {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
-		return (sh==null)?null:sh.get("fillColor");
+		return (sh==null)?null:sh.get(mxConstants.STYLE_FILLCOLOR);
 	}
 	public void setStrokeColor(String color) {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
@@ -549,13 +582,13 @@ public class SCXMLNode implements Serializable {
 			node.put(STYLE,sh=new HashMap<String, String>());
 		}
 		if (color==null)
-			sh.remove("strokeColor");
+			sh.remove(mxConstants.STYLE_STROKECOLOR);
 		else
-			sh.put("strokeColor",color);
+			sh.put(mxConstants.STYLE_STROKECOLOR,color);
 	}
 	public String getStrokeColor() {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
-		return (sh==null)?null:sh.get("strokeColor");
+		return (sh==null)?null:sh.get(mxConstants.STYLE_STROKECOLOR);
 	}
 	public void setStrokeWidth(String w) {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
@@ -563,13 +596,13 @@ public class SCXMLNode implements Serializable {
 			node.put(STYLE,sh=new HashMap<String, String>());
 		}
 		if (w==null)
-			sh.remove("strokeWidth");
+			sh.remove(mxConstants.STYLE_STROKEWIDTH);
 		else
-			sh.put("strokeWidth",w);
+			sh.put(mxConstants.STYLE_STROKEWIDTH,w);
 	}
 	public String getStrokeWidth() {
 		HashMap<String,String> sh=(HashMap<String, String>)node.get(STYLE);
-		return (sh==null)?null:sh.get("strokeWidth");
+		return (sh==null)?null:sh.get(mxConstants.STYLE_STROKEWIDTH);
 	}
 	public String getStyle() {
 		HashMap<String, String> sh = (HashMap<String, String>)node.get(STYLE);
@@ -577,7 +610,7 @@ public class SCXMLNode implements Serializable {
 		boolean outSourced=isOutsourcedNode();
 		for (String k:sh.keySet()) {
 			if (!k.equals("root")) {
-				if (!outSourced || (!k.equals("strokeWidth") && !k.equals("dashed")))
+				if (!outSourced || (!k.equals(mxConstants.STYLE_STROKEWIDTH) && !k.equals(mxConstants.STYLE_DASHED)))
 					ret+=k+"="+sh.get(k)+";";
 			}
 		}
@@ -706,7 +739,7 @@ public class SCXMLNode implements Serializable {
 
 	public SCXMLNode cloneNode() {
 		SCXMLNode n=new SCXMLNode();
-		n.node=(HashMap<String, Object>) this.node.clone();
+		n.node=(HashMap<String, Object>) node.clone();
 		// removes the documents in the original value (if there). But get their values (because if there they have the
 		// real value of the property they represent (the document)
 		n.setDatamodelDoc(null);
