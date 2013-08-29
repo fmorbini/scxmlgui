@@ -61,6 +61,7 @@ public class SCXMLNode implements Serializable {
 	public static final String DEEPHISTORYFILLCOLOR="#bb00a6";
 	public static final String SHALLOWHISTORYFILLCOLOR="#dd6fd1";
 
+	public static final String INITIALSHAPE="ellipse";
 	public static final String CLUSTERSHAPE="swimlane";
 
 	public static final String COMMENTS="comments";
@@ -414,6 +415,7 @@ public class SCXMLNode implements Serializable {
 	private void setShapeFromState() {
 		Boolean cluster=isClusterNode();
 		if (cluster!=null && cluster) setShape(CLUSTERSHAPE);
+		else if (isInitial()) setShape(INITIALSHAPE);
 		else setShape(DEFAULTSHAPE);
 	}
 	
