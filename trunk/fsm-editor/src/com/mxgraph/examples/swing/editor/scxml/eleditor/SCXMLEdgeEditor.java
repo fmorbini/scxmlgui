@@ -63,12 +63,12 @@ public class SCXMLEdgeEditor extends SCXMLElementEditor {
     private JPanel possibleEventDetailsPanel;
     private SCXMLNode sourceNode;
 
-    public SCXMLEdgeEditor(JFrame parent,mxCell en,SCXMLEdge e, SCXMLGraphEditor editor, Point pos) {
+    public SCXMLEdgeEditor(JFrame parent,mxCell en, SCXMLGraphEditor editor, Point pos) {
     	super(parent,editor,en);
     	setTitle(mxResources.get("titleEdgeEditor"));
     	setLocation(pos);
 
-        edge=e;
+        edge=(SCXMLEdge) en.getValue();
         //we need 3 editors:
         // one for the event
         // one for the condition

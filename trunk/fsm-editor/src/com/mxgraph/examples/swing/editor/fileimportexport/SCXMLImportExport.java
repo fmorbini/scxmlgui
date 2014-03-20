@@ -72,9 +72,9 @@ public class SCXMLImportExport implements IImportExport {
 	}
 	private SCXMLEdge addEdge(HashMap<String,Object> ec) throws Exception {
 		System.out.println("add edge: "+ec.get(SCXMLEdge.SOURCE)+"->"+ec.get(SCXMLEdge.TARGETS));
-		return addEdge((String)ec.get(SCXMLEdge.SOURCE),(ArrayList<String>) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE),(HashMap<String,String>)ec.get(SCXMLEdge.EDGEGEO));
+		return addEdge((String)ec.get(SCXMLEdge.SOURCE),(List) ec.get(SCXMLEdge.TARGETS),(String)ec.get(SCXMLEdge.CONDITION),(String)ec.get(SCXMLEdge.EVENT),(String)ec.get(SCXMLEdge.EDGEEXE),(HashMap<String,String>)ec.get(SCXMLEdge.EDGEGEO));
 	}
-	private SCXMLEdge addEdge(String SCXMLfromID,ArrayList<String> targets,String cond,String event,String content, HashMap<String, String> geometry) throws Exception {
+	private SCXMLEdge addEdge(String SCXMLfromID,List<String> targets,String cond,String event,String content, HashMap<String, String> geometry) throws Exception {
 		SCXMLEdge edge = new SCXMLEdge(SCXMLfromID,targets,cond, event, content,geometry);
 		edge.setInternalID(getNextInternalID());
 		int oe=getNumEdgesFrom(SCXMLfromID);

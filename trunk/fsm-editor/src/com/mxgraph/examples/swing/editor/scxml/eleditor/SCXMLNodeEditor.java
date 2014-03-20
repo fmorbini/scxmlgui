@@ -43,15 +43,15 @@ public class SCXMLNodeEditor extends SCXMLElementEditor {
 	private UndoJTextPane scriptPane;
 	private MyUndoManager undo;
 	private Document doc;
-	private SCXMLNode node;
+	private final SCXMLNode node;
 	private JMenu editMenu;
 
-	public SCXMLNodeEditor(JFrame parent,mxCell nn,mxCell rootOfGraph, SCXMLNode n, SCXMLGraphEditor editor, Point pos) {
+	public SCXMLNodeEditor(JFrame parent,mxCell nn,mxCell rootOfGraph, SCXMLGraphEditor editor, Point pos) {
 		super(parent,editor,nn);
 		setTitle(mxResources.get("titleNodeEditor"));
 		setLocation(pos);
 
-		node=n;
+		node=(SCXMLNode) nn.getValue();
 		//we need 3 editors:
 		// one for the event
 		// one for the condition

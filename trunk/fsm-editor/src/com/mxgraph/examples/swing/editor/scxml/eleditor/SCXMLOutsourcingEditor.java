@@ -41,7 +41,7 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor implements Action
     private SCXMLNode node;
 	private JRadioButton srcButton,xincludeButton;
     
-    public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, mxCell nn,SCXMLNode n, Point pos) throws Exception {
+    public SCXMLOutsourcingEditor(JFrame parent,SCXMLGraphEditor editor, mxCell nn, Point pos) throws Exception {
     	super(parent,editor,nn);
     	super.remove(idButton);
     	setModal(true);
@@ -52,7 +52,7 @@ public class SCXMLOutsourcingEditor extends SCXMLElementEditor implements Action
 
         tabbedPane = new JTabbedPane();
 
-        node=n;
+        node=(SCXMLNode) nn.getValue();
         undo=node.getSRCUndoManager();
         doc=node.getSRCDoc();
         // undo and doc must be both either null or not null.
