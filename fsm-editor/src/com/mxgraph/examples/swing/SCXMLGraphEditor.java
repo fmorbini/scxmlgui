@@ -1570,17 +1570,17 @@ public class SCXMLGraphEditor extends JPanel
 			JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
 			switch(type) {
 			case EDGE:
-				ee=new SCXMLEdgeEditor(frame, cell, (SCXMLEdge)cell.getValue(),this, pos);
+				ee=new SCXMLEdgeEditor(frame, cell,this, pos);
 				break;
 			case NODE:
 				SCXMLGraphComponent gc = getGraphComponent();
 				SCXMLGraph graph = gc.getGraph();
 				mxIGraphModel model = graph.getModel();
 				mxCell root=SCXMLImportExport.followUniqueDescendantLineTillSCXMLValueIsFound(model);
-				ee=new SCXMLNodeEditor(frame,cell,root,(SCXMLNode)cell.getValue(),this,pos);
+				ee=new SCXMLNodeEditor(frame,cell,root,this,pos);
 				break;
 			case OUTSOURCING:
-				ee=new SCXMLOutsourcingEditor(frame, this, cell, (SCXMLNode)cell.getValue(), pos);
+				ee=new SCXMLOutsourcingEditor(frame, this, cell, pos);
 				break;
 			case OUTGOING_EDGE_ORDER:
 				ee=new SCXMLOutEdgeOrderEditor(frame, cell, this, pos);

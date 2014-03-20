@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 
 import javax.swing.text.BadLocationException;
@@ -47,7 +48,7 @@ public class SCXMLEdge implements Serializable {
 		setSCXMLTargets(new ArrayList<String>());
 		setEvent("");
 	}
-	public SCXMLEdge(String fromSCXMLID,ArrayList<String> toSCXMLIDs,String cond,String event, String content, HashMap<String, String> geometry) {
+	public SCXMLEdge(String fromSCXMLID,List<String> toSCXMLIDs,String cond,String event, String content, HashMap<String, String> geometry) {
 		edge=new HashMap<String, Object>();
 		edge.put(CONDITION,cond);
 		edge.put(EVENT,event);
