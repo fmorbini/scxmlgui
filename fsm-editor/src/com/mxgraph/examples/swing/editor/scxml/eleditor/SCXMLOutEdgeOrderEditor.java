@@ -108,7 +108,7 @@ public class SCXMLOutEdgeOrderEditor extends JDialog implements ListSelectionLis
 	public class CloseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
 			SCXMLOutEdgeOrderEditor.this.actionPerformed(new ActionEvent(this, 0, "cancel"));
-			editor.setEditorForCellAndType(cell, Type.OUTGOING_EDGE_ORDER, null);
+			editor.setEditorForCellAndType(cell, SCXMLElementEditor.Type.OUTGOING_EDGE_ORDER, null);
 		}
 	}
 	
