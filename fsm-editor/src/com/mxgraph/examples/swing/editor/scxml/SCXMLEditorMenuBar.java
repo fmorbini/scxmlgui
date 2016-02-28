@@ -42,7 +42,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 4060203894740766714L;
 	private static final int MAX_RECENT_FILE_HISTORY=9;
@@ -56,7 +56,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		recentlyOpenedFiles.clear();
 		for (int i=0;i<MAX_RECENT_FILE_HISTORY;i++) {
 			String fileName=editor.preferences.get(PREFERENCE_FILES_KEY+i, null);
-			if (fileName!=null) recentlyOpenedFiles.add(fileName); 
+			if (fileName!=null) recentlyOpenedFiles.add(fileName);
 		}
 	}
 	public String getLastOpenedFile() {
@@ -70,7 +70,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		}
 		return null;
 	}
-	public void updateRecentlyOpenedListWithFile(File file) {		
+	public void updateRecentlyOpenedListWithFile(File file) {
 		String fileName=file.getAbsolutePath();
 		if (file.exists()) editor.preferences.put(PREFERENCE_LASTFILE_KEY, fileName);
 		if (!recentlyOpenedFiles.contains(fileName)) {
@@ -118,9 +118,9 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		editor.setRedoMenuAction(externalAction);
 
 		menu.addSeparator();
-		
+
 		menu.add(editor.bind(mxResources.get("find"),  new ShowSCXMLFindTool(), "/com/mxgraph/examples/swing/images/zoom.gif"));
-		
+
 		menu.addSeparator();
 
 		menu.add(editor.bind(mxResources.get("cut"), TransferHandler.getCutAction(), "/com/mxgraph/examples/swing/images/cut.gif"));
@@ -139,7 +139,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		menu = add(new JMenu(mxResources.get("tools")));
 		menu.setMnemonic(KeyEvent.VK_T);
 		menu.add(editor.bind(mxResources.get("showSCXMLListener"), new ShowSCXMLListener()));
-		
+
 		menu = add(new JMenu(mxResources.get("view")));
 		menu.setMnemonic(KeyEvent.VK_V);
 		internalAction=new ToggleDisplayOutsourcedContent();
@@ -149,7 +149,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 		editor.setDisplayOfOutsourcedContentSelected(editor.isDisplayOfOutsourcedContentSelected());
 
 		add(Box.createHorizontalGlue());
-		
+
 		// Creates the help menu
 		menu = add(new JMenu(mxResources.get("help")));
 		menu.setMnemonic(KeyEvent.VK_H);
@@ -166,9 +166,9 @@ public class SCXMLEditorMenuBar extends JMenuBar
 						"Institute for Creative Technologies\n"+
 						"University of Southern California\n\n"+
 						"Contributions by:\n" +
-						"Társi Róbert, Alerant Zrt (Hungary)\n";
+						"Torsi Robert, Alerant Zrt (Hungary)\n";
 				try {
-					
+
 					info=mxUtils.readFile(mxUtils.getURIForResourceNamed("info.txt"));
 					svn=mxUtils.readFile(mxUtils.getURIForResourceNamed("svn.version"));
 				} catch (Exception e1) {
