@@ -166,7 +166,7 @@ public class SCXMLEditorMenuBar extends JMenuBar
 						"Institute for Creative Technologies\n"+
 						"University of Southern California\n\n"+
 						"Contributions by:\n" +
-						"Torsi Robert, Alerant Zrt (Hungary)\n";
+						"Tarsi Robert, Alerant Zrt (Hungary)\n";
 				try {
 
 					info=mxUtils.readFile(mxUtils.getURIForResourceNamed("info.txt"));
