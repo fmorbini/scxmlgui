@@ -22,29 +22,35 @@
 		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="clean"/>
 		<echo message="Completed cleaning."/>
 	</target>
-	<target name="build">
+	<target name="build" depends="clean,git">
 		<echo message="Started building..."/>
 		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="build"/>
 		<echo message="Completed building."/>
 	</target>
-	<target name="jar">
-		<exec executable="svn" output="${FSM}/svn.properties">
-			<arg value="info" />
-		</exec>
-		<property prefix="svn" file="${FSM}/svn.properties"/>
-		<echo file="${FSM}/svn.version">SVN revision: ${svn.Revision}</echo>
-		<echo>SVN revision: ${svn.Revision}</echo>
+	<target name="jar" depends="build">
+		<echo>git master hash: ${repository.version}</echo>
+		<echo file="${FSM}/svn.version">git master hash: ${repository.version}</echo>
 		<echo message="Started building jar archives..."/>
 		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="jar"/>
 		<echo message="Completed jars."/>
 	</target>
-	<target name="svn">
-		<exec executable="svn" output="${FSM}/svn.properties">
-			<arg value="info" />
+	
+	<!-- from http://stackoverflow.com/questions/2974106/how-to-lookup-the-latest-git-commit-hash-from-an-ant-build-script -->
+	<available file=".git" type="dir" property="git.present"/>
+
+	<target name="git" description="Store git revision in ${repository.version}" if="git.present">
+		<exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+			<arg value="describe"/>
+			<arg value="--tags"/>
+			<arg value="--always"/>
+			<arg value="HEAD"/>
 		</exec>
-		<property prefix="svn" file="${FSM}/svn.properties"/>
-		<echo file="${FSM}/svn.version">SVN revision: ${svn.Revision}</echo>
-		<echo>SVN revision: ${svn.Revision}</echo>
+		<condition property="repository.version" value="${git.revision}" else="unknown">
+			<and>
+				<isset property="git.revision"/>
+				<length string="${git.revision}" trim="yes" length="0" when="greater"/>
+			</and>
+		</condition>
 	</target>
 
 	<!-- Eclipse targets -->
