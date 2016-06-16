@@ -697,7 +697,7 @@ public class SCXMLImportExport implements IImportExport {
 		String close="";
 		if (!isRoot || value.shouldThisRootBeSaved()) {
 			if (isRoot) {
-				ret="<scxml version=\"0.9\"";
+				ret="<scxml version=\"1.0\"";
 				close="</scxml>";
 			} else if (value.isParallel()) {
 				ret="<parallel";
