@@ -113,7 +113,7 @@ public class SCXMLGraph extends mxGraph
 		if (isCellEditable(cell) && (status==EditorStatus.EDITING)) {
 			if (model.isVertex(cell)) {			
 				mxCell node=(mxCell)cell;
-
+				
 				mxICell parent=node.getParent();
 				if ((parent!=null) && (parent.getValue() instanceof SCXMLNode)) {
 					mxCellState stateChild = view.getState(cell);
@@ -126,6 +126,7 @@ public class SCXMLGraph extends mxGraph
 
 				SCXMLNode nodeValue = (SCXMLNode)node.getValue();
 				String nodeValueID=nodeValue.getID();
+
 				if (nodeValueID.matches(".*[\\s]+.*")) warnings+="node name contains spaces.\n";
 				// check if the executable content is parsable xml
 				String error=XMLUtils.isParsableXMLString(nodeValue.getOnEntry());
@@ -173,6 +174,42 @@ public class SCXMLGraph extends mxGraph
 						else gc.addSCXMLNode(nodeValue,node);
 					}
 				}
+				
+				
+				//for issue #74, not ideal solution. should be done on the listener of the changes but too many updates are sent there.
+				int edges=node.getEdgeCount();
+				for(int i=0;i<edges;i++) {
+					mxCell e = (mxCell) node.getEdgeAt(i);
+
+					if (e!=null && e.getValue()!=null && e.getValue() instanceof SCXMLEdge) {
+						SCXMLEdge v=(SCXMLEdge) e.getValue();
+						if (e.getSource()==node) {
+							//outgoing edge from node
+							if (!v.getSCXMLSource().equals(nodeValueID)) v.setSCXMLSource(nodeValueID);
+						} else if (e.getTarget()==node) {
+							//incoming edge into node
+							ArrayList<String> ts = v.getSCXMLTargets();
+							boolean updated=false,found=false;
+							if (ts!=null) {
+								Iterator<String> it=ts.iterator();
+								while(it.hasNext()) {
+									String tid = it.next();
+									if (gc.getSCXMLNodeForID(tid)==null) {
+										it.remove();
+										updated=true;
+									}
+									if (!found && tid.equals(nodeValueID)) found=true;
+								}
+								if (!found) {
+									updated=true;
+									ts.add(nodeValueID);
+								}
+								if (updated) v.setSCXMLTargets(ts);
+							}
+						}
+					}
+				}
+
 				//Restricted node should have at least one related event
 				if (nodeValue.isRestricted()) {
 					List<RestrictedState> restrictionsOnNode = nodeValue.getRestrictedStates();
@@ -228,6 +265,21 @@ public class SCXMLGraph extends mxGraph
 				String error=XMLUtils.isParsableXMLString(edgeValue.getExe());
 				SCXMLNode source=(SCXMLNode)edge.getSource().getValue();
 				SCXMLNode target=(SCXMLNode)edge.getTarget().getValue();
+				if (edgeValue!=null) {
+					if (edgeValue.getSCXMLSource()!=null) {
+						if (!edgeValue.getSCXMLSource().equals(source.getID())) warnings+=" edge with incorrect SOURCE property.\n";
+					}
+					if (edgeValue.getSCXMLTargets()!=null) {
+						boolean found=false;
+						for(String t:edgeValue.getSCXMLTargets()) {
+							if (t.equals(target.getID())) {
+								found=true;
+								break;
+							}
+						}
+						if (!found) warnings+=" edge with incorrect TARGETS property.\n";
+					}
+				}
 				if (error!=null) warnings+="Executable content of one edge from "+source.getID()+" to "+target.getID()+" caused a parser error: "+error+"\n";
 				if (StringUtils.isEmptyString(source.getID()) || StringUtils.isEmptyString(target.getID())) {
 					warnings+="target and source of a transition must have not empty name.\n";
