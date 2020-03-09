@@ -10,6 +10,12 @@
 	<property name="JGRAPHX.antfile"		location="${JGRAPHX}/build.xml"/>
 	<property name="FSM.antfile"		location="${FSM}/build.xml"/>
 
+        <path id="depfiles">
+                <pathelement path="${JGRAPHX.antfile}"/>
+        </path>
+        <path id="codefiles">
+                <pathelement path="${FSM.antfile}"/>
+        </path>
 	<path id="antfiles">
 		<pathelement path="${JGRAPHX.antfile}"/>
 		<pathelement path="${FSM.antfile}"/>
@@ -22,16 +28,22 @@
 		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="clean"/>
 		<echo message="Completed cleaning."/>
 	</target>
-	<target name="build" depends="clean,git">
+	<target name="builddep" depends="clean,git">
 		<echo message="Started building..."/>
-		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="build"/>
+		<subant buildpathref="depfiles" inheritall="false" inheritrefs="false" target="jar"/>
 		<echo message="Completed building."/>
 	</target>
+        <target name="build" depends="builddep">
+                <echo message="Started building..."/>
+                <subant buildpathref="codefiles" inheritall="false" inheritrefs="false" target="build"/>
+                <echo message="Completed building."/>
+        </target>
+
 	<target name="jar" depends="build">
 		<echo>git master hash: ${repository.version}</echo>
 		<echo file="${FSM}/svn.version">git master hash: ${repository.version}</echo>
 		<echo message="Started building jar archives..."/>
-		<subant buildpathref="antfiles" inheritall="false" inheritrefs="false" target="jar"/>
+		<subant buildpathref="codefiles" inheritall="false" inheritrefs="false" target="jar"/>
 		<echo message="Completed jars."/>
 	</target>
 	
